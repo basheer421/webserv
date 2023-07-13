@@ -6,7 +6,7 @@
 #    By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/13 20:01:42 by bammar            #+#    #+#              #
-#    Updated: 2023/07/13 20:23:04 by bammar           ###   ########.fr        #
+#    Updated: 2023/07/13 23:22:06 by bammar           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ SRCS_FOLDER = ./src
 
 INCLUDE_FOLDER = ./include
 
-FILES_NAMES = main.cpp test.cpp
+FILES_NAMES = main.cpp Server.cpp
 
 FILES = $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES))
 
