@@ -6,7 +6,7 @@
 #    By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/13 20:01:42 by bammar            #+#    #+#              #
-#    Updated: 2023/07/13 23:42:21 by bammar           ###   ########.fr        #
+#    Updated: 2023/07/16 18:06:15 by bammar           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,13 +16,13 @@ SRCS_FOLDER = ./src
 
 INCLUDE_FOLDER = ./include
 
-FILES_NAMES = main.cpp Server.cpp
+FILES_NAMES = main.cpp Server.cpp ParserConf.cpp
 
 FILES = $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES))
 
 CXX		=	c++
 
-CXXFLAGS =	-Wall -Wextra -Werror -std=c++98
+CXXFLAGS =	-Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
 
 OBJS	=	$(FILES:.cpp=.o)
 

@@ -1,0 +1,14 @@
+user       www www;
+worker_processes  5;
+error_log  logs/error.log;
+pid        logs/nginx.pid;
+worker_rlimit_nofile 8192;
+server {
+listen          80;
+server_name     big.server.com;
+access_log      logs/big.server.access.log main;
+
+location / {
+	proxy_pass      http://big_server_com;
+}
+}

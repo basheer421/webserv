@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/13 22:32:16 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/16 17:33:31 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,3 +21,4 @@
 #include <cstring>
 #include <exception>
 #include "Server.hpp"
+#include "ParserConf.hpp"
