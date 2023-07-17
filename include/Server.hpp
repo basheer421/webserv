@@ -15,6 +15,7 @@
 #define PORT 8080
 
 #include "webserv.hpp"
+#include "Request.hpp"
 
 class Server
 {

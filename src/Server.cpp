@@ -86,6 +86,8 @@ void Server::run()
 			throw ReadException();
         std::string buffer_str = buffer;
         std::cout << buffer_str << std::endl;
+		Request req(buffer);
+		req.parseRequest();
         close(client);
     }
 }
