@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:19:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/16 19:18:06 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/17 18:36:28 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <unistd.h>
 
 /**
  * Doesn't handle comments for now

@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 12:05:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/17 16:07:07 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/17 19:20:49 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,15 @@ ParserConf::Module ParserConf::parseModule()
 	Module modls;
 	std::string::iterator tmp_it = iter;
 	std::string name = parseWord();
+	if (name == "}" || name.length() == 0)
+		return modls;
 	std::string firstWord = parseWord();
-	
 
+	// sleep(1);
 	if (firstWord == "{")
 	{
 		modls.name = name;
-		while (*iter != '}')
+		while (*iter != '}' && iter != text.end()) // make sure to check for "word}"
 		{
 			modls.modules.push_back(parseModule());
 		}
@@ -88,12 +90,6 @@ ParserConf::Module ParserConf::parseModule()
 		modls.name = "";
 		Directive dir = parseDirective();
 		modls.directives.push_back(dir);
-		std::cout << "name: " << dir.first << "\n";
-		for (std::vector<std::string>::iterator it = dir.second.begin(); it != dir.second.end(); it++)
-		{
-			std::cout << *it << " ";
-		}
-		std:: cout << "\n";
 	}
 	return modls;
 }
@@ -101,7 +97,7 @@ ParserConf::Module ParserConf::parseModule()
 std::vector<ParserConf::Module> ParserConf::parseFile()
 {
 	std::vector<ParserConf::Module> file;
-	while (iter != text.end())
+	while (iter < text.end())
 	{
 		file.push_back(parseModule());
 	}
