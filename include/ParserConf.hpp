@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:19:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/17 18:36:28 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/17 20:09:51 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,4 +42,6 @@ class ParserConf
 		Directive parseDirective();
 		Module parseModule();
 		std::vector<Module> parseFile();
+
+		static void print(const std::vector<ParserConf::Module>& conf);
 };

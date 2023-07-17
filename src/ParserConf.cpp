@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 12:05:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/17 19:20:49 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/17 20:14:12 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,20 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 		file.push_back(parseModule());
 	}
 	return (file);
+}
+
+void ParserConf::print(const std::vector<ParserConf::Module>& conf)
+{
+	std::cout << "names:-\n";
+	for (std::vector<ParserConf::Module>::const_iterator it = conf.begin(); it < conf.end(); it++)
+	{
+		if ((*it).name.length() != 0)
+		{
+			std::cout << (*it).name << "\n";
+			std::cout << "\t";
+			print((*it).modules);
+		}
+	}
 }
 
 /*
