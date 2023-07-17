@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 12:05:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/16 18:08:18 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/17 16:07:07 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,9 @@ ParserConf::~ParserConf() {}
 
 std::string ParserConf::parseWord()
 {
-	
-
 	while (iter != text.end() && std::isspace(*iter))
 		++iter;
-	
 	std::string::iterator start = iter;
-	
 	while (iter != text.end() && !std::isspace(*iter))
 		++iter;
 	return std::string(start, iter); // [start, end)
@@ -58,16 +54,22 @@ ParserConf::Directive ParserConf::parseDirective()
 	std::vector<std::string> data;
 
 	directive.first = parseWord();
-	while (*iter != ';')
-		data.push_back(parseWord());
+	std::string word = parseWord();
+	while (iter != text.end() &&  word != ";")
+	{
+		data.push_back(word);
+		if (word[word.length() - 1] == ';')
+			break ;
+		word = parseWord();
+	}
 	directive.second = data;
-	++iter; // consume ';'
 	return (directive);
 }
 
 ParserConf::Module ParserConf::parseModule()
 {
 	Module modls;
+	std::string::iterator tmp_it = iter;
 	std::string name = parseWord();
 	std::string firstWord = parseWord();
 	
@@ -75,26 +77,29 @@ ParserConf::Module ParserConf::parseModule()
 	if (firstWord == "{")
 	{
 		modls.name = name;
-		std::string word = parseWord();
-		while (word != "}")
+		while (*iter != '}')
 		{
-			iter -= word.length();
 			modls.modules.push_back(parseModule());
-			word = parseWord();
 		}
 	}
 	else
 	{
-		iter -= firstWord.length() + name.length();
+		iter = tmp_it;
 		modls.name = "";
-		modls.directives.push_back(parseDirective());
+		Directive dir = parseDirective();
+		modls.directives.push_back(dir);
+		std::cout << "name: " << dir.first << "\n";
+		for (std::vector<std::string>::iterator it = dir.second.begin(); it != dir.second.end(); it++)
+		{
+			std::cout << *it << " ";
+		}
+		std:: cout << "\n";
 	}
 	return modls;
 }
 
 std::vector<ParserConf::Module> ParserConf::parseFile()
 {
-	std::cout << "file: " << text << "\n";
 	std::vector<ParserConf::Module> file;
 	while (iter != text.end())
 	{

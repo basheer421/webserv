@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:19:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/16 17:43:47 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/16 19:18:06 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,9 @@ class ParserConf
 {
 	private:
 		std::string text;
-		std::string::iterator iter;
-		typedef std::pair<std::string, std::vector<std::string> > Directive;
-	
+		std::string::iterator iter;	
 	public:
+		typedef std::pair<std::string, std::vector<std::string> > Directive;
 		struct Module
 		{
 			std::string name;
