@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+         #
+#    By: bammar <bammar@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/13 20:01:42 by bammar            #+#    #+#              #
-#    Updated: 2023/07/17 13:38:47 by bammar           ###   ########.fr        #
+#    Updated: 2023/07/21 17:44:43 by bammar           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ FILES = $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES))
 
 CXX		=	c++
 
-CXXFLAGS =	-Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
+CXXFLAGS =	-Wall -Wextra -Werror -std=c++98
 
 OBJS	=	$(FILES:.cpp=.o)
 

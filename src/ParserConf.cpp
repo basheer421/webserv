@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParserConf.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 12:05:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/17 20:14:12 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/21 21:43:11 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 ParserConf::ParserConf() {}
 
-ParserConf::ParserConf(std::string text) : text(text)
+ParserConf::ParserConf(std::string& text) : text(text)
 {
 	iter = this->text.begin();
 }
@@ -38,60 +38,17 @@ ParserConf& ParserConf::operator = (const ParserConf& src)
 
 ParserConf::~ParserConf() {}
 
-std::string ParserConf::parseWord()
+bool ParserConf::isModuleName(std::string& str)
 {
-	while (iter != text.end() && std::isspace(*iter))
-		++iter;
-	std::string::iterator start = iter;
-	while (iter != text.end() && !std::isspace(*iter))
-		++iter;
-	return std::string(start, iter); // [start, end)
-}
-
-ParserConf::Directive ParserConf::parseDirective()
-{
-	ParserConf::Directive directive;
-	std::vector<std::string> data;
-
-	directive.first = parseWord();
-	std::string word = parseWord();
-	while (iter != text.end() &&  word != ";")
-	{
-		data.push_back(word);
-		if (word[word.length() - 1] == ';')
-			break ;
-		word = parseWord();
-	}
-	directive.second = data;
-	return (directive);
+	return (*(str.begin()) == '[' && *(str.end() - 1) == ']');
 }
 
 ParserConf::Module ParserConf::parseModule()
 {
 	Module modls;
-	std::string::iterator tmp_it = iter;
-	std::string name = parseWord();
-	if (name == "}" || name.length() == 0)
-		return modls;
-	std::string firstWord = parseWord();
+	std::string firstWord;
 
-	// sleep(1);
-	if (firstWord == "{")
-	{
-		modls.name = name;
-		while (*iter != '}' && iter != text.end()) // make sure to check for "word}"
-		{
-			modls.modules.push_back(parseModule());
-		}
-	}
-	else
-	{
-		iter = tmp_it;
-		modls.name = "";
-		Directive dir = parseDirective();
-		modls.directives.push_back(dir);
-	}
-	return modls;
+	// while ()
 }
 
 std::vector<ParserConf::Module> ParserConf::parseFile()
@@ -104,16 +61,32 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 	return (file);
 }
 
+void ParserConf::printDirective(const Directive& dir)
+{
+	std::cout << dir.first << " ";
+	for (std::vector<std::string>::const_iterator dit2 =
+		dir.second.begin();
+		dit2 != dir.second.end();
+		++dit2)
+	{
+		std::cout << *dit2 << " ";
+	}
+	std::cout << "\n";
+}
+
 void ParserConf::print(const std::vector<ParserConf::Module>& conf)
 {
-	std::cout << "names:-\n";
-	for (std::vector<ParserConf::Module>::const_iterator it = conf.begin(); it < conf.end(); it++)
+	for (std::vector<ParserConf::Module>::const_iterator it = conf.begin();
+		it != conf.end(); ++it)
 	{
-		if ((*it).name.length() != 0)
+		std::cout << "name: " << (*it).name << "\n";
+
+		for (std::vector<Directive>::const_iterator dit =
+			(*it).directives.begin();
+			dit != (*it).directives.end();
+			++dit)
 		{
-			std::cout << (*it).name << "\n";
-			std::cout << "\t";
-			print((*it).modules);
+			printDirective(*dit);
 		}
 	}
 }

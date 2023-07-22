@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParserConf.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:19:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/17 20:09:51 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/21 18:12:55 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,25 +22,27 @@
 */
 class ParserConf
 {
-	private:
-		std::string text;
-		std::string::iterator iter;	
 	public:
-		typedef std::pair<std::string, std::vector<std::string> > Directive;
+		typedef std::pair<std::string, std::vector<std::string> > Directive;	
 		struct Module
 		{
 			std::string name;
 			std::vector<Directive> directives;
-			std::vector<Module> modules;
 		};
+
+	private:	
+		std::string text;
+		std::string::iterator iter;
+		Module parseModule();
+		static bool isModuleName(std::string& str);
+		static void printDirective(const Directive& dir);
+	public:
 		ParserConf();
-		ParserConf(std::string text);
+		ParserConf(std::string& text);
 		ParserConf(const ParserConf& src);
 		ParserConf& operator = (const ParserConf& src);
 		~ParserConf();
-		std::string parseWord();
-		Directive parseDirective();
-		Module parseModule();
+		
 		std::vector<Module> parseFile();
 
 		static void print(const std::vector<ParserConf::Module>& conf);
