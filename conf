@@ -5,9 +5,9 @@ error_log  logs/error.log
 pid        logs/nginx.pid
 worker_rlimit_nofile 8192
 
-[events];this is a comment
-worker_connections  4096;this is a comment
-; this is a comment
+[events]
+worker_connections  4096
+
 
 [http]
 include    conf/mime.types
@@ -21,4 +21,4 @@ tcp_nopush   on
 server_names_hash_bucket_size 128
 
 [http-server-location /]
-proxy_pass      http://big_server_com;
+proxy_pass      http://big_server_com

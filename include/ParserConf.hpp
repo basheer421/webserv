@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:19:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/21 18:12:55 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/22 14:20:12 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <unistd.h>
+#include <sstream>
+#include <fstream>
 
 /**
  * Doesn't handle comments for now
@@ -33,7 +34,7 @@ class ParserConf
 	private:	
 		std::string text;
 		std::string::iterator iter;
-		Module parseModule();
+		// Module parseModule();
 		static bool isModuleName(std::string& str);
 		static void printDirective(const Directive& dir);
 	public:
