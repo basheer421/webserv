@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ParserConf.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:19:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/22 14:20:12 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/22 18:56:55 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,6 @@
 #include <sstream>
 #include <fstream>
 
-/**
- * Doesn't handle comments for now
-*/
 class ParserConf
 {
 	public:
@@ -32,17 +29,23 @@ class ParserConf
 		};
 
 	private:	
+		
 		std::string text;
 		std::string::iterator iter;
-		// Module parseModule();
+
 		static bool isModuleName(std::string& str);
 		static void printDirective(const Directive& dir);
+		static void removeComment(std::string& str);
+		static void replaceSpaces(std::string& str);
+		static void strip(std::string& str, char c);
+
 	public:
 		ParserConf();
 		ParserConf(std::string& text);
 		ParserConf(const ParserConf& src);
 		ParserConf& operator = (const ParserConf& src);
 		~ParserConf();
+
 		
 		std::vector<Module> parseFile();
 
