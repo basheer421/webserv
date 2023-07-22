@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_string.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:19:23 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/22 23:27:36 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/23 01:16:11 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,5 +36,29 @@ namespace ft
 			vec.push_back(buff);
 		}
 		return vec;
+	}
+
+	string string::rstrip(char c)
+	{
+		string cpy(*this);
+
+		while (*(cpy.end() - 1) == c)
+			cpy.erase(cpy.end() - 1);
+		return (cpy);
+	}
+
+	string string::lstrip(char c)
+	{
+		string cpy(*this);
+
+		size_t spos = 0;
+		for (spos = 0; spos < cpy.size() && cpy[spos] == c; ++spos)
+			;
+		return cpy.substr(spos);
+	}
+
+	string string::strip(char c)
+	{
+		return lstrip(c).rstrip(c);
 	}
 }

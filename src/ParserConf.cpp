@@ -3,26 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   ParserConf.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 12:05:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/22 23:11:45 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/23 01:13:04 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ParserConf.hpp"
 
 ParserConf::ParserConf() {}
-
-void ParserConf::strip(ft::string& str, char c)
-{
-	while (*(str.end() - 1) == c)
-		str.pop_back();
-	size_t spos = 0;
-	for (spos = 0; spos < str.size() && str[spos] == c; ++spos)
-		;
-	str = str.substr(spos);
-}
 
 // Replaces all spaces with ' ' except '\\n'
 void ParserConf::replaceSpaces(ft::string& str)
@@ -87,7 +77,7 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 		ft::string& line = *it;
 		removeComment(line);
 		replaceSpaces(line);
-		strip(line, ' ');
+		line = line.strip(' ');
 
 		if (isModuleName(line))
 		{
