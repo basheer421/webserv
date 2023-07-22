@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 12:05:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/22 19:37:43 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/22 23:11:45 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 ParserConf::ParserConf() {}
 
-void ParserConf::strip(std::string& str, char c)
+void ParserConf::strip(ft::string& str, char c)
 {
 	while (*(str.end() - 1) == c)
 		str.pop_back();
@@ -25,7 +25,7 @@ void ParserConf::strip(std::string& str, char c)
 }
 
 // Replaces all spaces with ' ' except '\\n'
-void ParserConf::replaceSpaces(std::string& str)
+void ParserConf::replaceSpaces(ft::string& str)
 {
 	for (size_t i = 0; i < str.size(); ++i)
 	{
@@ -35,12 +35,12 @@ void ParserConf::replaceSpaces(std::string& str)
 }
 
 // Sets the end of the str to be ';' exclusive
-void ParserConf::removeComment(std::string& str)
+void ParserConf::removeComment(ft::string& str)
 {
 	str = str.substr(0, str.find(';'));
 }
 
-ParserConf::ParserConf(std::string& text) : text(text)
+ParserConf::ParserConf(ft::string& text) : text(text)
 {
 	iter = this->text.begin();
 	
@@ -64,24 +64,9 @@ ParserConf& ParserConf::operator = (const ParserConf& src)
 
 ParserConf::~ParserConf() {}
 
-bool ParserConf::isModuleName(std::string& str)
+bool ParserConf::isModuleName(ft::string& str)
 {
 	return (*(str.begin()) == '[' && *(str.end() - 1) == ']');
-}
-
-static std::vector<std::string> split(std::string& str, char sep)
-{
-	std::vector<std::string> vec;
-	std::stringstream ss(str);
-	std::string buff;
-
-	while (std::getline(ss, buff, sep))
-	{
-		if (buff.length() == 0)
-			continue ;
-		vec.push_back(buff);
-	}
-	return vec;
 }
 
 /**
@@ -94,12 +79,12 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 {
 	std::vector<ParserConf::Module> file;
 
-	std::vector<std::string> lines = split(text, '\n');
+	std::vector<ft::string> lines = text.split('\n');
 
-	for (std::vector<std::string>::iterator it = lines.begin();
+	for (std::vector<ft::string>::iterator it = lines.begin();
 		it < lines.end(); ++it)
 	{
-		std::string& line = *it;
+		ft::string& line = *it;
 		removeComment(line);
 		replaceSpaces(line);
 		strip(line, ' ');
@@ -113,7 +98,7 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 		}
 		else
 		{
-			std::vector<std::string> segments = split(line, ' ');
+			std::vector<ft::string> segments = line.split(' ');
 			Directive dir;
 
 			if (segments.empty())
@@ -143,7 +128,7 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 void ParserConf::printDirective(const Directive& dir)
 {
 	std::cout << dir.first << " ";
-	for (std::vector<std::string>::const_iterator dit2 =
+	for (std::vector<ft::string>::const_iterator dit2 =
 		dir.second.begin();
 		dit2 != dir.second.end();
 		++dit2)

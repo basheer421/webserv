@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:19:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/22 19:37:27 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/22 23:08:16 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,35 +14,33 @@
 
 #include <utility>
 #include <vector>
-#include <string>
+#include "string.hpp"
 #include <iostream>
-#include <sstream>
-#include <fstream>
 
 class ParserConf
 {
 	public:
-		typedef std::pair<std::string, std::vector<std::string> > Directive;	
+		typedef std::pair<ft::string, std::vector<ft::string> > Directive;	
 		struct Module
 		{
-			std::string name;
+			ft::string name;
 			std::vector<Directive> directives;
 		};
 
 	private:	
 		
-		std::string text;
-		std::string::iterator iter;
+		ft::string text;
+		ft::string::iterator iter;
 
-		static bool isModuleName(std::string& str);
+		static bool isModuleName(ft::string& str);
 		static void printDirective(const Directive& dir);
-		static void removeComment(std::string& str);
-		static void replaceSpaces(std::string& str);
-		static void strip(std::string& str, char c);
+		static void removeComment(ft::string& str);
+		static void replaceSpaces(ft::string& str);
+		static void strip(ft::string& str, char c);
 
 	public:
 		ParserConf();
-		ParserConf(std::string& text);
+		ParserConf(ft::string& text);
 		ParserConf(const ParserConf& src);
 		ParserConf& operator = (const ParserConf& src);
 		~ParserConf();
