@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bammar <bammar@student.42.fr>              +#+  +:+       +#+         #
+#    By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/13 20:01:42 by bammar            #+#    #+#              #
-#    Updated: 2023/07/21 17:44:43 by bammar           ###   ########.fr        #
+#    Updated: 2023/07/22 23:26:48 by bammar           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,11 +14,11 @@ NAME	=	webserv
 
 SRCS_FOLDER = ./src
 
-INCLUDE_FOLDER = ./include
+INCLUDE_FOLDERS = -I./include -I./lib/string
 
 FILES_NAMES = main.cpp Server.cpp ParserConf.cpp
 
-FILES = $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES))
+FILES = lib/string/ft_string.cpp $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES)) 
 
 CXX		=	c++
 
@@ -29,10 +29,10 @@ OBJS	=	$(FILES:.cpp=.o)
 all: $(NAME)
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) -I$(INCLUDE_FOLDER) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDE_FOLDERS) -c $< -o $@
 
 $(NAME): $(OBJS)
-	$(CXX) $(OBJS) $(CXXFLAGS) -I$(INCLUDE_FOLDER) -o $(NAME)
+	$(CXX) $(OBJS) $(CXXFLAGS) $(INCLUDE_FOLDERS) -o $(NAME)
 
 clean:
 	/bin/rm -f $(OBJS)
