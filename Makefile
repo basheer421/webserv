@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+         #
+#    By: bammar <bammar@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/13 20:01:42 by bammar            #+#    #+#              #
-#    Updated: 2023/07/22 23:26:48 by bammar           ###   ########.fr        #
+#    Updated: 2023/07/23 02:06:27 by bammar           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ SRCS_FOLDER = ./src
 
 INCLUDE_FOLDERS = -I./include -I./lib/string
 
-FILES_NAMES = main.cpp Server.cpp ParserConf.cpp
+FILES_NAMES = main.cpp Server.cpp ParserConf.cpp http_special_response.cpp
 
 FILES = lib/string/ft_string.cpp $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES)) 
 

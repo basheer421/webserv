@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:06:07 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/22 23:07:34 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/23 01:27:22 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,18 @@
 
 int main(void)
 {
-    // Server server;
-	// server.run();
+    Server server;
+
 	std::fstream file("conf", std::fstream::in);
 	std::stringstream textStream;
 	textStream << file.rdbuf();
+	file.close();
 	ft::string text = textStream.str();
-	
 	ParserConf parser(text);
 	std::vector<ParserConf::Module> conf = parser.parseFile();
 	ParserConf::print(conf);
 
-	(void)conf;
-	file.close();
+	server.run();
+	
     return (0);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/13 23:23:22 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/23 02:17:54 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,15 @@ void Server::run()
 			throw ReadException();
         std::string buffer_str = buffer;
         std::cout << buffer_str << std::endl;
+
+		// Parse request here
+
+		// Sending 404 to test server
+		ft::string response (
+			"HTTP/1.1 404 Not Found"
+		);
+		send(client, response.c_str(), response.length(), 0);
+
         close(client);
     }
 }
