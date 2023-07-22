@@ -6,12 +6,11 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 12:05:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/22 18:57:06 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/22 19:37:43 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ParserConf.hpp"
-#include <iostream>
 
 ParserConf::ParserConf() {}
 
