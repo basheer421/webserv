@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/23 02:17:54 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/23 18:39:06 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,9 +90,22 @@ void Server::run()
 		// Parse request here
 
 		// Sending 404 to test server
-		ft::string response (
-			"HTTP/1.1 404 Not Found"
+		ft::string res_body(
+			"<html>" CRLF
+			"<head><title>404 NOT FOUND</title></head>" CRLF
+			"<body>" CRLF
+			"<h1 style='text-align=center; color:red;'>404 NOT FOUND</h1>" CRLF
+			"</body>" CRLF
+			"</html>" CRLF
 		);
+
+		ft::string response (
+			"HTTP/1.1 404 Not Found" CRLF
+			"Content-Type: text/html; charset=utf-8" CRLF
+			"Content-Length: 140" CRLF
+			CRLF
+		);
+		response += res_body;
 		send(client, response.c_str(), response.length(), 0);
 
         close(client);
