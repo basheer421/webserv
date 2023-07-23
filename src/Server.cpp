@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/23 18:39:06 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/23 20:31:55 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,9 +92,11 @@ void Server::run()
 		// Sending 404 to test server
 		ft::string res_body(
 			"<html>" CRLF
-			"<head><title>404 NOT FOUND</title></head>" CRLF
+			"<head><title>404 Not Found</title></head>" CRLF
 			"<body>" CRLF
-			"<h1 style='text-align=center; color:red;'>404 NOT FOUND</h1>" CRLF
+			"<h1 style='text-align:center; marign:2rem; margin-top:3rem;'>404 Not Found</h1>" CRLF
+			"<hr>" CRLF
+			"<h2 style='text-align:center;'>webserv</h2>" CRLF
 			"</body>" CRLF
 			"</html>" CRLF
 		);
@@ -102,7 +104,7 @@ void Server::run()
 		ft::string response (
 			"HTTP/1.1 404 Not Found" CRLF
 			"Content-Type: text/html; charset=utf-8" CRLF
-			"Content-Length: 140" CRLF
+			"Content-Length: 210" CRLF
 			CRLF
 		);
 		response += res_body;
