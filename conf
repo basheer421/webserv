@@ -1,5 +1,4 @@
-  ; hi
-    [global] ;lol
+[global]
 user       www
    worker_processes  5
 error_log  logs/error.log

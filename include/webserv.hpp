@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/23 20:31:28 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/26 22:53:19 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,12 @@
 #include <unistd.h>
 #include <cstring>
 #include <exception>
+#include <poll.h>
+#include <list>
+#include "ft_string.hpp"
 #include "Server.hpp"
 #include "ParserConf.hpp"
 
-# define PORT 80
+# define PORT 8080
 # define CRLF "\r\n"
+# define FD_COUNT 255

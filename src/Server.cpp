@@ -6,35 +6,17 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/23 20:31:55 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/26 22:51:20 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-const char *Server::SocketException::what() const throw()
-{
-	return ("Bad socket");
-}
+Server::ServerException::ServerException(const ft::string& msg) : msg(msg) {}
 
-const char *Server::BindException::what() const throw()
+const char *Server::ServerException::what() const throw()
 {
-	return ("Bind failed");
-}
-
-const char *Server::ListenException::what() const throw()
-{
-	return ("Listen failed");
-}
-
-const char *Server::AcceptException::what() const throw()
-{
-	return ("Accept failed");
-}
-
-const char *Server::ReadException::what() const throw()
-{
-	return ("Read failed");
+	return (msg.c_str());
 }
 
 Server::Server()
@@ -46,11 +28,11 @@ Server::Server()
 	address.sin_port = htons(PORT);
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
-		throw SocketException();
+		throw ServerException("Socket Error");
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
-		throw BindException();
+		throw ServerException("Bind Error");
     if (listen(server_fd, 10) < 0)
-		throw ListenException();
+		throw ServerException("Listen Error");
 }
 
 Server::Server(const Server& src)
@@ -75,15 +57,25 @@ void Server::run()
 	while (true)
     {
         int client;
+		// struct pollfd pfds[FD_COUNT];
 
-        std::cout << "Waiting for a connection on PORT: " << PORT << "\n";
-        client = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+		std::cout << "Waiting for connections on PORT: " << PORT << "\n";
+		// pfds[0] = (struct pollfd) {server_fd, POLLIN, 0};
+		
+		// int index = 0;
+        // for (std::list<int>::iterator it = clients.begin(); it != clients.end(); ++it)
+		// 	pfds[++index] = (struct pollfd) {*it, POLL_IN, 0};
+        
+		// if (poll(pfds, clients.size() + 1, -1) < 0)
+		// 	throw ServerException("Poll Error");
+		client = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
         if (client < 0)
-			throw AcceptException();
+			throw ServerException("AcceptException");
         char buffer[30000] = {0};
+
         int read_res = read(client, buffer, 29999);
         if (read_res < 0)
-			throw ReadException();
+			throw ServerException("ReadException");
         std::string buffer_str = buffer;
         std::cout << buffer_str << std::endl;
 

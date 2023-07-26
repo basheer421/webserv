@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/16 11:19:54 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/22 23:27:18 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/26 16:16:11 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ class ParserConf
 		static void printDirective(const Directive& dir);
 		static void removeComment(ft::string& str);
 		static void replaceSpaces(ft::string& str);
-		static void strip(ft::string& str, char c);
 
 	public:
 		ParserConf();
