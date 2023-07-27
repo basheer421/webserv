@@ -1,0 +1,24 @@
+[global]
+user       www
+   worker_processes  5
+error_log  logs/error.log
+pid        logs/nginx.pid
+worker_rlimit_nofile 8192
+
+[events]
+worker_connections  4096
+
+
+[http]
+include    conf/mime.types
+include    /etc/nginx/proxy.conf
+include    /etc/nginx/fastcgi.conf
+index    index.html index.htm index.php
+default_type application/octet-stream
+access_log   logs/access.log  main
+sendfile     on
+tcp_nopush  on
+server_names_hash_bucket_size 128
+
+[http-server-location /]
+proxy_pass      http://big_server_com

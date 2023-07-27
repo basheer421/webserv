@@ -1,31 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   http_special_response.cpp                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/26 22:53:19 by bammar           ###   ########.fr       */
+/*   Created: 2023/07/23 01:39:30 by bammar            #+#    #+#             */
+/*   Updated: 2023/07/23 15:17:35 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#pragma once
+#include "webserv.hpp"
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <sys/socket.h>
-#include <netinet/ip.h>
-#include <unistd.h>
-#include <cstring>
-#include <exception>
-#include <poll.h>
-#include <list>
-#include "ft_string.hpp"
-#include "Server.hpp"
-#include "ParserConf.hpp"
-
-# define PORT 8080
-# define CRLF "\r\n"
-# define FD_COUNT 255
+// Will add more later.
+// const ft::string webserv::page_404 (
+// 	"<html>" CRLF
+// 	"<head><title>404 NOT FOUND</title></head>" CRLF
+// 	"<body>" CRLF
+// 	"<h1 style='text-align=center; color:red;'>404 NOT FOUND</h1>" CRLF
+// );
