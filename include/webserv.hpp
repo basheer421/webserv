@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/26 22:53:19 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/27 13:27:29 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,6 @@
 #include "Server.hpp"
 #include "ParserConf.hpp"
 
-# define PORT 8080
+# define PORT 80
 # define CRLF "\r\n"
 # define FD_COUNT 255

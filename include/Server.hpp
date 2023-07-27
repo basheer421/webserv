@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/26 22:49:18 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/27 13:13:17 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,4 +38,5 @@ public:
 	~Server();
 
 	void run(); // Throws
+	void sendResponse(const int& client);
 };

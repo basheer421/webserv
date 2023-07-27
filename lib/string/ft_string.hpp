@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_string.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:18:20 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/23 01:11:06 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/27 13:41:28 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,4 +37,8 @@ namespace ft
 			string strip(char c);
 
 	};
+
+	string to_string(size_t n);
+	string to_string(long n);
+	string to_string(double n);
 }
