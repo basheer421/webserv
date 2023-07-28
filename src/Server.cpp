@@ -59,7 +59,9 @@ void Server::run()
         int client;
 		// struct pollfd pfds[FD_COUNT];
 
+		std::cout << "--------------------------------------" << std::endl;
 		std::cout << "Waiting for connections on PORT: " << PORT << "\n";
+		std::cout << "--------------------------------------" << std::endl;
 		// pfds[0] = (struct pollfd) {server_fd, POLLIN, 0};
 		
 		// int index = 0;
