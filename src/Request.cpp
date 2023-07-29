@@ -1,12 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Request.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/07/29 18:01:59 by mkhan             #+#    #+#             */
+/*   Updated: 2023/07/29 18:01:59 by mkhan            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Request.hpp"
 
-Request::Request()
+Request::Request(): _buff(""), _reqUrl(""), _isUrlCgi(false)
 {
 }
 
-Request::Request(std::string buffer)
+Request::Request(std::string buffer): _buff(buffer), _reqUrl(""), _isUrlCgi(false)
 {
-    this->buff = buffer;
 }
 
 Request::Request(const Request &object)
@@ -37,7 +48,7 @@ bool    Request::isWhiteSpace(std::string str1)
 
 void    Request::parseRequest()
 {
-    std::stringstream str(buff);
+    std::stringstream str(_buff);
     std::string       str1;
     std::string       key;
     std::string       value;
@@ -50,15 +61,18 @@ void    Request::parseRequest()
         std::stringstream   line(str1);
         getline(line, key, ' ');
         getline(line, value);
-        this->request[key] = value;
+        this->_request[key] = value;
         if (first)
         {
             std::stringstream   url(value);
-            getline(url, reqUrl, ' ');
-            std::cout << "Requested Url ===========> " << reqUrl << std::endl;
+            getline(url, _reqUrl, ' ');
+			std::size_t	pos_idx = _reqUrl.find("/cgi-bin");
+			if (pos_idx != std::string::npos)
+				this->_isUrlCgi = true;
+            std::cout << "Requested Url ===========> " << _reqUrl << " === _isUrlCgi ====> " << _isUrlCgi << std::endl;
             first = false;
         }
-        std::cout << key << request[key] << std::endl;
+        std::cout << key << _request[key] << std::endl;
     }
 }
 
