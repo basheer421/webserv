@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/27 14:07:54 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/31 01:21:19 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,8 @@ Server::Server()
 	if (server_fd < 0)
 		throw ServerException("Socket Error");
 	int optval = 1;
-	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int));
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int)) < 0)
+		throw ServerException("setsockopt Error");
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		throw ServerException("Bind Error");
     if (listen(server_fd, 10) < 0)
@@ -122,6 +123,5 @@ void Server::run()
 		}
 	}
 }
-
 
 Server::~Server() {}
