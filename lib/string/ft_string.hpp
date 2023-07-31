@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_string.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:18:20 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/23 01:11:06 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/31 20:10:40 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,4 +37,23 @@ namespace ft
 			string strip(char c);
 
 	};
+
+	template <typename T>
+	string to_string(T n)
+	{
+		std::stringstream ss;
+
+		ss << n;
+		return (ss.str());
+	}
+
+	template <typename T>
+	T from_string(string str)
+	{
+		std::stringstream ss(str);
+
+		T n;
+		ss >> n;
+		return (n);
+	}
 }
