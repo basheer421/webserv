@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/31 20:10:30 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/31 20:13:55 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,11 @@ void Server::run()
 					continue;
 				} else {
 					// Handle the client request
+					Request request(buffer);
+					request.parseRequest();
+
 					sendResponse(client_fd);
+
 				}
 			}
 			index++;

@@ -48,6 +48,15 @@ bool    Request::isWhiteSpace(std::string str1)
 
 void    Request::parseRequest()
 {
+
+	// Replace all occurrences of '\r\n' with '\n' in the _buff string
+    std::string::size_type pos = 0;
+    while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
+    {
+        _buff.replace(pos, 2, "\n");
+        pos += 1; // Move past the replaced '\n' to avoid an infinite loop
+    }
+
     std::stringstream str(_buff);
     std::string       str1;
     std::string       key;
@@ -72,7 +81,7 @@ void    Request::parseRequest()
             std::cout << "Requested Url ===========> " << _reqUrl << " === _isUrlCgi ====> " << _isUrlCgi << std::endl;
             first = false;
         }
-        std::cout << key << _request[key] << std::endl;
+        std::cout << key << "{" << _request[key] << "}\n";
     }
 }
 
