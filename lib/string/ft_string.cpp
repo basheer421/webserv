@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:19:23 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/27 13:42:57 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/31 19:39:09 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,29 +60,5 @@ namespace ft
 	string string::strip(char c)
 	{
 		return lstrip(c).rstrip(c);
-	}
-
-	string to_string(size_t n)
-	{
-		std::stringstream ss;
-
-		ss << n;
-		return (ss.str());
-	}
-
-	string to_string(long n)
-	{
-		std::stringstream ss;
-
-		ss << n;
-		return (ss.str());
-	}
-
-	string to_string(double n)
-	{
-		std::stringstream ss;
-
-		ss << n;
-		return (ss.str());
 	}
 }

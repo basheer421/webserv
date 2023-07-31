@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/27 13:27:29 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/31 19:02:04 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <sstream>
 #include <sys/socket.h>
 #include <netinet/ip.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
 #include <exception>

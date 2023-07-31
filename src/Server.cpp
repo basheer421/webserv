@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/31 01:21:19 by bammar           ###   ########.fr       */
+/*   Updated: 2023/07/31 19:44:25 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,21 +22,20 @@ const char *Server::ServerException::what() const throw()
 void Server::sendResponse(const int& client)
 {
 	ft::string res_body(
-		"<html>" CRLF
-		"<head><title>404 Not Found</title></head>" CRLF
-		"<body>" CRLF
-		"<h1 style='text-align:center; marign:2rem; margin-top:3rem;'>404 Not Found</h1>" CRLF
-		"<hr>" CRLF
-		"<h2 style='text-align:center;'>webserv</h2>" CRLF
-		"</body>" CRLF
-		"</html>" CRLF
+		"<html>"
+		"<head><title>404 Not Found</title></head>"
+		"<body>"
+		"<h1 style='text-align:center; marign:2rem; margin-top:3rem;'>404 Not Found</h1>"
+		"<hr>"
+		"<h2 style='text-align:center;'>webserv</h2>"
+		"</body>"
+		"</html>"
 	);
 
 	ft::string response (
 		"HTTP/1.1 404 Not Found" CRLF
 		"Content-Type: text/html; charset=utf-8" CRLF
 		"Content-Length: " + ft::to_string(res_body.length()) + CRLF
-		"Connection: keep-alive" CRLF
 		CRLF
 	);
 	response += res_body;
@@ -53,6 +52,7 @@ Server::Server()
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
 		throw ServerException("Socket Error");
+	fcntl(server_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	int optval = 1;
 	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(int)) < 0)
 		throw ServerException("setsockopt Error");
