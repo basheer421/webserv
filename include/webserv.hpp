@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/31 20:09:17 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/01 13:56:10 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@
 #include <poll.h>
 #include <list>
 #include "ft_string.hpp"
-#include "Server.hpp"
 #include "ParserConf.hpp"
+#include "Server.hpp"
 
 # define PORT 80
 # define CRLF "\r\n"

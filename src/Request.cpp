@@ -85,3 +85,16 @@ void    Request::parseRequest()
     }
 }
 
+std::map<std::string, std::string> Request::getRequest() const
+{
+	return (_request);
+}
+
+std::string Request::getReqUrl() const
+{
+	return _reqUrl;
+}
+bool Request::isUrlCgi() const
+{
+	return _isUrlCgi;
+}

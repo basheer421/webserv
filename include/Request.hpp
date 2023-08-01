@@ -33,4 +33,7 @@ class Request
         ~Request();
         void    parseRequest();
         bool    isWhiteSpace(std::string    str1);
+		std::map<std::string, std::string> getRequest() const;
+		std::string getReqUrl() const;
+		bool isUrlCgi() const;
 };

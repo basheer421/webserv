@@ -14,17 +14,17 @@
 
 #include <utility>
 #include <vector>
+#include <map>
 #include "ft_string.hpp"
 #include <iostream>
 
 class ParserConf
 {
 	public:
-		typedef std::pair<ft::string, std::vector<ft::string> > Directive;	
+		typedef std::vector<ft::string> Directive;
 		struct Module
 		{
-			ft::string name;
-			std::vector<Directive> directives;
+			std::map<ft::string, Directive> directives;
 		};
 
 	private:	
@@ -44,8 +44,7 @@ class ParserConf
 		ParserConf& operator = (const ParserConf& src);
 		~ParserConf();
 
-		
-		std::vector<Module> parseFile();
+		std::map<ft::string, Module> parseFile();
 
-		static void print(const std::vector<ParserConf::Module>& conf);
+		static void print(const std::map<ft::string, ParserConf::Module>& conf);
 };

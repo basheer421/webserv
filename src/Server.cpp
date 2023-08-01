@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/31 20:13:55 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/01 20:02:48 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,18 +19,28 @@ const char *Server::ServerException::what() const throw()
 	return (msg.c_str());
 }
 
-void Server::sendResponse(const int& client)
+/**
+ * Only handles GET requests for now
+*/
+void Server::sendResponse(const int& client, Request& request)
 {
-	ft::string res_body(
-		"<html>"
-		"<head><title>404 Not Found</title></head>"
-		"<body>"
-		"<h1 style='text-align:center; marign:2rem; margin-top:3rem;'>404 Not Found</h1>"
-		"<hr>"
-		"<h2 style='text-align:center;'>webserv</h2>"
-		"</body>"
-		"</html>"
-	);
+	// request is not used now cuz parsing is not done
+	(void) request;
+
+	std::map<std::string, std::string>  reqMap = request.getRequest();
+	ft::string url(  request.getReqUrl());
+	
+
+	
+	ft::string res_body;
+
+	try {
+		res_body = ft::file_to_string(url);
+	} catch (std::exception& e) {
+		// res_body = 
+	}
+
+
 
 	ft::string response (
 		"HTTP/1.1 404 Not Found" CRLF
@@ -38,11 +48,14 @@ void Server::sendResponse(const int& client)
 		"Content-Length: " + ft::to_string(res_body.length()) + CRLF
 		CRLF
 	);
-	response += res_body;
+	// response += res_body;
 	send(client, response.c_str(), response.length(), 0);
 }
 
 Server::Server()
+{}
+
+Server::Server(const std::map<ft::string, ParserConf::Module>& cnf) : conf(cnf)
 {
 	addrlen = sizeof(address);
 	bzero((char *)&address, sizeof(address));
@@ -118,7 +131,7 @@ void Server::run()
 					Request request(buffer);
 					request.parseRequest();
 
-					sendResponse(client_fd);
+					sendResponse(client_fd, request);
 
 				}
 			}

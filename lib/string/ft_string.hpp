@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:18:20 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/31 20:10:40 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/01 15:47:04 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,10 @@ namespace ft
 		return (ss.str());
 	}
 
+	string file_to_string(const string& file_name); // Throws
+
 	template <typename T>
-	T from_string(string str)
+	T from_string(string& str)
 	{
 		std::stringstream ss(str);
 

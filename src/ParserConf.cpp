@@ -65,9 +65,10 @@ bool ParserConf::isModuleName(ft::string& str)
  * - Remove everything after ';' (comments).
  * - Make your exceptions.
 */
-std::vector<ParserConf::Module> ParserConf::parseFile()
+std::map<ft::string, ParserConf::Module> ParserConf::parseFile()
 {
-	std::vector<ParserConf::Module> file;
+	std::map<ft::string, ParserConf::Module> file;
+	ft::string lastModl;
 
 	std::vector<ft::string> lines = text.split('\n');
 
@@ -83,8 +84,8 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 		{
 			Module modl;
 
-			modl.name = line.substr(1, line.length() - 2);
-			file.push_back(modl);
+			lastModl = line.substr(1, line.length() - 2);
+			file[lastModl] = modl;
 		}
 		else
 		{
@@ -104,12 +105,11 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 			*/
 			if (segments.size() == 1)
 				throw std::exception();
-			
-			dir.first = segments[0];
+
+			ft::string name = *(segments.begin());
 			segments.erase(segments.begin());
-			dir.second = segments;
-			
-			file[file.size() - 1].directives.push_back(dir);
+			dir = segments;
+			file[lastModl].directives[name] = dir;
 		}
 	}
 	return (file);
@@ -117,30 +117,27 @@ std::vector<ParserConf::Module> ParserConf::parseFile()
 
 void ParserConf::printDirective(const Directive& dir)
 {
-	std::cout << dir.first << " ";
 	for (std::vector<ft::string>::const_iterator dit2 =
-		dir.second.begin();
-		dit2 != dir.second.end();
+		dir.begin();
+		dit2 != dir.end();
 		++dit2)
 	{
-		std::cout << "{" << *dit2  << "}" << (dit2 + 1 == dir.second.end() ? "" : " ");
+		std::cout << "{" << *dit2  << "}" << (dit2 + 1 == dir.end() ? "" : " ");
 	}
 	std::cout << "\n";
 }
 
-void ParserConf::print(const std::vector<ParserConf::Module>& conf)
+void ParserConf::print(const std::map<ft::string, ParserConf::Module>& conf)
 {
-	for (std::vector<ParserConf::Module>::const_iterator it = conf.begin();
+	for (std::map<ft::string, ParserConf::Module>::const_iterator it = conf.begin();
 		it != conf.end(); ++it)
 	{
-		std::cout << "[" << (*it).name << "]\n";
-
-		for (std::vector<Directive>::const_iterator dit =
-			(*it).directives.begin();
-			dit != (*it).directives.end();
-			++dit)
+		std::cout << "[" << (*it).first << "]\n";
+		for (std::map<ft::string, Directive>::const_iterator dit = (*it).second.directives.begin();
+			dit != (*it).second.directives.end(); ++dit)
 		{
-			printDirective(*dit);
+			std::cout << (*dit).first << "-> ";
+			printDirective((*dit).second);
 		}
 	}
 }

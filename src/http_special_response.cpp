@@ -14,8 +14,8 @@
 
 // Will add more later.
 // const ft::string webserv::page_404 (
-// 	"<html>" CRLF
-// 	"<head><title>404 NOT FOUND</title></head>" CRLF
-// 	"<body>" CRLF
-// 	"<h1 style='text-align=center; color:red;'>404 NOT FOUND</h1>" CRLF
+// 	"<html>"
+// 	"<head><title>404 NOT FOUND</title></head>"
+// 	"<body>"
+// 	"<h1 style='text-align=center; color:red;'>404 NOT FOUND</h1>"
 // );

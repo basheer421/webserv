@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:19:23 by bammar            #+#    #+#             */
-/*   Updated: 2023/07/31 20:09:27 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/01 15:47:12 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,20 @@ namespace ft
 	{
 		return lstrip(c).rstrip(c);
 	}
+
+	string file_to_string(const string& file_name)
+	{
+		std::stringstream ss;
+		std::ifstream file;
+
+		file.exceptions ( std::ifstream::badbit );
+		file.open(file_name.c_str());
+		ss << file.rdbuf();
+		if (ss.bad())
+			throw std::exception();
+		file.close();
+		return (ss.str());
+	}
 }
+
+

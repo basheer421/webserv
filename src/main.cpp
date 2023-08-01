@@ -22,7 +22,7 @@ int main(void)
 	file.close();
 	ft::string text = textStream.str();
 	ParserConf parser(text);
-	std::vector<ParserConf::Module> conf = parser.parseFile();
+	std::map<ft::string, ParserConf::Module> conf = parser.parseFile();
 	ParserConf::print(conf);
 
 	server.run();
