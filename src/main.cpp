@@ -14,7 +14,7 @@
 
 int main(void)
 {
-    Server server;
+
 
 	std::fstream file("conf", std::fstream::in);
 	std::stringstream textStream;
@@ -25,6 +25,7 @@ int main(void)
 	std::map<ft::string, ParserConf::Module> conf = parser.parseFile();
 	ParserConf::print(conf);
 
+	Server server(conf);
 	server.run();
 	
     return (0);

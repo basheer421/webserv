@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/01 20:02:48 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/02 22:04:06 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,31 +29,39 @@ void Server::sendResponse(const int& client, Request& request)
 
 	std::map<std::string, std::string>  reqMap = request.getRequest();
 	ft::string url(  request.getReqUrl());
-	
 
-	
+	std::string response;
 	ft::string res_body;
 
 	try {
-		res_body = ft::file_to_string(url);
+		response = "HTTP/1.1 200 OK" CRLF;
+		ft::string path = (conf.at("http-server-location /").directives.at("root").at(0)) + url;
+		std::cout << "------------sending-->  {" << path << "}\n";
+		res_body = ft::file_to_string(path);
+		std::cout << "body >> \n";
+		std::cout << res_body << "\n";
+		std::cout << "body << \n";
 	} catch (std::exception& e) {
-		// res_body = 
+		response = "HTTP/1.1 404 Not Found" CRLF;
+		try {
+			res_body = ft::file_to_string("error_pages/404.html");
+		} catch (std::exception& e) {
+			std::cerr << "404.html not found!\n";
+		}
 	}
-
-
-
-	ft::string response (
-		"HTTP/1.1 404 Not Found" CRLF
+	response +=
 		"Content-Type: text/html; charset=utf-8" CRLF
 		"Content-Length: " + ft::to_string(res_body.length()) + CRLF
 		CRLF
-	);
-	// response += res_body;
+	;
+	response += res_body;
 	send(client, response.c_str(), response.length(), 0);
 }
 
 Server::Server()
-{}
+{
+	*this = Server(std::map<ft::string, ParserConf::Module>());
+}
 
 Server::Server(const std::map<ft::string, ParserConf::Module>& cnf) : conf(cnf)
 {
@@ -107,7 +115,7 @@ void Server::run()
 		
 		if (poll(pfds, clients.size() + 1, -1) < 0)
 			throw ServerException("Poll Error");
-		
+
 		if (pfds[0].revents & POLLIN)
 		{
 			client = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
