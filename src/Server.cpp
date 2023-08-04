@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/04 16:38:06 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/04 17:31:55 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,8 @@ void Server::sendResponse(const int& client, Request& request)
 	try {
 		response = "HTTP/1.1 200 OK" CRLF;
 		ft::string path = (conf.at("http-server-location /").directives.at("root").at(0)) + url;
-		std::cout << "------------sending-->  {" << path << "}\n";
 		res_body = ft::file_to_string(path);
-		std::cout << "body >> \n";
-		std::cout << res_body << "\n";
-		std::cout << "body << \n";
+		std::cout << "sending-->  {" << path << "}\n";
 	} catch (std::exception& e) {
 		response = "HTTP/1.1 404 Not Found" CRLF;
 		try {
@@ -71,7 +68,7 @@ void Server::sendResponse(const int& client, Request& request)
 void Server::addressInit()
 {
 	// Default
-	ft::string conf_addrs = "*:" + ft::to_string(DEFAULT_PORT);
+	conf_addrs = "*:" + ft::to_string(DEFAULT_PORT);
 
 	std::map<ft::string, ParserConf::Module>::const_iterator conf_server;
 	conf_server = conf.find("http-server");
@@ -85,16 +82,16 @@ void Server::addressInit()
 				conf_addrs = (*listen_it).second.at(0);
 		}
 	}
-	setAddress(conf_addrs);
+	setAddress();
 }
 
-void Server::setAddress(ft::string& addrs)
+void Server::setAddress()
 {
-    std::vector<ft::string> vec = addrs.split(':');
-
+    std::vector<ft::string> vec = conf_addrs.split(':');
     if (vec.size() != 1 && vec.size() != 2)
         throw ServerException("Bad Address: Invalid format");
-
+	else if (vec.size() == 1)
+		conf_addrs = "*:" + conf_addrs;
     addrlen = sizeof(address);
     std::memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
@@ -126,8 +123,6 @@ void Server::setAddress(ft::string& addrs)
 
     // Handling port
     in_port_t port = ft::from_string<in_port_t>(vec.at(1));
-	std::cout << "string: " << vec.at(1) << "\n";
-	std::cout << "num: " << port << "\n";
     address.sin_port = htons(port);
 }
 
@@ -175,7 +170,7 @@ Server& Server::operator = (const Server& src)
 
 void Server::run()
 {
-	std::cout << "Waiting for connections on PORT: " << htons(address.sin_port) << "\n";
+	std::cout << "Listening on: " << conf_addrs << "\n";
 	while (true)
 	{
 		int client;

@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/03 14:04:10 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/04 17:27:52 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ private:
 	int addrlen;
 	int server_fd;
 	const std::map<ft::string, ParserConf::Module> conf;
+	ft::string conf_addrs;
 
 	class ServerException : public std::exception
 	{
@@ -33,7 +34,7 @@ private:
 			virtual const char *what() const throw();
 	};
 	void addressInit();
-	void setAddress(ft::string& addrs);
+	void setAddress();
 
 public:
 	Server(); // Throws
