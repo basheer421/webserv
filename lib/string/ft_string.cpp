@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:19:23 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/03 13:43:58 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/04 17:10:39 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,8 @@ namespace ft
 
 		file.exceptions ( std::ifstream::badbit );
 		file.open(file_name.c_str());
+		if (file.fail())
+			throw std::exception();
 		ss << file.rdbuf();
 		if (ss.bad())
 			throw std::exception();
