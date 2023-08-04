@@ -14,8 +14,6 @@
 
 int main(void)
 {
-
-
 	std::fstream file("conf", std::fstream::in);
 	std::stringstream textStream;
 	textStream << file.rdbuf();

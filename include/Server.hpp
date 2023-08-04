@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/01 15:03:31 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/03 14:04:10 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ private:
 			ServerException(const ft::string& msg);
 			virtual const char *what() const throw();
 	};
+	void addressInit();
+	void setAddress(ft::string& addrs);
 
 public:
 	Server(); // Throws

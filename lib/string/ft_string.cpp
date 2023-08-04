@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_string.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:19:23 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/01 15:47:12 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/03 13:43:58 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,18 @@ namespace ft
 	string& string::operator=(const std::string& other)
 	{
 		std::string::operator=(other);
+		return *this;
+	}
+
+	string& string::operator= (const char* s)
+	{
+		std::string::operator=(s);
+		return *this;
+	}
+
+	string& string::operator= (char c)
+	{
+		std::string::operator=(c);
 		return *this;
 	}
 

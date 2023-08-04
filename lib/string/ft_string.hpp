@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_string.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:18:20 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/01 15:47:04 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/03 13:40:55 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ namespace ft
         	string(const char* str);
         	string(const std::string& str);
 			string& operator=(const std::string& other);
+			string& operator= (const char* s);
+			string& operator= (char c);
 
 			std::vector<string> split(char sep);
 

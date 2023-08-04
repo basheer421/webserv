@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/01 13:56:10 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/04 16:11:43 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,6 @@
 #include "ParserConf.hpp"
 #include "Server.hpp"
 
-# define PORT 80
+# define DEFAULT_PORT 8080
 # define CRLF "\r\n"
 # define FD_COUNT 255
