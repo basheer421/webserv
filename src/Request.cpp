@@ -75,12 +75,22 @@ void    Request::parseRequest()
         {
             std::stringstream   url(value);
             getline(url, _reqUrl, ' ');
+			// std::cout << "===============>>  request =================> " << key << std::endl;
+			if (key.find("GET") != std::string::npos)
+				this->_type = GET;
+			else if (key.find("POST") != std::string::npos)
+				this->_type = POST;
+			else if (key.find("DELETE") != std::string::npos)
+				this->_type = DELETE;
 			std::size_t	pos_idx = _reqUrl.find("/cgi-bin");
 			if (pos_idx != std::string::npos)
 				this->_isUrlCgi = true;
             std::cout << "Requested Url ===========> " << _reqUrl << " === _isUrlCgi ====> " << _isUrlCgi << std::endl;
             first = false;
         }
+		if (key == "Host:")
+			this->_host = value;
+		// std::cout << "===============> _host >>>>>" << _host << "        "  << _type << std::endl;
         std::cout << key << "{" << _request[key] << "}\n";
     }
 }
@@ -94,6 +104,17 @@ std::string Request::getReqUrl() const
 {
 	return _reqUrl;
 }
+
+std::string	Request::getHost() const
+{
+	return _host;
+}
+
+e_request_type	Request::getReqType() const
+{
+	return (_type);
+}
+
 bool Request::isUrlCgi() const
 {
 	return _isUrlCgi;
