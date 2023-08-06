@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/04 17:31:55 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/06 16:05:32 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void Server::sendResponse(const int& client, Request& request)
 
 	try {
 		response = "HTTP/1.1 200 OK" CRLF;
-		ft::string path = (conf.at("http-server-location /").directives.at("root").at(0)) + url;
+		ft::string path = 
 		res_body = ft::file_to_string(path);
 		std::cout << "sending-->  {" << path << "}\n";
 	} catch (std::exception& e) {
