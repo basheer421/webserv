@@ -65,10 +65,10 @@ bool ParserConf::isModuleName(ft::string& str)
  * - Remove everything after ';' (comments).
  * - Make your exceptions.
 */
-std::map<ft::string, ParserConf::Module> ParserConf::parseFile()
+std::map<ft::string, std::vector<ParserConf::Module> > ParserConf::parseFile()
 {
-	std::map<ft::string, ParserConf::Module> file;
-	ft::string lastModl;
+	std::map<ft::string, std::vector<ParserConf::Module> > file;
+	ft::string lastModlVec;
 
 	std::vector<ft::string> lines = text.split('\n');
 
@@ -82,37 +82,28 @@ std::map<ft::string, ParserConf::Module> ParserConf::parseFile()
 
 		if (isModuleName(line))
 		{
-			Module modl;
-
-			lastModl = line.substr(1, line.length() - 2);
-			file[lastModl] = modl;
+			lastModlVec = line.substr(1, line.length() - 2);
+			file[lastModlVec].push_back(Module());
 		}
 		else
 		{
-			std::vector<ft::string> segments = line.split(' ');
-			Directive dir;
+			Directive segments = line.split(' ');
 
 			if (segments.empty())
 				continue ;
 			/*
 				First element should always be a Module.
-			*/
-			if (file.empty())
-				throw std::exception();
-			
-			/*
 				There should be a name at the start.
 			*/
-			if (segments.size() == 1)
+			if (file.empty() || segments.size() == 1)
 				throw std::exception();
 
-			ft::string name = *(segments.begin());
+			ft::string name = segments.front();
 			segments.erase(segments.begin());
-			dir = segments;
-			file[lastModl][name] = dir;
+			Module& modl = file[lastModlVec].back();
+			modl[name] = segments;
 		}
 	}
-	std::cout << (*file.begin()).first << "\n";
 	return (file);
 }
 
@@ -126,19 +117,4 @@ void ParserConf::printDirective(const Directive& dir)
 		std::cout << "{" << *dit2  << "}" << (dit2 + 1 == dir.end() ? "" : " ");
 	}
 	std::cout << "\n";
-}
-
-void ParserConf::print(const std::map<ft::string, ParserConf::Module>& conf)
-{
-	for (std::map<ft::string, ParserConf::Module>::const_iterator it = conf.begin();
-		it != conf.end(); ++it)
-	{
-		std::cout << "[" << (*it).first << "]\n";
-		for (std::map<ft::string, Directive>::const_iterator dit = (*it).second.begin();
-			dit != (*it).second.end(); ++dit)
-		{
-			std::cout << (*dit).first << "-> ";
-			printDirective((*dit).second);
-		}
-	}
 }

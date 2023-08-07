@@ -17,7 +17,7 @@
 	index	index.html
 	listen	8090 ; Expands to *:8090
 	server_name	_
-	client_max_body_size 1024
+	client_max_body_size 1030
 	[location /] ; This is a route
 		limit_except GET POST DELETE ; We allow all our server http methods here.
-		autoindex true ; Will list the files if a dir is requested
+		autoindex false ; Will list the files if a dir is requested

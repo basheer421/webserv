@@ -40,7 +40,5 @@ class ParserConf
 		ParserConf& operator = (const ParserConf& src);
 		~ParserConf();
 
-		std::map<ft::string, Module> parseFile();
-
-		static void print(const std::map<ft::string, ParserConf::Module>& conf);
+		std::map<ft::string, std::vector<ParserConf::Module> > parseFile();
 };

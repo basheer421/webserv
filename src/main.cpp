@@ -20,11 +20,9 @@ int main(void)
 	file.close();
 	ft::string text = textStream.str();
 	ParserConf parser(text);
-	std::map<ft::string, ParserConf::Module> conf = parser.parseFile();
-	// ParserConf::print(conf);
-
-	Server server(conf);
+	std::map<ft::string, std::vector<ParserConf::Module> > conf
+		= parser.parseFile();
+	// Server server(conf);
 	// server.run();
-	
     return (0);
 }
