@@ -12,23 +12,19 @@
 
 #pragma once
 
+#include <iostream>
 #include <utility>
 #include <vector>
 #include <map>
 #include "ft_string.hpp"
-#include <iostream>
 
 class ParserConf
 {
 	public:
 		typedef std::vector<ft::string> Directive;
-		struct Module
-		{
-			std::map<ft::string, Directive> directives;
-		};
+		typedef std::map<ft::string, Directive> Module;
 
-	private:	
-		
+	private:
 		ft::string text;
 		ft::string::iterator iter;
 

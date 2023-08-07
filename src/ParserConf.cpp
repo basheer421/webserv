@@ -109,9 +109,10 @@ std::map<ft::string, ParserConf::Module> ParserConf::parseFile()
 			ft::string name = *(segments.begin());
 			segments.erase(segments.begin());
 			dir = segments;
-			file[lastModl].directives[name] = dir;
+			file[lastModl][name] = dir;
 		}
 	}
+	std::cout << (*file.begin()).first << "\n";
 	return (file);
 }
 
@@ -133,8 +134,8 @@ void ParserConf::print(const std::map<ft::string, ParserConf::Module>& conf)
 		it != conf.end(); ++it)
 	{
 		std::cout << "[" << (*it).first << "]\n";
-		for (std::map<ft::string, Directive>::const_iterator dit = (*it).second.directives.begin();
-			dit != (*it).second.directives.end(); ++dit)
+		for (std::map<ft::string, Directive>::const_iterator dit = (*it).second.begin();
+			dit != (*it).second.end(); ++dit)
 		{
 			std::cout << (*dit).first << "-> ";
 			printDirective((*dit).second);

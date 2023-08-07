@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/06 16:05:32 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/07 18:13:50 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,8 @@ void Server::addressInit()
 	if (conf_server != conf.end())
 	{
 		std::map<ft::string, ParserConf::Directive>::const_iterator listen_it;
-		listen_it = (*(conf_server)).second.directives.find("listen");
-		if (listen_it != (*conf_server).second.directives.end())
+		listen_it = (*(conf_server)).second.find("listen");
+		if (listen_it != (*conf_server).second.end())
 		{
 			if ((*listen_it).second.size() != 0)
 				conf_addrs = (*listen_it).second.at(0);
@@ -192,10 +192,13 @@ void Server::run()
 			clients.push_back(client);
 		}
 
+		// We have 1 server so count will be 1 here, otherwise the server count.
 		index = 1;
 		for (std::list<int>::iterator it = clients.begin(); it != clients.end();) {
 			int client_fd = *it;
 			if (pfds[index].revents & POLLIN) {
+				// 30000 is temp,
+				//	We should put the (client_max_body_size + header size)
 				char buffer[30000] = {0};
 				int read_res = recv(client_fd, buffer, 29999, 0);
 				if (read_res <= 0) {
@@ -211,7 +214,7 @@ void Server::run()
 
 				}
 			}
-			index++;
+			++index;
 			++it;
 		}
 	}

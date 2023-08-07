@@ -1,6 +1,23 @@
-[http]
-index    index.html index.htm index.php
-server_names_hash_bucket_size 128
+; This is almost .ini file format.
+[server]
+	root	/home/basheer/Desktop/ws-dir
+	index	index.html
+	listen	127.0.0.1:8080
+	server_name	_
+	client_max_body_size 1024    ; This has to be in bytes. (Integer)
+	[location /] ; This is a route
+		limit_except GET POST DELETE ; We allow all our server http methods here.
+		autoindex true ; Will list the files if a dir is requested
 
-[http-server-location /]
-root      /Users/bammar/Desktop/ws-dir
+	[location /home]
+		return / ; redirects (/)
+
+[server] ; This is another server
+	root /home/basheer/Desktop/temp-website
+	index	index.html
+	listen	8090 ; Expands to *:8090
+	server_name	_
+	client_max_body_size 1024
+	[location /] ; This is a route
+		limit_except GET POST DELETE ; We allow all our server http methods here.
+		autoindex true ; Will list the files if a dir is requested
