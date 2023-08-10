@@ -35,7 +35,7 @@ void Server::sendResponse(const int& client, Request& request)
 
 	try {
 		response = "HTTP/1.1 200 OK" CRLF;
-		ft::string path = 
+		ft::string path = (conf.at("http-server-location /").directives.at("root").at(0)) + url;
 		res_body = ft::file_to_string(path);
 		std::cout << "sending-->  {" << path << "}\n";
 	} catch (std::exception& e) {
@@ -179,7 +179,7 @@ void Server::run()
 		
 		int index = 0;
 		for (std::list<int>::iterator it = clients.begin(); it != clients.end(); ++it)
-			pfds[++index] = (struct pollfd) {*it, POLLIN, 0};
+			pfds[++index] = (struct pollfd) {*it, POLLIN | POLLOUT, 0};
 		
 		if (poll(pfds, clients.size() + 1, -1) < 0)
 			throw ServerException("Poll Error");
@@ -195,20 +195,25 @@ void Server::run()
 		index = 1;
 		for (std::list<int>::iterator it = clients.begin(); it != clients.end();) {
 			int client_fd = *it;
-			if (pfds[index].revents & POLLIN) {
+			if (pfds[index].revents & POLLIN)
+			{
 				char buffer[30000] = {0};
 				int read_res = recv(client_fd, buffer, 29999, 0);
 				if (read_res <= 0) {
 					it = clients.erase(it);
 					close(client_fd);
 					continue;
-				} else {
+				} 
+				else 
+				{
 					// Handle the client request
 					Request request(buffer);
 					request.parseRequest();
-
-					sendResponse(client_fd, request);
-
+					if (pfds[index].revents & POLLOUT)
+					{
+						std::cout << "Sending response to ==================> client_fd: " << client_fd << std::endl;
+						sendResponse(client_fd, request);
+					}
 				}
 			}
 			index++;
