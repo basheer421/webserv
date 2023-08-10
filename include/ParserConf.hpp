@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 #include "ft_string.hpp"
+#include "ServerTraits.hpp"
 
 class ParserConf
 {
@@ -24,12 +25,20 @@ class ParserConf
 		typedef std::vector<ft::string> Directive;
 		typedef std::map<ft::string, Directive> Module;
 
+		class ParseException : public std::exception
+		{
+			public:
+				const ft::string& msg;
+				ParseException(const ft::string& msg);
+				virtual const char *what() const throw();
+		};
+
 	private:
 		ft::string text;
 		ft::string::iterator iter;
+		std::map< ft::string, std::vector<ParserConf::Module> > conf;
 
 		static bool isModuleName(ft::string& str);
-		static void printDirective(const Directive& dir);
 		static void removeComment(ft::string& str);
 		static void replaceSpaces(ft::string& str);
 
@@ -40,5 +49,7 @@ class ParserConf
 		ParserConf& operator = (const ParserConf& src);
 		~ParserConf();
 
-		std::map<ft::string, std::vector<ParserConf::Module> > parseFile();
+		std::map< ft::string, std::vector<ParserConf::Module> > parseFile();
+		std::vector<ServerTraits> parseToStruct();
+		void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port);
 };
