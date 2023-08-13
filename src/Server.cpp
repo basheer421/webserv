@@ -37,7 +37,7 @@ void Server::sendResponse(const int& client, Request& request)
 		response = "HTTP/1.1 200 OK" CRLF;
 		ft::string path = (conf.at("http-server-location /").directives.at("root").at(0)) + url;
 		res_body = ft::file_to_string(path);
-		std::cout << "sending-->  {" << path << "}\n";
+		std::cout << "sending =============================>  {" << path << "}\n";
 	} catch (std::exception& e) {
 		response = "HTTP/1.1 404 Not Found" CRLF;
 		try {
@@ -170,7 +170,9 @@ Server& Server::operator = (const Server& src)
 
 void Server::run()
 {
+	std::cout << "===============================================" << std::endl;
 	std::cout << "Listening on: " << conf_addrs << "\n";
+	std::cout << "===============================================" << std::endl;
 	while (true)
 	{
 		int client;
@@ -211,7 +213,7 @@ void Server::run()
 					request.parseRequest();
 					if (pfds[index].revents & POLLOUT)
 					{
-						std::cout << "Sending response to ==================> client_fd: " << client_fd << std::endl;
+						std::cout << "Sending response to ============================> client_fd: " << client_fd << std::endl;
 						sendResponse(client_fd, request);
 					}
 				}

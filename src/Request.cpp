@@ -12,11 +12,11 @@
 
 #include "Request.hpp"
 
-Request::Request(): _buff(""), _reqUrl(""), _isUrlCgi(false)
+Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false)
 {
 }
 
-Request::Request(std::string buffer): _buff(buffer), _reqUrl(""), _isUrlCgi(false)
+Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false)
 {
 }
 
@@ -46,11 +46,36 @@ bool    Request::isWhiteSpace(std::string str1)
     return (true);
 }
 
+void	Request::parsePostBody()
+{
+    std::string::size_type pos = 0;
+	std::string	req = _buffCopy;
+	std::cout << "================================>" << _request["content-length:"].empty() << std::endl;
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["content-length:"].empty() == false && _postFlag == false)
+	{
+		std::string	body = req.substr(pos, atoi(_request["content-length:"].c_str()));
+		std::string::size_type pos1 = 0;
+		while ((pos1 = body.find("\r\n", pos1)) != std::string::npos)
+		{
+			body.replace(pos1, 2, "\n");
+			pos1 += 1; // Move past the replaced '\n' to avoid an infinite loop
+		}
+		_postBody = body;
+		std::cout << "===========================================================================" << std::endl;
+		std::cout << "{" << body << "}" << std::endl;
+		std::cout << "===========================================================================" << std::endl;
+		_postFlag = true;
+	}
+
+
+}
+
 void    Request::parseRequest()
 {
 
 	// Replace all occurrences of '\r\n' with '\n' in the _buff string
     std::string::size_type pos = 0;
+	this->_buffCopy = _buff;
     while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
     {
         _buff.replace(pos, 2, "\n");
@@ -65,12 +90,17 @@ void    Request::parseRequest()
 
     while (getline(str, str1, '\n'))
     {
-        if (str1.empty() || isWhiteSpace(str1))
+        if ((str1.empty() || isWhiteSpace(str1)) && _type == GET)
             continue;
+		if (_type == POST)
+		{
+			parsePostBody();
+			// return ;
+		}
         std::stringstream   line(str1);
         getline(line, key, ' ');
         getline(line, value);
-        this->_request[key] = value;
+		this->_request[key] = value;
         if (first)
         {
             std::stringstream   url(value);
@@ -85,12 +115,11 @@ void    Request::parseRequest()
 			std::size_t	pos_idx = _reqUrl.find("/cgi-bin");
 			if (pos_idx != std::string::npos)
 				this->_isUrlCgi = true;
-            std::cout << "Requested Url ===========> " << _reqUrl << " === _isUrlCgi ====> " << _isUrlCgi << std::endl;
+            // std::cout << "Requested Url ===========> " << _reqUrl << " === _isUrlCgi ====> " << _isUrlCgi << std::endl;
             first = false;
         }
 		if (key == "Host:")
 			this->_host = value;
-		// std::cout << "===============> _host >>>>>" << _host << "        "  << _type << std::endl;
         std::cout << key << "{" << _request[key] << "}\n";
     }
 }
@@ -103,6 +132,11 @@ std::map<std::string, std::string> Request::getRequest() const
 std::string Request::getReqUrl() const
 {
 	return _reqUrl;
+}
+
+std::string Request::getPostBody() const
+{
+	return _postBody;
 }
 
 std::string	Request::getHost() const
