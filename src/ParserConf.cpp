@@ -157,13 +157,14 @@ std::vector<ServerTraits> ParserConf::parseFile()
 			}
 			else if ((modlSplit.size() == 2) && modlSplit.front() == "location")
 			{
+				if (modlSplit.back()[0] != '/')
+					throw ParseException("Parse Error: Bad module name");
+
 				file.back().routes[modlSplit.back()] = ServerRoute();
 				isRoute = true;
 			}
 			else
-			{
 				throw ParseException("Parse Error: Bad module name");
-			}
 		}
 		else
 		{
@@ -171,16 +172,13 @@ std::vector<ServerTraits> ParserConf::parseFile()
 
 			if (segments.empty())
 				continue ;
-
-			/*
-				First element should always be a Module.
-				There should be a name at the start.
-			*/
+			// First element should always be a Module and there should be a name at the start.
 			if (file.empty() || segments.size() == 1)
 				throw std::exception();
 
 			ft::string name = segments.front();
 			segments.erase(segments.begin());
+
 			if (isRoute)
 				fillRouteValue(file.back().routes[lastModlName.split(' ').back()], name, segments);
 			else
@@ -236,54 +234,3 @@ void ParserConf::setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t
     port = ft::from_string<in_port_t>(vec.at(1));
     port = htons(port);
 }
-
-// std::vector<ServerTraits> ParserConf::parseToStruct()
-// {
-// 	std::vector<ServerTraits> srvs;
-
-// 	std::vector< std::pair< ft::string, std::vector<ParserConf::Module> > > file = parseFile();
-
-
-// 	std::cout << file.size() << " is the size\n";
-// 	if (file.empty() ||  ((*file.begin()).first != "server"))
-// 			return srvs;
-// 	std::cout << "hello\n";
-// 	for (std::vector< std::pair< ft::string, std::vector<ParserConf::Module> > >::iterator it = file.begin();
-// 		it != file.end(); ++it)
-// 	{
-// 		std::pair<ft::string, std::vector<ParserConf::Module> > modl = *it;
-// 		if (modl.first == "server")
-// 		{
-// 			srvs.push_back(ServerTraits());
-// 			ServerTraits& srv = srvs.back();
-// 			for (size_t i = 0; i < modl.second.size(); ++i)
-// 			{
-// 				ParserConf::Module& modlData = modl.second[i];
-// 				ParserConf::Module::iterator element;
-
-// 				element = modlData.find("root");
-// 				if (element != modlData.end())
-// 					srv.root = (*element).second[0];
-// 				element = modlData.find("index");
-// 				if (element != modlData.end())
-// 					srv.index = (*element).second;
-// 				element = modlData.find("listen");
-// 				if (element != modlData.end())
-// 					setAddress((*element).second[0], srv.listen_address, srv.listen_port);
-// 				element = modlData.find("server_name");
-// 				if (element != modlData.end())
-// 					srv.server_name = (*element).second;
-// 				element = modlData.find("client_max_body_size");
-// 				if (element != modlData.end())
-// 					srv.client_max_body_size = ft::from_string<size_t>((*element).second[0]);
-// 			}
-// 		}
-// 		else if (modl.first.split(' ').front() == "location")
-// 		{
-// 			;
-// 		}
-// 		else
-// 			throw std::exception();
-// 	}
-// 	return (srvs);
-// }
