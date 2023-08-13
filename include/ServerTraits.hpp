@@ -6,13 +6,14 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 17:39:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/09 19:14:00 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/13 15:39:26 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "Server.hpp"
+#include <vector>
+#include <ft_string.hpp>
 
 using namespace ft;
 
@@ -66,5 +67,5 @@ struct ServerTraits
 	in_port_t listen_port;
 	std::vector<string> server_name;
 	size_t client_max_body_size;
-	std::vector<ServerRoute> routes;
+	std::map<string, ServerRoute> routes;
 };

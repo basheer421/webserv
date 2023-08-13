@@ -65,16 +65,76 @@ bool ParserConf::isModuleName(ft::string& str)
 	return (*(str.begin()) == '[' && *(str.end() - 1) == ']');
 }
 
+void ParserConf::fillRouteValue(ServerRoute& route, string& name, std::vector<string>& segments)
+{
+	if (name == "limit_except")
+		route.limit_except = segments;
+	else if (name == "autoindex")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'autoindex' should have 1 value");
+		if (segments.front() == "true")
+			route.autoindex = true;
+		else if (segments.front() == "false")
+			route.autoindex = false;
+		else
+			throw ParseException("Parse Error: could not parse 'autoindex'");
+	}
+	else if (name == "try_files")
+		route.try_files = segments;
+	else if (name == "return")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'return' should have 1 value");
+		route.return_ = segments.front();
+	}
+}
+
+void ParserConf::fillServerValue(ServerTraits& server, string& name, std::vector<string>& segments)
+{
+	if (name == "root")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'root' should have 1 value");
+		server.root = segments.front();
+	}
+	else if (name == "index")
+	{
+		server.index = segments;
+	}
+	else if (name == "listen")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'listen' should have 1 value");
+		setAddress(segments.front(), server.listen_address, server.listen_port);
+	}
+	else if (name == "server_name")
+	{
+		server.server_name = segments;
+	}
+	else if (name == "client_max_body_size")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'client_max_body_size' should have 1 value");
+		try {
+			server.client_max_body_size = ft::from_string<size_t>(segments.front()); // Throws
+		} catch (std::exception& e) {
+			throw ParseException("Parse Error: could not parse 'client_max_body_size'");
+		}
+	}
+}
+
 /**
  * TODO:
  * - Replace all space chars (except '\\n') with '\ ' (space).
  * - Remove everything after ';' (comments).
  * - Make your exceptions.
 */
-std::map<ft::string, std::vector<ParserConf::Module> > ParserConf::parseFile()
+std::vector<ServerTraits> ParserConf::parseFile()
 {
-	std::map<ft::string, std::vector<ParserConf::Module> > file;
-	ft::string lastModlVec;
+	std::vector<ServerTraits> file;
+	ft::string lastModlName;
+	bool isRoute;
 
 	std::vector<ft::string> lines = text.split('\n');
 
@@ -88,8 +148,22 @@ std::map<ft::string, std::vector<ParserConf::Module> > ParserConf::parseFile()
 
 		if (isModuleName(line))
 		{
-			lastModlVec = line.substr(1, line.length() - 2);
-			file[lastModlVec].push_back(Module());
+			lastModlName = line.substr(1, line.length() - 2);
+			std::vector<string> modlSplit = lastModlName.split(' ');
+			if ((modlSplit.size() == 1) && lastModlName == "server")
+			{
+				file.push_back(ServerTraits());
+				isRoute = false;
+			}
+			else if ((modlSplit.size() == 2) && modlSplit.front() == "location")
+			{
+				file.back().routes[modlSplit.back()] = ServerRoute();
+				isRoute = true;
+			}
+			else
+			{
+				throw ParseException("Parse Error: Bad module name");
+			}
 		}
 		else
 		{
@@ -97,6 +171,7 @@ std::map<ft::string, std::vector<ParserConf::Module> > ParserConf::parseFile()
 
 			if (segments.empty())
 				continue ;
+
 			/*
 				First element should always be a Module.
 				There should be a name at the start.
@@ -106,11 +181,12 @@ std::map<ft::string, std::vector<ParserConf::Module> > ParserConf::parseFile()
 
 			ft::string name = segments.front();
 			segments.erase(segments.begin());
-			Module& modl = file[lastModlVec].back();
-			modl[name] = segments;
+			if (isRoute)
+				fillRouteValue(file.back().routes[lastModlName.split(' ').back()], name, segments);
+			else
+				fillServerValue(file.back(), name, segments);
 		}
 	}
-	conf = file;
 	return (file);
 }
 
@@ -161,52 +237,53 @@ void ParserConf::setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t
     port = htons(port);
 }
 
-std::vector<ServerTraits> ParserConf::parseToStruct()
-{
-	std::vector<ServerTraits> srvs;
+// std::vector<ServerTraits> ParserConf::parseToStruct()
+// {
+// 	std::vector<ServerTraits> srvs;
 
-	std::map<ft::string, std::vector<ParserConf::Module> > file = parseFile();
+// 	std::vector< std::pair< ft::string, std::vector<ParserConf::Module> > > file = parseFile();
 
-	if (file.empty() ||  (*file.begin()).first != "server")
-			return srvs;
-	for (std::map<ft::string, std::vector<ParserConf::Module> >::iterator it = file.begin();
-		it != file.end(); ++it)
-	{
-		std::pair<ft::string, std::vector<ParserConf::Module> > modl = *it;
-		if (modl.first == "server")
-		{
-			srvs.push_back(ServerTraits());
-			ServerTraits& srv = srvs.back();
-			for (size_t i = 0; i < modl.second.size(); ++i)
-			{
-				ParserConf::Module& modlData = modl.second[i];
-				ParserConf::Module::iterator element;
 
-				element = modlData.find("root");
-				if (element != modlData.end())
-					srvs.back().root = (*element).second[0];
-				element = modlData.find("index");
-				if (element != modlData.end())
-					srvs.back().index = (*element).second;
-				element = modlData.find("listen");
-				if (element != modlData.end())
-					setAddress((*element).second[0], srvs.back().listen_address, srvs.back().listen_port);
-				element = modlData.find("server_name");
-				if (element != modlData.end())
-					srvs.back().server_name = (*element).second;
-				element = modlData.find("client_max_body_size");
-				if (element != modlData.end())
-					srvs.back().client_max_body_size = ft::from_string<size_t>((*element).second[0]);
-				// element = modlData.find("routes");
-				// if (element != modlData.end())
-				// 	srvs.back().routes = (*element).second;
-			}
-		}
-		else if (modl.first.split(' ').front() == "location")
-		{
-			
-		}
-		else
-			throw std::exception();
-	}
-}
+// 	std::cout << file.size() << " is the size\n";
+// 	if (file.empty() ||  ((*file.begin()).first != "server"))
+// 			return srvs;
+// 	std::cout << "hello\n";
+// 	for (std::vector< std::pair< ft::string, std::vector<ParserConf::Module> > >::iterator it = file.begin();
+// 		it != file.end(); ++it)
+// 	{
+// 		std::pair<ft::string, std::vector<ParserConf::Module> > modl = *it;
+// 		if (modl.first == "server")
+// 		{
+// 			srvs.push_back(ServerTraits());
+// 			ServerTraits& srv = srvs.back();
+// 			for (size_t i = 0; i < modl.second.size(); ++i)
+// 			{
+// 				ParserConf::Module& modlData = modl.second[i];
+// 				ParserConf::Module::iterator element;
+
+// 				element = modlData.find("root");
+// 				if (element != modlData.end())
+// 					srv.root = (*element).second[0];
+// 				element = modlData.find("index");
+// 				if (element != modlData.end())
+// 					srv.index = (*element).second;
+// 				element = modlData.find("listen");
+// 				if (element != modlData.end())
+// 					setAddress((*element).second[0], srv.listen_address, srv.listen_port);
+// 				element = modlData.find("server_name");
+// 				if (element != modlData.end())
+// 					srv.server_name = (*element).second;
+// 				element = modlData.find("client_max_body_size");
+// 				if (element != modlData.end())
+// 					srv.client_max_body_size = ft::from_string<size_t>((*element).second[0]);
+// 			}
+// 		}
+// 		else if (modl.first.split(' ').front() == "location")
+// 		{
+// 			;
+// 		}
+// 		else
+// 			throw std::exception();
+// 	}
+// 	return (srvs);
+// }

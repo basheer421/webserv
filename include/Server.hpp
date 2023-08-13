@@ -6,12 +6,13 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/06 16:05:17 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/12 16:36:50 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "ParserConf.hpp"
 #include "webserv.hpp"
 #include "Request.hpp"
 
@@ -33,6 +34,7 @@ private:
 			ServerException(const ft::string& msg);
 			virtual const char *what() const throw();
 	};
+
 	void addressInit();
 	void setAddress();
 
@@ -45,5 +47,4 @@ public:
 
 	void run(); // Throws
 	void sendResponse(const int& client, Request& request);
-	ft::string get_request(Request& request); // Throws
 };

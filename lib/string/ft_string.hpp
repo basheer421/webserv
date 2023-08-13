@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_string.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:18:20 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/03 13:40:55 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/13 15:10:12 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,12 +52,14 @@ namespace ft
 	string file_to_string(const string& file_name); // Throws
 
 	template <typename T>
-	T from_string(string& str)
+	T from_string(string& str) // Throws
 	{
 		std::stringstream ss(str);
 
 		T n;
 		ss >> n;
+		if (ss.fail())
+			throw std::exception();
 		return (n);
 	}
 }
