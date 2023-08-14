@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/12 16:36:50 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/14 17:48:56 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,7 @@ private:
 	std::list<int> clients;
 	int addrlen;
 	int server_fd;
-	const std::map<ft::string, ParserConf::Module> conf;
-	ft::string conf_addrs;
+	std::vector<ServerTraits> conf;
 
 	class ServerException : public std::exception
 	{
@@ -35,12 +34,12 @@ private:
 			virtual const char *what() const throw();
 	};
 
-	void addressInit();
-	void setAddress();
+	// There shouldn't be a default constructor
+	Server();
 
 public:
-	Server(); // Throws
-	Server(const std::map<ft::string, ParserConf::Module>& cnf);
+	
+	Server(const std::vector<ServerTraits>& cnf);
 	Server(const Server& src);
 	Server& operator = (const Server& src);
 	~Server();

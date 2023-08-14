@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/10 20:17:18 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/14 17:50:57 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void Server::sendResponse(const int& client, Request& request)
 
 	try {
 		response = "HTTP/1.1 200 OK" CRLF;
-		ft::string path = 
+		ft::string path = conf[0].root + url;
 		res_body = ft::file_to_string(path);
 		std::cout << "sending-->  {" << path << "}\n";
 	} catch (std::exception& e) {
@@ -55,90 +55,19 @@ void Server::sendResponse(const int& client, Request& request)
 	send(client, response.c_str(), response.length(), 0);
 }
 
-/**
- * TODO:
- * https://nginx.org/en/docs/http/ngx_http_core_module.html#listen
- * listen address[:port]
- * listen port
- * listen unix:path
- * Default:	listen *:80 | *:8000;
- * 
- * https://stackoverflow.com/questions/15673846
-*/
-void Server::addressInit()
-{
-	// Default
-	conf_addrs = "*:" + ft::to_string(DEFAULT_PORT);
-
-	std::map<ft::string, ParserConf::Module>::const_iterator conf_server;
-	conf_server = conf.find("http-server");
-	if (conf_server != conf.end())
-	{
-		std::map<ft::string, ParserConf::Directive>::const_iterator listen_it;
-		listen_it = (*(conf_server)).second.find("listen");
-		if (listen_it != (*conf_server).second.end())
-		{
-			if ((*listen_it).second.size() != 0)
-				conf_addrs = (*listen_it).second.at(0);
-		}
-	}
-	setAddress();
-}
-
-void Server::setAddress()
-{
-    std::vector<ft::string> vec = conf_addrs.split(':');
-    if (vec.size() != 1 && vec.size() != 2)
-        throw ServerException("Bad Address: Invalid format");
-	else if (vec.size() == 1)
-		conf_addrs = "*:" + conf_addrs;
-    addrlen = sizeof(address);
-    std::memset(&address, 0, sizeof(address));
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    // Only port provided
-    if (vec.size() == 1)
-    {
-        in_port_t port = ft::from_string<in_port_t>(vec.at(0));
-        if (port <= 0)
-            throw ServerException("Bad Address: Invalid port number");
-        address.sin_port = htons(port);
-        return;
-    }
-
-    // Handling address
-    if (vec.at(0) != "*")
-    {
-        std::vector<ft::string> segments = vec.at(0).split('.');
-        if (segments.size() != 4)
-            throw ServerException("Bad Address: Invalid IP address format");
-
-        in_addr_t adrs_int = (ft::from_string<in_addr_t>(segments.at(0)) << 24)
-                           | (ft::from_string<in_addr_t>(segments.at(1)) << 16)
-                           | (ft::from_string<in_addr_t>(segments.at(2)) << 8)
-                           | ft::from_string<in_addr_t>(segments.at(3));
-        address.sin_addr.s_addr = htonl(adrs_int);
-    }
-
-    // Handling port
-    in_port_t port = ft::from_string<in_port_t>(vec.at(1));
-    address.sin_port = htons(port);
-}
-
-
-Server::Server()
-{
-	*this = Server(std::map<ft::string, ParserConf::Module>());
-}
-
-Server::Server(const std::map<ft::string, ParserConf::Module>& cnf) : conf(cnf)
+Server::Server(const std::vector<ServerTraits>& cnf) : conf(cnf)
 {
 	int optval;
 
 	optval = 1;
-	addressInit();
-	server_fd = socket(AF_UNSPEC, SOCK_STREAM, 0);
+
+	std::memset(&address, 0, sizeof(address));
+	address.sin_addr.s_addr = conf[0].listen_address;
+	address.sin_port = conf[0].listen_port;
+	address.sin_family = AF_INET;
+	address.sin_len = sizeof(address);
+
+	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd < 0)
 		throw ServerException("Socket Error");
 	if (fcntl(server_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
@@ -156,6 +85,7 @@ Server::Server(const Server& src)
 	if (this == &src)
 		return ;
 	*this = src;
+	conf = src.conf;
 }
 
 Server& Server::operator = (const Server& src)
@@ -165,12 +95,13 @@ Server& Server::operator = (const Server& src)
 	this->address = src.address;
 	this->addrlen = src.addrlen;
 	this->server_fd = src.server_fd;
+	this->conf = src.conf;
 	return *this;
 }
 
 void Server::run()
 {
-	std::cout << "Listening on: " << conf_addrs << "\n";
+	std::cout << "Listening on port: " << htons(conf[0].listen_port) << "\n";
 	while (true)
 	{
 		int client;

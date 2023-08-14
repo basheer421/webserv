@@ -21,7 +21,7 @@ int main(void)
 	ft::string text = textStream.str();
 	ParserConf parser(text);
 	std::vector<ServerTraits> conf = parser.parseFile();
-	// Server server(conf);
-	// server.run();
+	Server server(conf);
+	server.run();
     return (0);
 }
