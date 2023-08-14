@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/06 16:05:32 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/14 15:48:30 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Pages.hpp"
 
 Server::ServerException::ServerException(const ft::string& msg) : msg(msg) {}
 
@@ -36,7 +37,12 @@ void Server::sendResponse(const int& client, Request& request)
 	try {
 		response = "HTTP/1.1 200 OK" CRLF;
 		ft::string path = (conf.at("http-server-location /").directives.at("root").at(0)) + url;
-		res_body = ft::file_to_string(path);
+		if (is_dir(path.c_str()))
+		{
+			res_body = dirList(path);
+		}
+		else
+			res_body = ft::file_to_string(path);
 		std::cout << "sending =============================>  {" << path << "}\n";
 	} catch (std::exception& e) {
 		response = "HTTP/1.1 404 Not Found" CRLF;
@@ -222,6 +228,15 @@ void Server::run()
 			++it;
 		}
 	}
+}
+
+int	Server::is_dir(const char *path)
+{
+	struct stat	statbuf;
+
+	if (stat(path, &statbuf) != 0)
+		return (0);
+	return (S_ISDIR(statbuf.st_mode));
 }
 
 Server::~Server() {}

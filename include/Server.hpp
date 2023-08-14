@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/06 16:05:17 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/14 15:45:58 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 #include "webserv.hpp"
 #include "Request.hpp"
+#include "Pages.hpp"
+# include <sys/stat.h>
 
 class Server
 {
@@ -44,6 +46,7 @@ public:
 	~Server();
 
 	void run(); // Throws
+	int	is_dir(const char *path);
 	void sendResponse(const int& client, Request& request);
 	ft::string get_request(Request& request); // Throws
 };
