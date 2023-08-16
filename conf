@@ -1,6 +1,0 @@
-[http]
-index    index.html index.htm index.php
-server_names_hash_bucket_size 128
-
-[http-server-location /]
-root      /Users/bammar/Desktop/ws-dir

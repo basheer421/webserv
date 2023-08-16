@@ -14,6 +14,13 @@
 
 ParserConf::ParserConf() {}
 
+ParserConf::ParseException::ParseException(const ft::string& msg) : msg(msg) {}
+
+const char *ParserConf::ParseException::what() const throw()
+{
+	return (msg.c_str());
+}
+
 // Replaces all spaces with ' ' except '\\n'
 void ParserConf::replaceSpaces(ft::string& str)
 {
@@ -33,7 +40,6 @@ void ParserConf::removeComment(ft::string& str)
 ParserConf::ParserConf(ft::string& text) : text(text)
 {
 	iter = this->text.begin();
-	
 }
 
 ParserConf::ParserConf(const ParserConf& src)
@@ -59,16 +65,76 @@ bool ParserConf::isModuleName(ft::string& str)
 	return (*(str.begin()) == '[' && *(str.end() - 1) == ']');
 }
 
+void ParserConf::fillRouteValue(ServerRoute& route, string& name, std::vector<string>& segments)
+{
+	if (name == "limit_except")
+		route.limit_except = segments;
+	else if (name == "autoindex")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'autoindex' should have 1 value");
+		if (segments.front() == "true")
+			route.autoindex = true;
+		else if (segments.front() == "false")
+			route.autoindex = false;
+		else
+			throw ParseException("Parse Error: could not parse 'autoindex'");
+	}
+	else if (name == "try_files")
+		route.try_files = segments;
+	else if (name == "return")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'return' should have 1 value");
+		route.return_ = segments.front();
+	}
+}
+
+void ParserConf::fillServerValue(ServerTraits& server, string& name, std::vector<string>& segments)
+{
+	if (name == "root")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'root' should have 1 value");
+		server.root = segments.front();
+	}
+	else if (name == "index")
+	{
+		server.index = segments;
+	}
+	else if (name == "listen")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'listen' should have 1 value");
+		setAddress(segments.front(), server.listen_address, server.listen_port);
+	}
+	else if (name == "server_name")
+	{
+		server.server_name = segments;
+	}
+	else if (name == "client_max_body_size")
+	{
+		if (segments.size() > 1)
+			throw ParseException("Parse Error: 'client_max_body_size' should have 1 value");
+		try {
+			server.client_max_body_size = ft::from_string<size_t>(segments.front()); // Throws
+		} catch (std::exception& e) {
+			throw ParseException("Parse Error: could not parse 'client_max_body_size'");
+		}
+	}
+}
+
 /**
  * TODO:
  * - Replace all space chars (except '\\n') with '\ ' (space).
  * - Remove everything after ';' (comments).
  * - Make your exceptions.
 */
-std::map<ft::string, ParserConf::Module> ParserConf::parseFile()
+std::vector<ServerTraits> ParserConf::parseFile()
 {
-	std::map<ft::string, ParserConf::Module> file;
-	ft::string lastModl;
+	std::vector<ServerTraits> file;
+	ft::string lastModlName;
+	bool isRoute;
 
 	std::vector<ft::string> lines = text.split('\n');
 
@@ -82,62 +148,89 @@ std::map<ft::string, ParserConf::Module> ParserConf::parseFile()
 
 		if (isModuleName(line))
 		{
-			Module modl;
+			lastModlName = line.substr(1, line.length() - 2);
+			std::vector<string> modlSplit = lastModlName.split(' ');
+			if ((modlSplit.size() == 1) && lastModlName == "server")
+			{
+				file.push_back(ServerTraits());
+				isRoute = false;
+			}
+			else if ((modlSplit.size() == 2) && modlSplit.front() == "location")
+			{
+				if (modlSplit.back()[0] != '/')
+					throw ParseException("Parse Error: Bad module name");
 
-			lastModl = line.substr(1, line.length() - 2);
-			file[lastModl] = modl;
+				file.back().routes[modlSplit.back()] = ServerRoute();
+				isRoute = true;
+			}
+			else
+				throw ParseException("Parse Error: Bad module name");
 		}
 		else
 		{
-			std::vector<ft::string> segments = line.split(' ');
-			Directive dir;
+			Directive segments = line.split(' ');
 
 			if (segments.empty())
 				continue ;
-			/*
-				First element should always be a Module.
-			*/
-			if (file.empty())
-				throw std::exception();
-			
-			/*
-				There should be a name at the start.
-			*/
-			if (segments.size() == 1)
+			// First element should always be a Module and there should be a name at the start.
+			if (file.empty() || segments.size() == 1)
 				throw std::exception();
 
-			ft::string name = *(segments.begin());
+			ft::string name = segments.front();
 			segments.erase(segments.begin());
-			dir = segments;
-			file[lastModl].directives[name] = dir;
+
+			if (isRoute)
+				fillRouteValue(file.back().routes[lastModlName.split(' ').back()], name, segments);
+			else
+				fillServerValue(file.back(), name, segments);
 		}
 	}
 	return (file);
 }
 
-void ParserConf::printDirective(const Directive& dir)
+/**
+ * TODO:
+ * https://nginx.org/en/docs/http/ngx_http_core_module.html#listen
+ * listen address[:port]
+ * listen port
+ * listen unix:path
+ * Default:	listen *:80 | *:8000;
+ * 
+ * https://stackoverflow.com/questions/15673846
+*/
+void ParserConf::setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port)
 {
-	for (std::vector<ft::string>::const_iterator dit2 =
-		dir.begin();
-		dit2 != dir.end();
-		++dit2)
-	{
-		std::cout << "{" << *dit2  << "}" << (dit2 + 1 == dir.end() ? "" : " ");
-	}
-	std::cout << "\n";
-}
+    std::vector<ft::string> vec = confAdrss.split(':');
+    if (vec.size() != 1 && vec.size() != 2)
+        throw ParseException("Bad Address: Invalid format");
+	else if (vec.size() == 1)
+		confAdrss = "*:" + confAdrss;
 
-void ParserConf::print(const std::map<ft::string, ParserConf::Module>& conf)
-{
-	for (std::map<ft::string, ParserConf::Module>::const_iterator it = conf.begin();
-		it != conf.end(); ++it)
-	{
-		std::cout << "[" << (*it).first << "]\n";
-		for (std::map<ft::string, Directive>::const_iterator dit = (*it).second.directives.begin();
-			dit != (*it).second.directives.end(); ++dit)
-		{
-			std::cout << (*dit).first << "-> ";
-			printDirective((*dit).second);
-		}
-	}
+    // Only port provided
+    if (vec.size() == 1)
+    {
+        port = ft::from_string<in_port_t>(vec.at(0));
+        if (port <= 0)
+            throw ParseException("Bad Address: Invalid port number");
+        port = htons(port);
+        return;
+    }
+
+    // Handling address
+    if (vec.at(0) != "*")
+    {
+        std::vector<ft::string> segments = vec.at(0).split('.');
+        if (segments.size() != 4)
+            throw ParseException("Bad Address: Invalid IP address format");
+
+        in_addr_t adrs_int = (ft::from_string<in_addr_t>(segments.at(0)) << 24)
+                           | (ft::from_string<in_addr_t>(segments.at(1)) << 16)
+                           | (ft::from_string<in_addr_t>(segments.at(2)) << 8)
+                           | ft::from_string<in_addr_t>(segments.at(3));
+        address = htonl(adrs_int);
+    }
+
+    // Handling port
+    port = ft::from_string<in_port_t>(vec.at(1));
+    port = htons(port);
 }
