@@ -12,30 +12,37 @@
 
 #pragma once
 
+#include <iostream>
 #include <utility>
 #include <vector>
 #include <map>
 #include "ft_string.hpp"
-#include <iostream>
+#include "ServerTraits.hpp"
 
 class ParserConf
 {
 	public:
 		typedef std::vector<ft::string> Directive;
-		struct Module
+		typedef std::map<ft::string, Directive> Module;
+
+		class ParseException : public std::exception
 		{
-			std::map<ft::string, Directive> directives;
+			public:
+				const ft::string& msg;
+				ParseException(const ft::string& msg);
+				virtual const char *what() const throw();
 		};
 
-	private:	
-		
+	private:
 		ft::string text;
 		ft::string::iterator iter;
+		std::vector< std::pair< ft::string, std::vector<ParserConf::Module> > > conf;
 
 		static bool isModuleName(ft::string& str);
-		static void printDirective(const Directive& dir);
 		static void removeComment(ft::string& str);
 		static void replaceSpaces(ft::string& str);
+		void fillRouteValue(ServerRoute& route, string& name, std::vector<string>& segments);
+		void fillServerValue(ServerTraits& route, string& name, std::vector<string>& segments);
 
 	public:
 		ParserConf();
@@ -44,7 +51,7 @@ class ParserConf
 		ParserConf& operator = (const ParserConf& src);
 		~ParserConf();
 
-		std::map<ft::string, Module> parseFile();
-
-		static void print(const std::map<ft::string, ParserConf::Module>& conf);
+		std::vector<ServerTraits> parseFile();
+		// std::vector<ServerTraits> parseToStruct();
+		void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port);
 };

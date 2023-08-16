@@ -6,12 +6,13 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/14 15:45:58 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/16 12:38:57 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "ParserConf.hpp"
 #include "webserv.hpp"
 #include "Request.hpp"
 #include "Pages.hpp"
@@ -25,8 +26,7 @@ private:
 	std::list<int> clients;
 	int addrlen;
 	int server_fd;
-	const std::map<ft::string, ParserConf::Module> conf;
-	ft::string conf_addrs;
+	std::vector<ServerTraits> conf;
 
 	class ServerException : public std::exception
 	{
@@ -35,12 +35,13 @@ private:
 			ServerException(const ft::string& msg);
 			virtual const char *what() const throw();
 	};
-	void addressInit();
-	void setAddress();
+
+	// There shouldn't be a default constructor
+	Server();
 
 public:
-	Server(); // Throws
-	Server(const std::map<ft::string, ParserConf::Module>& cnf);
+	
+	Server(const std::vector<ServerTraits>& cnf);
 	Server(const Server& src);
 	Server& operator = (const Server& src);
 	~Server();
@@ -48,5 +49,4 @@ public:
 	void run(); // Throws
 	int	is_dir(const char *path);
 	void sendResponse(const int& client, Request& request);
-	ft::string get_request(Request& request); // Throws
 };

@@ -14,17 +14,14 @@
 
 int main(void)
 {
-	std::fstream file("conf", std::fstream::in);
+	std::fstream file("conf.ini", std::fstream::in);
 	std::stringstream textStream;
 	textStream << file.rdbuf();
 	file.close();
 	ft::string text = textStream.str();
 	ParserConf parser(text);
-	std::map<ft::string, ParserConf::Module> conf = parser.parseFile();
-	ParserConf::print(conf);
-
+	std::vector<ServerTraits> conf = parser.parseFile();
 	Server server(conf);
 	server.run();
-	
     return (0);
 }
