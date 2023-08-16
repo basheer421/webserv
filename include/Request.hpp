@@ -21,7 +21,8 @@ enum	e_request_type
 {
 	GET,
 	POST,
-	DELETE
+	DELETE,
+	DEFAULT
 };
 
 class Request
@@ -30,9 +31,12 @@ class Request
         std::map<std::string, std::string>  _request;
 		e_request_type						_type;
         std::string                         _buff;
+        std::string                         _buffCopy;
         std::string                         _reqUrl;
 		std::string							_host;
 		bool								_isUrlCgi;
+		bool								_postFlag;
+		std::string							_postBody;
 
     public:
         Request();
@@ -42,10 +46,12 @@ class Request
         ~Request();
         void    parseRequest();
         bool    isWhiteSpace(std::string    str1);
+		void	parsePostBody();
 
 		std::map<std::string, std::string> getRequest() const;
 		std::string getReqUrl() const;
 		std::string	getHost() const;
+		std::string getPostBody() const;
 		e_request_type getReqType() const;
 
 		bool isUrlCgi() const;

@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/14 17:50:57 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/16 12:40:53 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Pages.hpp"
 
 Server::ServerException::ServerException(const ft::string& msg) : msg(msg) {}
 
@@ -36,8 +37,13 @@ void Server::sendResponse(const int& client, Request& request)
 	try {
 		response = "HTTP/1.1 200 OK" CRLF;
 		ft::string path = conf[0].root + url;
-		res_body = ft::file_to_string(path);
-		std::cout << "sending-->  {" << path << "}\n";
+		if (is_dir(path.c_str()))
+		{
+			res_body = dirList(path);
+		}
+		else
+			res_body = ft::file_to_string(path);
+		std::cout << "sending =============================>  {" << path << "}\n";
 	} catch (std::exception& e) {
 		response = "HTTP/1.1 404 Not Found" CRLF;
 		try {
@@ -110,7 +116,7 @@ void Server::run()
 		
 		int index = 0;
 		for (std::list<int>::iterator it = clients.begin(); it != clients.end(); ++it)
-			pfds[++index] = (struct pollfd) {*it, POLLIN, 0};
+			pfds[++index] = (struct pollfd) {*it, POLLIN | POLLOUT, 0};
 		
 		if (poll(pfds, clients.size() + 1, -1) < 0)
 			throw ServerException("Poll Error");
@@ -136,19 +142,32 @@ void Server::run()
 					it = clients.erase(it);
 					close(client_fd);
 					continue;
-				} else {
+				} 
+				else 
+				{
 					// Handle the client request
 					Request request(buffer);
 					request.parseRequest();
-
-					sendResponse(client_fd, request);
-
+					if (pfds[index].revents & POLLOUT)
+					{
+						std::cout << "Sending response to ============================> client_fd: " << client_fd << std::endl;
+						sendResponse(client_fd, request);
+					}
 				}
 			}
 			++index;
 			++it;
 		}
 	}
+}
+
+int	Server::is_dir(const char *path)
+{
+	struct stat	statbuf;
+
+	if (stat(path, &statbuf) != 0)
+		return (0);
+	return (S_ISDIR(statbuf.st_mode));
 }
 
 Server::~Server() {}
