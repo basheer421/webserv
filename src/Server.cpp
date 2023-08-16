@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/16 12:40:53 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/16 21:41:37 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "Pages.hpp"
 
 Server::ServerException::ServerException(const ft::string& msg) : msg(msg) {}
 
@@ -36,7 +35,7 @@ void Server::sendResponse(const int& client, Request& request)
 
 	try {
 		response = "HTTP/1.1 200 OK" CRLF;
-		ft::string path = conf[0].root + url;
+		ft::string path = conf.root + url;
 		if (is_dir(path.c_str()))
 		{
 			res_body = dirList(path);
@@ -61,28 +60,28 @@ void Server::sendResponse(const int& client, Request& request)
 	send(client, response.c_str(), response.length(), 0);
 }
 
-Server::Server(const std::vector<ServerTraits>& cnf) : conf(cnf)
+Server::Server(const ServerTraits& cnf) : conf(cnf)
 {
 	int optval;
 
 	optval = 1;
 
 	std::memset(&address, 0, sizeof(address));
-	address.sin_addr.s_addr = conf[0].listen_address;
-	address.sin_port = conf[0].listen_port;
+	address.sin_addr.s_addr = conf.listen_address;
+	address.sin_port = conf.listen_port;
 	address.sin_family = AF_INET;
 	address.sin_len = sizeof(address);
 
-	server_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (server_fd < 0)
+	serverFd = socket(AF_INET, SOCK_STREAM, 0);
+	if (serverFd < 0)
 		throw ServerException("Socket Error");
-	if (fcntl(server_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
+	if (fcntl(serverFd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
 		throw ServerException("fcntl Error"); 
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0)
+	if (setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0)
 		throw ServerException("setsockopt Error");
-	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+	if (bind(serverFd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		throw ServerException("Bind Error");
-    if (listen(server_fd, 10) < 0)
+    if (listen(serverFd, 10) < 0)
 		throw ServerException("Listen Error");
 }
 
@@ -100,19 +99,19 @@ Server& Server::operator = (const Server& src)
 		return *this;
 	this->address = src.address;
 	this->addrlen = src.addrlen;
-	this->server_fd = src.server_fd;
+	this->serverFd = src.serverFd;
 	this->conf = src.conf;
 	return *this;
 }
 
 void Server::run()
 {
-	std::cout << "Listening on port: " << htons(conf[0].listen_port) << "\n";
+	std::cout << "Listening on port: " << htons(conf.listen_port) << "\n";
 	while (true)
 	{
 		int client;
 		struct pollfd pfds[FD_COUNT];
-		pfds[0] = (struct pollfd) {server_fd, POLLIN, 0};
+		pfds[0] = (struct pollfd) {serverFd, POLLIN, 0};
 		
 		int index = 0;
 		for (std::list<int>::iterator it = clients.begin(); it != clients.end(); ++it)
@@ -123,7 +122,7 @@ void Server::run()
 
 		if (pfds[0].revents & POLLIN)
 		{
-			client = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+			client = accept(serverFd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
 			if (client < 0)
 				throw ServerException("AcceptException");
 			clients.push_back(client);
@@ -169,5 +168,7 @@ int	Server::is_dir(const char *path)
 		return (0);
 	return (S_ISDIR(statbuf.st_mode));
 }
+
+int Server::getServerFd() const { return serverFd; }
 
 Server::~Server() {}
