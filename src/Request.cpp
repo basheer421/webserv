@@ -12,6 +12,9 @@
 
 #include "Request.hpp"
 
+// curl -X POST -H "Transfer-Encoding: chunked" --data-binary @- http://localhost:8080 < data.txt
+// Command to send a chunked post request to the server. The body will be in the data.txt
+
 Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false)
 {
 }
@@ -50,7 +53,7 @@ void	Request::parsePostBody()
 {
     std::string::size_type pos = 0;
 	std::string	req = _buffCopy;
-	std::cout << "================================>" << _request["content-length:"].empty() << std::endl;
+	// std::cout << "================================>" << _request["content-length:"].empty() << std::endl;
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["content-length:"].empty() == false && _postFlag == false)
 	{
 		std::string	body = req.substr(pos, atoi(_request["content-length:"].c_str()));
@@ -76,6 +79,7 @@ void    Request::parseRequest()
 	// Replace all occurrences of '\r\n' with '\n' in the _buff string
     std::string::size_type pos = 0;
 	this->_buffCopy = _buff;
+	std::cout << _buff << std::endl;
     while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
     {
         _buff.replace(pos, 2, "\n");
@@ -88,13 +92,14 @@ void    Request::parseRequest()
     std::string       value;
     bool              first = true;
 
+
     while (getline(str, str1, '\n'))
     {
         if ((str1.empty() || isWhiteSpace(str1)) && _type == GET)
             continue;
 		if (_type == POST)
 		{
-			parsePostBody();
+			// parsePostBody();
 			// return ;
 		}
         std::stringstream   line(str1);
@@ -120,7 +125,7 @@ void    Request::parseRequest()
         }
 		if (key == "Host:")
 			this->_host = value;
-        std::cout << key << "{" << _request[key] << "}\n";
+        // std::cout << key << "{" << _request[key] << "}\n";
     }
 }
 
