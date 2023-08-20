@@ -12,12 +12,7 @@
 
 #pragma once
 
-#include <iostream>
-#include <utility>
-#include <vector>
-#include <map>
-#include "ft_string.hpp"
-#include "ServerTraits.hpp"
+#include "webserv.hpp"
 
 class ParserConf
 {
@@ -52,6 +47,6 @@ class ParserConf
 		~ParserConf();
 
 		std::vector<ServerTraits> parseFile();
-		// std::vector<ServerTraits> parseToStruct();
-		void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port);
 };
+
+void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port);

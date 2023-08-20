@@ -12,10 +12,7 @@
 
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <map>
-#include <sstream>
+#include "webserv.hpp"
 
 enum	e_request_type
 {

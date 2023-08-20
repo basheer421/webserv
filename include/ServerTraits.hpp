@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 17:39:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/13 15:39:26 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/17 17:42:18 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <ft_string.hpp>
+#include <netinet/in.h>
 
 using namespace ft;
 

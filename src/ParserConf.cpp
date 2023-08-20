@@ -198,11 +198,11 @@ std::vector<ServerTraits> ParserConf::parseFile()
  * 
  * https://stackoverflow.com/questions/15673846
 */
-void ParserConf::setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port)
+void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port)
 {
     std::vector<ft::string> vec = confAdrss.split(':');
     if (vec.size() != 1 && vec.size() != 2)
-        throw ParseException("Bad Address: Invalid format");
+        throw std::runtime_error("Bad Address: Invalid format");
 	else if (vec.size() == 1)
 		confAdrss = "*:" + confAdrss;
 
@@ -211,7 +211,7 @@ void ParserConf::setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t
     {
         port = ft::from_string<in_port_t>(vec.at(0));
         if (port <= 0)
-            throw ParseException("Bad Address: Invalid port number");
+            throw std::runtime_error("Bad Address: Invalid port number");
         port = htons(port);
         return;
     }
@@ -221,7 +221,7 @@ void ParserConf::setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t
     {
         std::vector<ft::string> segments = vec.at(0).split('.');
         if (segments.size() != 4)
-            throw ParseException("Bad Address: Invalid IP address format");
+            throw std::runtime_error("Bad Address: Invalid IP address format");
 
         in_addr_t adrs_int = (ft::from_string<in_addr_t>(segments.at(0)) << 24)
                            | (ft::from_string<in_addr_t>(segments.at(1)) << 16)

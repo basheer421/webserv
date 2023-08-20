@@ -6,16 +6,36 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/16 22:09:31 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/20 16:47:04 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerManager.hpp"
 
+static std::vector<Server>::iterator findServer(std::vector<Server>::iterator start, std::vector<Server>::iterator end, in_addr_t address, in_port_t port)
+{
+	std::vector<Server>::iterator it;
+
+	for (it = start; it != end; ++it)
+	{
+		if ((*it).getConf().listen_address == address && (*it).getConf().listen_port == port)
+			return (it);
+	}
+	return (it);
+}
+
 ServerManager::ServerManager(const std::vector<ServerTraits>& cnf)
 {
 	for (size_t i = 0; i < cnf.size(); ++i)
-		servers.push_back(Server(cnf[i]));
+	{
+		servers.push_back( Server(cnf[i]) );
+
+		sockets.push_back((struct pollfd){
+			servers.back().getServerFd(),
+			POLLIN,
+			0
+		});
+	}
 	
 }
 
@@ -30,76 +50,128 @@ ServerManager& ServerManager::operator = (const ServerManager& src)
 {
 	if (this == &src)
 		return *this;
-	this->servers = src.servers;
+	this->sockets = src.sockets;
 	return *this;
 }
 
 ServerManager::~ServerManager() {}
 
+/**
+ * Only handles GET requests for now
+*/
+void ServerManager::sendResponse(const int& client, Request& request)
+{
+	std::map<std::string, std::string>  reqMap = request.getRequest();
+	ft::string url(  request.getReqUrl() );
+	
+	// will be like "localhost:8080"
+	std::vector<string> host = string(request.getHost()).split(':');
+	
+	if (host.empty() || host.size() > 2)
+		throw std::runtime_error("Error: Bad or no host format was found in the request");
+
+	in_port_t req_port;
+	in_addr_t req_address;
+
+	if (host.size() == 1)
+	{
+		req_address = htonl( INADDR_ANY );
+		req_port = htons(ft::from_string<in_port_t>(host[0]));
+	} else {
+		req_address = htonl(ft::from_string<in_port_t>(host[0]));
+		req_port = htons(ft::from_string<in_port_t>(host[1]));
+	}
+	
+	std::cout << "------------host << " << htonl(req_address) << "------" << htons(req_port) << "-----\n";
+	std::vector<Server>::iterator server_it = findServer(servers.begin(), servers.end(), req_address, req_port);
+	if (server_it == servers.end())
+		throw std::runtime_error("Error: Wrong host was found in the request");
+	const ServerTraits& conf = (*server_it).getConf();
+
+	std::string response;
+	ft::string res_body;
+
+	try {
+		response = "HTTP/1.1 200 OK" CRLF;
+		ft::string path = conf.root + url;
+		if (Server::is_dir(path.c_str()))
+		{
+			res_body = dirList(path);
+		}
+		else
+			res_body = ft::file_to_string(path);
+		std::cout << "sending =============================>  {" << path << "}\n";
+	} catch (std::exception& e) {
+		response = "HTTP/1.1 404 Not Found" CRLF;
+		try {
+			res_body = ft::file_to_string("error_pages/404.html");
+		} catch (std::exception& e) {
+			std::cerr << "404.html not found!\n";
+		}
+	}
+	response +=
+		"Content-Type: text/html; charset=utf-8" CRLF
+		"Content-Length: " + ft::to_string(res_body.length()) + CRLF
+		CRLF
+	;
+	response += res_body;
+	send(client, response.c_str(), response.length(), 0);
+}
+
 void ServerManager::run()
 {
 	while (true)
 	{
-		int client;
-		std::vector<struct pollfd> sockets;
+		// All servers and clients will be inside the poll.
+		if (poll(sockets.data(), sockets.size(), -1) < 0)
+			throw std::runtime_error("Poll Error");
 
-
+		/**
+		 * loop through servers and check if any is ready to read
+		 * 	and then accept the connection.
+		*/
 		for (size_t i = 0; i < servers.size(); ++i)
 		{
-			sockets.push_back((struct pollfd) {servers[i].getServerFd(), POLLIN, 0});
+			if (sockets[i].revents & POLLIN)
+			{
+				int client = accept(
+					sockets[i].fd,
+					servers[i].getAddress(),
+					servers[i].getAddrlen()
+				);
+
+				if (client < 0)
+					throw std::runtime_error("Accept Error");
+				sockets.push_back( (struct pollfd) {client, POLLIN | POLLOUT, 0} );
+			}
 		}
-		
 
-
-
-
-
-
-
-		
-		int index = 0;
-		for (std::vector<int>::iterator it = sockets.begin(); it != sockets.end(); ++it)
-			sockets.push_back( (struct pollfd) {*it, POLLIN | POLLOUT, 0} );
-		
-		if (poll(pfds, sockets.size() + 1, -1) < 0)
-			throw ServerException("Poll Error");
-
-		if (pfds[0].revents & POLLIN)
+		// loop on the clients
+		for (std::vector<struct pollfd>::iterator
+			it = sockets.begin() + servers.size();
+			it != sockets.end();
+			++it)
 		{
-			client = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-			if (client < 0)
-				throw ServerException("AcceptException");
-			sockets.push_back(client);
-		}
-
-		// We have 1 server so count will be 1 here, otherwise the server count.
-		index = 1;
-		for (std::list<int>::iterator it = sockets.begin(); it != sockets.end();) {
-			int client_fd = *it;
-			if (pfds[index].revents & POLLIN) {
-				// 30000 is temp,
-				//	We should put (client_max_body_size + header size)
+			struct pollfd& pfd = *it;
+			if (pfd.revents & POLLIN)
+			{
 				char buffer[30000] = {0};
-				int read_res = recv(client_fd, buffer, 29999, 0);
-				if (read_res <= 0) {
+				int read_res = recv(pfd.fd, buffer, 29999, 0);
+				if (read_res <= 0)
+				{
+					close(pfd.fd);
 					it = sockets.erase(it);
-					close(client_fd);
-					continue;
-				} 
+					continue ;
+				}
 				else
 				{
 					// Handle the client request
 					Request request(buffer);
 					request.parseRequest();
-					if (pfds[index].revents & POLLOUT)
-					{
-						std::cout << "Sending response to ============================> client_fd: " << client_fd << std::endl;
-						sendResponse(client_fd, request);
-					}
+					if (pfd.revents & POLLOUT)
+						sendResponse(pfd.fd, request); // server can be known from the request
 				}
 			}
-			++index;
-			++it;
 		}
 	}
 }
