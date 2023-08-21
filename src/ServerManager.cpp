@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/20 16:47:04 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/21 16:52:28 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ static std::vector<Server>::iterator findServer(std::vector<Server>::iterator st
 
 	for (it = start; it != end; ++it)
 	{
-		if ((*it).getConf().listen_address == address && (*it).getConf().listen_port == port)
+		if ((((*it).getConf().listen_address == address) || ((*it).getConf().listen_address == htonl(INADDR_ANY)))
+			&& (*it).getConf().listen_port == port)
 			return (it);
 	}
 	return (it);
@@ -65,24 +66,16 @@ void ServerManager::sendResponse(const int& client, Request& request)
 	ft::string url(  request.getReqUrl() );
 	
 	// will be like "localhost:8080"
-	std::vector<string> host = string(request.getHost()).split(':');
-	
-	if (host.empty() || host.size() > 2)
-		throw std::runtime_error("Error: Bad or no host format was found in the request");
 
 	in_port_t req_port;
 	in_addr_t req_address;
+	string host = request.getHost();
 
-	if (host.size() == 1)
-	{
-		req_address = htonl( INADDR_ANY );
-		req_port = htons(ft::from_string<in_port_t>(host[0]));
-	} else {
-		req_address = htonl(ft::from_string<in_port_t>(host[0]));
-		req_port = htons(ft::from_string<in_port_t>(host[1]));
-	}
-	
-	std::cout << "------------host << " << htonl(req_address) << "------" << htons(req_port) << "-----\n";
+	// Throws
+	setAddress(host, req_address, req_port);
+	std::cout << "------------host: " << htonl(req_address) << "------" << htons(req_port) << "-----\n";
+
+
 	std::vector<Server>::iterator server_it = findServer(servers.begin(), servers.end(), req_address, req_port);
 	if (server_it == servers.end())
 		throw std::runtime_error("Error: Wrong host was found in the request");
