@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/16 12:40:53 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/21 14:04:37 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,3 +171,48 @@ int	Server::is_dir(const char *path)
 }
 
 Server::~Server() {}
+
+std::string	Server::strToUpper(std::string str)
+{
+    for(size_t i = 0; i < str.length(); i++) {
+        str[i] = toupper(str[i]);
+    }
+	return (str);
+}
+
+void	Server::parseEnv(char **rawEnv)
+{
+	std::string str1;
+	std::string envStr;
+	bool	flag = false;
+
+	for (size_t i = 0; rawEnv[i]; i++)
+	{
+		envStr += rawEnv[i];
+		envStr += "\n";
+	}
+	std::stringstream str(envStr);
+	while (getline(str, str1, '\n'))
+	{
+		std::stringstream line(str1);
+		std::string key, value;
+		getline(line, key, '=');
+		getline(line, value);
+		std::map<std::string, std::string>::iterator it;
+		for (it = envMap.begin(); it != envMap.end(); ++it)
+		{
+			key = strToUpper(key);
+			if (key == it->first)
+				flag = true;
+		}
+		if (flag)
+			continue;
+		envMap[key] = value;
+		// std::cout << key << " " << envMap[key] << std::endl;
+	}
+}
+
+std::map<std::string, std::string> Server::getEnv() const
+{
+	return envMap;
+}

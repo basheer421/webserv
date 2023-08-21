@@ -12,8 +12,11 @@
 
 #include "webserv.hpp"
 
-int main(void)
+int main(int argc, char **argv, char **envp)
 {
+	(void)argc;
+	(void)argv;
+	(void)envp;
 	std::fstream file("conf.ini", std::fstream::in);
 	std::stringstream textStream;
 	textStream << file.rdbuf();
@@ -22,6 +25,7 @@ int main(void)
 	ParserConf parser(text);
 	std::vector<ServerTraits> conf = parser.parseFile();
 	Server server(conf);
-	server.run();
+	server.parseEnv(envp);
+	// server.run();
     return (0);
 }

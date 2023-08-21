@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/16 12:38:57 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/21 14:02:12 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ private:
 	int addrlen;
 	int server_fd;
 	std::vector<ServerTraits> conf;
+	std::map<std::string, std::string> envMap;
 
 	class ServerException : public std::exception
 	{
@@ -49,4 +50,8 @@ public:
 	void run(); // Throws
 	int	is_dir(const char *path);
 	void sendResponse(const int& client, Request& request);
+	
+	void	parseEnv(char **rawEnv);
+	std::map<std::string, std::string> getEnv() const;
+	std::string	strToUpper(std::string str);
 };
