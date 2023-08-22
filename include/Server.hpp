@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/22 12:29:18 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/22 13:36:22 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,5 +40,4 @@ public:
 	struct sockaddr *getAddress() const;
 	socklen_t *getAddrlen() const;
 	const ServerTraits& getConf() const;
-	static int			is_dir(const char *path);
 };

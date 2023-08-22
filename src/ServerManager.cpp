@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/22 13:32:47 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/22 13:45:14 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,6 @@ void ServerManager::sendResponse(const int& client, Request& request)
 		}
 	}
 	response = res.getResponse();
-	std::cout << "-------------------------------" << response << std::endl;
 	send(client, response.c_str(), response.length(), 0);
 }
 
@@ -198,7 +197,6 @@ void	ServerManager::parseEnv(char **rawEnv)
 		if (flag)
 			continue;
 		envMap[key] = value;
-		// std::cout << key << " " << envMap[key] << std::endl;
 	}
 }
 

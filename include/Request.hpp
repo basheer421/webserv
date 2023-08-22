@@ -41,15 +41,19 @@ class Request
         Request(const Request &object);
         Request &operator=(const Request &rhs);
         ~Request();
+
         void    parseRequest();
         bool    isWhiteSpace(std::string    str1);
 		void	parsePostBody();
+		void	parseReqUrl();
 
 		std::map<std::string, std::string> getRequest() const;
 		std::string getReqUrl() const;
 		std::string	getHost() const;
 		std::string getPostBody() const;
 		e_request_type getReqType() const;
+
+		int hexadecimalToDecimal(string hexVal);
 
 		bool isUrlCgi() const;
 };

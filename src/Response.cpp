@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/22 13:26:15 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/22 13:35:28 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void	Response::setBody(std::string path)
 		body = dirList(path);
 	else
 		body = ft::file_to_string(path);
-		
+
 	this->res_body.clear();
 	this->res_body = body;
 	this->content_len = res_body.length();
