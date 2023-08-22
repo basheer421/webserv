@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/22 12:18:10 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/22 12:29:18 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ private:
 	int addrlen;
 	int serverFd;
 	ServerTraits conf;
-	std::map<std::string, std::string> envMap;
 
 	// There shouldn't be a default constructor
 	Server();
@@ -36,14 +35,10 @@ public:
 	~Server();
 
 	void run(); // Throws
-	static int	is_dir(const char *path);
 
 	int getServerFd() const;
 	struct sockaddr *getAddress() const;
 	socklen_t *getAddrlen() const;
 	const ServerTraits& getConf() const;
-	
-	void	parseEnv(char **rawEnv);
-	std::map<std::string, std::string> getEnv() const;
-	std::string	strToUpper(std::string str);
+	static int			is_dir(const char *path);
 };

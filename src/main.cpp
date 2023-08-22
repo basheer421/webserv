@@ -25,7 +25,7 @@ int main(int argc, char **argv, char **envp)
 	ParserConf parser(text);
 	std::vector<ServerTraits> conf = parser.parseFile();
 	ServerManager serverManager(conf);
-	server.parseEnv(envp);
-	// serverManager.run();
+	serverManager.parseEnv(envp);
+	serverManager.run();
     return (0);
 }

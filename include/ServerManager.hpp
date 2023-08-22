@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/20 16:42:58 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/22 12:34:34 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ class ServerManager
 private:
 	std::vector<Server> servers;
 	std::vector<struct pollfd> sockets;
+	std::map<std::string, std::string> envMap;
 
 
 public:
@@ -33,4 +34,8 @@ public:
 	void sendResponse(const int& client, Request& request);
 
 	void run(); // Throws
+
+	void	parseEnv(char **rawEnv);
+	std::map<std::string, std::string> getEnv() const;
+	std::string	strToUpper(std::string str);
 };

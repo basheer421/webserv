@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/21 16:52:28 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/22 13:32:47 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ ServerManager::~ServerManager() {}
 */
 void ServerManager::sendResponse(const int& client, Request& request)
 {
+	(void)client;
 	std::map<std::string, std::string>  reqMap = request.getRequest();
 	ft::string url(  request.getReqUrl() );
 	
@@ -84,30 +85,22 @@ void ServerManager::sendResponse(const int& client, Request& request)
 	std::string response;
 	ft::string res_body;
 
+	Response res;
 	try {
-		response = "HTTP/1.1 200 OK" CRLF;
+		res.setResponseHeader("200", "OK");
 		ft::string path = conf.root + url;
-		if (Server::is_dir(path.c_str()))
-		{
-			res_body = dirList(path);
-		}
-		else
-			res_body = ft::file_to_string(path);
+		res.setBody(path);
 		std::cout << "sending =============================>  {" << path << "}\n";
 	} catch (std::exception& e) {
-		response = "HTTP/1.1 404 Not Found" CRLF;
+		res.setResponseHeader("404", "Not Found");		
 		try {
-			res_body = ft::file_to_string("error_pages/404.html");
+			res.setBody("error_pages/404.html");
 		} catch (std::exception& e) {
 			std::cerr << "404.html not found!\n";
 		}
 	}
-	response +=
-		"Content-Type: text/html; charset=utf-8" CRLF
-		"Content-Length: " + ft::to_string(res_body.length()) + CRLF
-		CRLF
-	;
-	response += res_body;
+	response = res.getResponse();
+	std::cout << "-------------------------------" << response << std::endl;
 	send(client, response.c_str(), response.length(), 0);
 }
 
@@ -167,4 +160,49 @@ void ServerManager::run()
 			}
 		}
 	}
+}
+
+std::string	ServerManager::strToUpper(std::string str)
+{
+    for(size_t i = 0; i < str.length(); i++) {
+        str[i] = toupper(str[i]);
+    }
+	return (str);
+}
+
+void	ServerManager::parseEnv(char **rawEnv)
+{
+	std::string str1;
+	std::string envStr;
+	bool	flag = false;
+
+	for (size_t i = 0; rawEnv[i]; i++)
+	{
+		envStr += rawEnv[i];
+		envStr += "\n";
+	}
+	std::stringstream str(envStr);
+	while (getline(str, str1, '\n'))
+	{
+		std::stringstream line(str1);
+		std::string key, value;
+		getline(line, key, '=');
+		getline(line, value);
+		std::map<std::string, std::string>::iterator it;
+		for (it = envMap.begin(); it != envMap.end(); ++it)
+		{
+			key = strToUpper(key);
+			if (key == it->first)
+				flag = true;
+		}
+		if (flag)
+			continue;
+		envMap[key] = value;
+		// std::cout << key << " " << envMap[key] << std::endl;
+	}
+}
+
+std::map<std::string, std::string> ServerManager::getEnv() const
+{
+	return envMap;
 }
