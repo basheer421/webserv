@@ -24,8 +24,8 @@ int main(int argc, char **argv, char **envp)
 	ft::string text = textStream.str();
 	ParserConf parser(text);
 	std::vector<ServerTraits> conf = parser.parseFile();
-	Server server(conf);
+	ServerManager serverManager(conf);
 	server.parseEnv(envp);
-	// server.run();
+	// serverManager.run();
     return (0);
 }

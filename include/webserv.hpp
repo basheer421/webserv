@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/12 19:50:15 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/20 16:08:42 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <list>
+#include <vector>
+#include <map>
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <fcntl.h>
@@ -22,10 +25,14 @@
 #include <cstring>
 #include <exception>
 #include <poll.h>
-#include <list>
+#include <sys/stat.h>
 #include "ft_string.hpp"
+#include "ServerTraits.hpp"
 #include "ParserConf.hpp"
+#include "Pages.hpp"
 #include "Server.hpp"
+#include "Request.hpp"
+#include "ServerManager.hpp"
 
 # define DEFAULT_PORT 8080
 # define CRLF "\r\n"
