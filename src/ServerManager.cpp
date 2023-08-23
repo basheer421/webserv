@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/23 12:46:15 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/23 14:55:04 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ void ServerManager::sendResponse(const int& client, Request& request)
 {
 	(void)client;
 	this->envMap = request.modifyEnv(this->envMap);
-	std::map<std::string, std::string>::iterator it;
+	// std::map<std::string, std::string>::iterator it;
 	// std::cout << "==============================================================" << std::cout;
 	// for (it = envMap.begin(); it != envMap.end(); ++it)
 	// {
@@ -94,17 +94,25 @@ void ServerManager::sendResponse(const int& client, Request& request)
 	ft::string res_body;
 
 	Response res;
-	try {
-		res.setResponseHeader("200", "OK");
-		ft::string path = conf.root + url;
-		res.setBody(path);
-		std::cout << "sending =============================>  {" << path << "}\n";
-	} catch (std::exception& e) {
-		res.setResponseHeader("404", "Not Found");		
+	if (request.isUrlCgi() == true)
+	{
+		// handleCGI(&res, request);
+	}
+	else
+	{
+		// create a function for other responses
 		try {
-			res.setBody("error_pages/404.html");
+			res.setResponseHeader("200", "OK");
+			ft::string path = conf.root + url;
+			res.setBody(path);
+			std::cout << "sending =============================>  {" << path << "}\n";
 		} catch (std::exception& e) {
-			std::cerr << "404.html not found!\n";
+			res.setResponseHeader("404", "Not Found");		
+			try {
+				res.setBody("error_pages/404.html");
+			} catch (std::exception& e) {
+				std::cerr << "404.html not found!\n";
+			}
 		}
 	}
 	response = res.getResponse();

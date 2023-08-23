@@ -251,16 +251,8 @@ std::map<std::string, std::string> Request::modifyEnv(std::map<std::string, std:
 	{
 		env[it1->first] = it1->second;
 	}
-	std::map<std::string, std::string>::iterator it;
-	for (it = env.begin(); it != env.end(); ++it)
-	{
-		std::cout << it->first << " " << it->second << std::endl;
-	}
 	return env;
 }
-
-
-
 
 // ----------------------------------
 
