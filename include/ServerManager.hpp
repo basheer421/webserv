@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/22 12:34:34 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/23 20:36:52 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 class Server;
 class Request;
-
+class Response;
 class ServerManager
 {
 private:
@@ -31,7 +31,8 @@ public:
 	ServerManager& operator = (const ServerManager& src);
 	~ServerManager();
 
-	void sendResponse(const int& client, Request& request);
+	void ProcessResponse(Request& request, Response& res);
+	Response ManageRequest(char *buffer);
 
 	void run(); // Throws
     // void handleCgi(Response &res, Request &req);

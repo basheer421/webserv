@@ -1,0 +1,29 @@
+
+
+
+
+
+OBJ CONFIG.
+argc > 2
+	return (-1)
+else
+
+{
+
+try{
+	CONFIG
+	CONFIG.PARSE(INPUT FILE)
+
+	servermanager SERVER(CONFIG)
+
+	SERVER(CONFIG)
+	SERVER.RUN()
+}
+catch
+
+{
+	print error.
+	exit .
+}
+
+}

@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/23 14:55:04 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/23 20:42:11 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,17 +60,9 @@ ServerManager::~ServerManager() {}
 /**
  * Only handles GET requests for now
 */
-void ServerManager::sendResponse(const int& client, Request& request)
+void ServerManager::ProcessResponse(Request& request, Response& res)
 {
-	(void)client;
 	this->envMap = request.modifyEnv(this->envMap);
-	std::map<std::string, std::string>::iterator it;
-	std::cout << "==============================================================" << std::cout;
-	for (it = envMap.begin(); it != envMap.end(); ++it)
-	{
-		std::cout << it->first << " " << it->second << std::endl;
-	}
-	std::cout << "==============================================================" << std::cout;
 	std::map<std::string, std::string>  reqMap = request.getRequest();
 	ft::string url(  request.getReqUrl() );
 	
@@ -90,81 +82,51 @@ void ServerManager::sendResponse(const int& client, Request& request)
 		throw std::runtime_error("Error: Wrong host was found in the request");
 	const ServerTraits& conf = (*server_it).getConf();
 
-	std::string response;
-	ft::string res_body;
-
-	Response res;
 
 
 
-    /*
-if Bad request == true
+
+
+
+
+
+	// if (request.isUrlCgi() == true)
+	// 	handleCgi(res, request);
+	// else
+	// {
+		res.setResponseHeader("200", "OK");
+		ft::string path = conf.root + url;
+		res.setBody(path);
+		std::cout << "sending =============================>  {" << path << "}\n";
+	// }	
+	
+}
+
+
+Response ServerManager::ManageRequest(char *buffer)
 {
-    set response
-    return res;
-} 
+	Request  request(buffer);
+	Response response;
 
-try
-{
-    if cgi == true
-    {
-        handle cgi
-    }
-    else
-    {
-        handle request
-    }
-}   
-catch(std excetion error){
-    if (error.what == 404)
-    {
-        set body 404
-        set response 404;
-    }
-    else if (error.waht == 403)
-    {
-        set body 403
-        set response 404;
-    }
-    ...
-
-    .
-
-    .
-        return response
-
-}   
-    */
-
-	if (request.isUrlCgi() == true)
+	try
 	{
-        // try
-        // {
-		//     handleCgi(res, request);
-        // }
-        // catch(const std::exception& e)
-        // {
-        //     std::cerr << e.what() << '\n';
-        // }
+		request.parseRequest();
+		ProcessResponse(request, response); // server can be known from the request
 	}
-	else
+	catch(const std::exception& e)
 	{
-		// create a function for other responses
-		try {
-			res.setResponseHeader("200", "OK");
-			ft::string path = conf.root + url;
-			res.setBody(path);
-			std::cout << "sending =============================>  {" << path << "}\n";
-		} catch (std::exception& e) {
-			res.setResponseHeader("404", "Not Found");		
-			try {
-				res.setBody("error_pages/404.html");
-			} catch (std::exception& e) {
-				std::cerr << "404.html not found!\n";
-			}
+		if (e.what())
+		{
+			response.setResponseHeader("404", "Not Found");		
+			response.setBody("error_pages/404.html");
 		}
+		// else if (e.what() == "403")
+		// {
+			
+		// }
 	}
-	response = res.getResponse();
+	
+	return (response);
 }
 
 void ServerManager::run()
@@ -196,6 +158,7 @@ void ServerManager::run()
 		}
 
 		// loop on the clients
+		// why NEW
 		for (std::vector<struct pollfd>::iterator
 			it = sockets.begin() + servers.size();
 			it != sockets.end();
@@ -205,7 +168,8 @@ void ServerManager::run()
 
 			if (pfd.revents & POLLIN)
 			{
-				char *buffer = new char[30000];
+				char buffer[30000];
+
                 std::memset(buffer, 0, 30000);
 				int read_res = recv(pfd.fd, buffer, 29999, 0);
 
@@ -213,22 +177,17 @@ void ServerManager::run()
 				{
 					close(pfd.fd);
 					it = sockets.erase(it);
-                    delete[] buffer;
+                    // delete[] buffer;
 					continue ;
 				}
 				else
 				{
-                    // Manage_request();
-					// Handle the client request
-                    
-					Request request(buffer);
-					request.parseRequest();
-                    sendResponse(pfd.fd, request); // server can be known from the request
+            		Response res =  ManageRequest(buffer);
+					
 					if (pfd.revents & POLLOUT)
-                    	send(client, response.c_str(), response.length(), 0);
-                    delete[] buffer;
+                    	send(pfd.fd, res.getResponse().c_str(), res.getResponse().length(), 0);
+					// delete[] buffer;
 				}
-
 			}
 		}
 	}
