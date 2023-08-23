@@ -55,7 +55,8 @@ void	Request::parsePostBody()
 	std::string	req = _buffCopy;
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["content-length:"].empty() == false && _postFlag == false)
 	{
-		std::string	body = req.substr(pos, atoi(_request["content-length:"].c_str()));
+        string cont_length = _request["content-length:"];
+		std::string	body = req.substr(pos, ft::from_string<int>(cont_length));
 		std::string::size_type pos1 = 0;
 		while ((pos1 = body.find("\r\n", pos1)) != std::string::npos)
 		{

@@ -94,9 +94,64 @@ void ServerManager::sendResponse(const int& client, Request& request)
 	ft::string res_body;
 
 	Response res;
+
+
+
+    /*
+if Bad request == true
+{
+    set response
+    return res;
+} 
+try
+{
+    if cgi == true
+    {
+        handle cgi
+    }
+    else
+    {
+        handle request
+    }
+}   
+catch(std excetion error){
+    if (error.what == 404)
+    {
+        set body 404
+        set response 404;
+    }
+    else if (error.waht == 403)
+    {
+        set body 403
+        set response 404;
+    }
+    ...
+
+    .
+
+    .
+        return response
+
+} 
+    
+    
+    
+    
+    */
+
+
+
 	if (request.isUrlCgi() == true)
 	{
-		// handleCGI(&res, request);
+        // try
+        // {
+		//     handleCgi(res, request);
+        // }
+        // catch(const std::exception& e)
+        // {
+        //     std::cerr << e.what() << '\n';
+        // }
+        
 	}
 	else
 	{
@@ -156,12 +211,14 @@ void ServerManager::run()
 			struct pollfd& pfd = *it;
 			if (pfd.revents & POLLIN)
 			{
-				char buffer[30000] = {0};
+				char *buffer = new char[30000];
+                std::memset(buffer, 0, 30000);
 				int read_res = recv(pfd.fd, buffer, 29999, 0);
-				if (read_res <= 0)
+				if (read_res < 0)
 				{
 					close(pfd.fd);
 					it = sockets.erase(it);
+                    delete[] buffer;
 					continue ;
 				}
 				else
@@ -171,6 +228,7 @@ void ServerManager::run()
 					request.parseRequest();
 					if (pfd.revents & POLLOUT)
 						sendResponse(pfd.fd, request); // server can be known from the request
+                    delete[] buffer;
 				}
 			}
 		}

@@ -34,6 +34,7 @@ public:
 	void sendResponse(const int& client, Request& request);
 
 	void run(); // Throws
+    // void handleCgi(Response &res, Request &req);
 
 	void	parseEnv(char **rawEnv);
 	std::map<std::string, std::string> getEnv() const;
