@@ -64,13 +64,13 @@ void ServerManager::sendResponse(const int& client, Request& request)
 {
 	(void)client;
 	this->envMap = request.modifyEnv(this->envMap);
-	// std::map<std::string, std::string>::iterator it;
-	// std::cout << "==============================================================" << std::cout;
-	// for (it = envMap.begin(); it != envMap.end(); ++it)
-	// {
-	// 	std::cout << it->first << " " << it->second << std::endl;
-	// }
-	// std::cout << "==============================================================" << std::cout;
+	std::map<std::string, std::string>::iterator it;
+	std::cout << "==============================================================" << std::cout;
+	for (it = envMap.begin(); it != envMap.end(); ++it)
+	{
+		std::cout << it->first << " " << it->second << std::endl;
+	}
+	std::cout << "==============================================================" << std::cout;
 	std::map<std::string, std::string>  reqMap = request.getRequest();
 	ft::string url(  request.getReqUrl() );
 	

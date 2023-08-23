@@ -54,8 +54,12 @@ namespace ft
 	{
 		string cpy(*this);
 
+        if (cpy.empty() == true)
+            return (cpy);
 		while (*(cpy.end() - 1) == c)
+        {
 			cpy.erase(cpy.end() - 1);
+        }
 		return (cpy);
 	}
 
