@@ -70,7 +70,7 @@ void	Request::parsePostBody()
 	}
 }
 
-void	Request::parseReqUrl()
+void	Request::parseHexReqUrl()
 {
 	unsigned int pos = 0;
 	int hex_num = 0;
@@ -85,9 +85,40 @@ void	Request::parseReqUrl()
 		converted_hex = char(hex_num);
 		this->_reqUrl.replace(pos, 3, converted_hex);
 	}
-		std::cout << "===========================================================================" << std::endl;
-		std::cout << this->_reqUrl << std::endl;
-		std::cout << "===========================================================================" << std::endl;
+}
+
+void	Request::parseQueryUrl()
+{
+	unsigned int pos = 0;
+		bool	flag = false;
+	pos = this->_reqUrl.find_first_of('?');
+	if (!pos)
+		return;
+	std::string str;
+	str = this->_reqUrl.substr(pos + 1, (this->_reqUrl.length() - pos));
+
+    std::stringstream str1(str);
+    std::string       pair;
+	while (getline(str1, pair, '&'))
+	{
+		std::stringstream line(pair);
+		std::string			key;
+		std::string			value;
+
+		getline(line, key, '=');
+		getline(line, value);
+		key = strToUpper(key);
+		std::map<std::string, std::string>::iterator it;
+		for (it = _queryMap.begin(); it != _queryMap.end(); ++it)
+		{
+			if (key == it->first)
+				flag = true;
+		}
+		if (flag)
+			continue;
+		_queryMap[key] = value;
+		// std::cout << key << "{" << _queryMap[key] << "}\n";
+	}	
 }
 
 void    Request::parseRequest()
@@ -114,11 +145,11 @@ void    Request::parseRequest()
     {
         if ((str1.empty() || isWhiteSpace(str1)) && _type == GET)
             continue;
-		if (_type == POST)
-		{
-			// parsePostBody();
-			// return ;
-		}
+		// if (_type == POST)
+		// {
+		// 	parsePostBody();
+		// 	return ;
+		// }
         std::stringstream   line(str1);
         getline(line, key, ' ');
         getline(line, value);
@@ -127,8 +158,8 @@ void    Request::parseRequest()
         {
             std::stringstream   url(value);
             getline(url, _reqUrl, ' ');
-			parseReqUrl();
-			// std::cout << "===============>>  request =================> " << key << std::endl;
+			parseHexReqUrl();
+			parseQueryUrl();
 			if (key.find("GET") != std::string::npos)
 				this->_type = GET;
 			else if (key.find("POST") != std::string::npos)
@@ -175,6 +206,61 @@ bool Request::isUrlCgi() const
 {
 	return _isUrlCgi;
 }
+
+std::string	Request::strToUpper(std::string str)
+{
+    for(size_t i = 0; i < str.length(); i++) {
+        str[i] = toupper(str[i]);
+    }
+	return (str);
+}
+
+std::string Request::replaceChar(std::string str)
+{
+	for (size_t pos = str.find('-'); pos != std::string::npos; pos = str.find('-'))
+	{
+		str.replace(pos, 1, "_");
+	}
+	return(str);
+}
+
+std::map<std::string, std::string>	Request::parseUnderScore()
+{
+	std::map<std::string, std::string> mapCopy = _request;
+	std::map<std::string, std::string> mapC;
+	std::map<std::string, std::string>::iterator it;
+	for (it = mapCopy.begin(); it != mapCopy.end(); ++it)
+	{
+		std::string key = replaceChar(it->first);
+		key = strToUpper(key);
+		mapC[key] = it->second;
+	}
+	return (mapC);
+}
+
+std::map<std::string, std::string> Request::modifyEnv(std::map<std::string, std::string> env)
+{
+	std::map<std::string, std::string> updatedReq = parseUnderScore();
+	std::map<std::string, std::string>::iterator it1;
+	for (it1 = updatedReq.begin(); it1 != updatedReq.end(); ++it1)
+	{
+
+		env[it1->first] = it1->second;
+	}
+	for (it1 = _queryMap.begin(); it1 != _queryMap.end(); ++it1)
+	{
+		env[it1->first] = it1->second;
+	}
+	std::map<std::string, std::string>::iterator it;
+	for (it = env.begin(); it != env.end(); ++it)
+	{
+		std::cout << it->first << " " << it->second << std::endl;
+	}
+	return env;
+}
+
+
+
 
 // ----------------------------------
 

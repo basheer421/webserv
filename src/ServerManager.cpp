@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/22 13:45:14 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/23 12:46:15 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,14 @@ ServerManager::~ServerManager() {}
 void ServerManager::sendResponse(const int& client, Request& request)
 {
 	(void)client;
+	this->envMap = request.modifyEnv(this->envMap);
+	std::map<std::string, std::string>::iterator it;
+	// std::cout << "==============================================================" << std::cout;
+	// for (it = envMap.begin(); it != envMap.end(); ++it)
+	// {
+	// 	std::cout << it->first << " " << it->second << std::endl;
+	// }
+	// std::cout << "==============================================================" << std::cout;
 	std::map<std::string, std::string>  reqMap = request.getRequest();
 	ft::string url(  request.getReqUrl() );
 	
