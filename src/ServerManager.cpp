@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/21 16:52:28 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/23 18:10:59 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ void ServerManager::run()
 			{
 				char buffer[30000] = {0};
 				int read_res = recv(pfd.fd, buffer, 29999, 0);
-				if (read_res <= 0)
+				if (read_res < 0)
 				{
 					close(pfd.fd);
 					it = sockets.erase(it);
