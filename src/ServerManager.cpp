@@ -103,6 +103,7 @@ if Bad request == true
     set response
     return res;
 } 
+
 try
 {
     if cgi == true
@@ -132,14 +133,8 @@ catch(std excetion error){
     .
         return response
 
-} 
-    
-    
-    
-    
+}   
     */
-
-
 
 	if (request.isUrlCgi() == true)
 	{
@@ -151,7 +146,6 @@ catch(std excetion error){
         // {
         //     std::cerr << e.what() << '\n';
         // }
-        
 	}
 	else
 	{
@@ -171,7 +165,6 @@ catch(std excetion error){
 		}
 	}
 	response = res.getResponse();
-	send(client, response.c_str(), response.length(), 0);
 }
 
 void ServerManager::run()
@@ -209,11 +202,13 @@ void ServerManager::run()
 			++it)
 		{
 			struct pollfd& pfd = *it;
+
 			if (pfd.revents & POLLIN)
 			{
 				char *buffer = new char[30000];
                 std::memset(buffer, 0, 30000);
 				int read_res = recv(pfd.fd, buffer, 29999, 0);
+
 				if (read_res < 0)
 				{
 					close(pfd.fd);
@@ -223,13 +218,17 @@ void ServerManager::run()
 				}
 				else
 				{
+                    // Manage_request();
 					// Handle the client request
+                    
 					Request request(buffer);
 					request.parseRequest();
+                    sendResponse(pfd.fd, request); // server can be known from the request
 					if (pfd.revents & POLLOUT)
-						sendResponse(pfd.fd, request); // server can be known from the request
+                    	send(client, response.c_str(), response.length(), 0);
                     delete[] buffer;
 				}
+
 			}
 		}
 	}
