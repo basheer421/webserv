@@ -37,8 +37,15 @@ void ParserConf::removeComment(ft::string& str)
 	str = str.substr(0, str.find(';'));
 }
 
-ParserConf::ParserConf(ft::string& text) : text(text)
+ParserConf::ParserConf(ft::string& input)
 {
+	std::fstream file(input, std::fstream::in);
+	if (file.fail())
+		throw std::runtime_error("Error with config file");
+	std::stringstream textStream;
+	textStream << file.rdbuf();
+	file.close();
+	this->text = textStream.str();
 	iter = this->text.begin();
 }
 

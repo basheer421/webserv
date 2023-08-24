@@ -12,6 +12,9 @@
 
 #include "Request.hpp"
 
+// curl -X POST -H "Transfer-Encoding: chunked" --data-binary @- http://localhost:8080 < data.txt
+// Command to send a chunked post request to the server. The body will be in the data.txt
+
 Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false)
 {
 }
@@ -50,10 +53,10 @@ void	Request::parsePostBody()
 {
     std::string::size_type pos = 0;
 	std::string	req = _buffCopy;
-	std::cout << "================================>" << _request["content-length:"].empty() << std::endl;
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["content-length:"].empty() == false && _postFlag == false)
 	{
-		std::string	body = req.substr(pos, atoi(_request["content-length:"].c_str()));
+        string cont_length = _request["content-length:"];
+		std::string	body = req.substr(pos, ft::from_string<int>(cont_length));
 		std::string::size_type pos1 = 0;
 		while ((pos1 = body.find("\r\n", pos1)) != std::string::npos)
 		{
@@ -66,8 +69,57 @@ void	Request::parsePostBody()
 		std::cout << "===========================================================================" << std::endl;
 		_postFlag = true;
 	}
+}
 
+void	Request::parseHexReqUrl()
+{
+	unsigned int pos = 0;
+	int hex_num = 0;
+	std::string temp;
+	std::string converted_hex;
 
+	while(this->_reqUrl.find('%') != std::string::npos)
+	{
+		pos = this->_reqUrl.find_first_of('%');
+		hex_num = hexadecimalToDecimal(this->_reqUrl.substr(pos + 1, 2));
+		converted_hex.clear();
+		converted_hex = char(hex_num);
+		this->_reqUrl.replace(pos, 3, converted_hex);
+	}
+}
+
+void	Request::parseQueryUrl()
+{
+	unsigned int pos = 0;
+		bool	flag = false;
+	pos = this->_reqUrl.find_first_of('?');
+	if (!pos)
+		return;
+	std::string str;
+	str = this->_reqUrl.substr(pos + 1, (this->_reqUrl.length() - pos));
+
+    std::stringstream str1(str);
+    std::string       pair;
+	while (getline(str1, pair, '&'))
+	{
+		std::stringstream line(pair);
+		std::string			key;
+		std::string			value;
+
+		getline(line, key, '=');
+		getline(line, value);
+		key = strToUpper(key);
+		std::map<std::string, std::string>::iterator it;
+		for (it = _queryMap.begin(); it != _queryMap.end(); ++it)
+		{
+			if (key == it->first)
+				flag = true;
+		}
+		if (flag)
+			continue;
+		_queryMap[key] = value;
+		// std::cout << key << "{" << _queryMap[key] << "}\n";
+	}	
 }
 
 void    Request::parseRequest()
@@ -76,6 +128,7 @@ void    Request::parseRequest()
 	// Replace all occurrences of '\r\n' with '\n' in the _buff string
     std::string::size_type pos = 0;
 	this->_buffCopy = _buff;
+	std::cout << _buff << std::endl;
     while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
     {
         _buff.replace(pos, 2, "\n");
@@ -88,15 +141,16 @@ void    Request::parseRequest()
     std::string       value;
     bool              first = true;
 
+
     while (getline(str, str1, '\n'))
     {
         if ((str1.empty() || isWhiteSpace(str1)) && _type == GET)
             continue;
-		if (_type == POST)
-		{
-			parsePostBody();
-			// return ;
-		}
+		// if (_type == POST)
+		// {
+		// 	parsePostBody();
+		// 	return ;
+		// }
         std::stringstream   line(str1);
         getline(line, key, ' ');
         getline(line, value);
@@ -105,7 +159,8 @@ void    Request::parseRequest()
         {
             std::stringstream   url(value);
             getline(url, _reqUrl, ' ');
-			// std::cout << "===============>>  request =================> " << key << std::endl;
+			parseHexReqUrl();
+			parseQueryUrl();
 			if (key.find("GET") != std::string::npos)
 				this->_type = GET;
 			else if (key.find("POST") != std::string::npos)
@@ -115,12 +170,11 @@ void    Request::parseRequest()
 			std::size_t	pos_idx = _reqUrl.find("/cgi-bin");
 			if (pos_idx != std::string::npos)
 				this->_isUrlCgi = true;
-            // std::cout << "Requested Url ===========> " << _reqUrl << " === _isUrlCgi ====> " << _isUrlCgi << std::endl;
             first = false;
         }
 		if (key == "Host:")
 			this->_host = value;
-        std::cout << key << "{" << _request[key] << "}\n";
+        // std::cout << key << "{" << _request[key] << "}\n";
     }
 }
 
@@ -152,4 +206,90 @@ e_request_type	Request::getReqType() const
 bool Request::isUrlCgi() const
 {
 	return _isUrlCgi;
+}
+
+std::string	Request::strToUpper(std::string str)
+{
+    for(size_t i = 0; i < str.length(); i++) {
+        str[i] = toupper(str[i]);
+    }
+	return (str);
+}
+
+std::string Request::replaceChar(std::string str)
+{
+	for (size_t pos = str.find('-'); pos != std::string::npos; pos = str.find('-'))
+	{
+		str.replace(pos, 1, "_");
+	}
+	return(str);
+}
+
+std::map<std::string, std::string>	Request::parseUnderScore()
+{
+	std::map<std::string, std::string> mapCopy = _request;
+	std::map<std::string, std::string> mapC;
+	std::map<std::string, std::string>::iterator it;
+	for (it = mapCopy.begin(); it != mapCopy.end(); ++it)
+	{
+		std::string key = replaceChar(it->first);
+		key = strToUpper(key);
+		mapC[key] = it->second;
+	}
+	return (mapC);
+}
+
+std::map<std::string, std::string> Request::modifyEnv(std::map<std::string, std::string> env)
+{
+	std::map<std::string, std::string> updatedReq = parseUnderScore();
+	std::map<std::string, std::string>::iterator it1;
+	for (it1 = updatedReq.begin(); it1 != updatedReq.end(); ++it1)
+	{
+
+		env[it1->first] = it1->second;
+	}
+	for (it1 = _queryMap.begin(); it1 != _queryMap.end(); ++it1)
+	{
+		env[it1->first] = it1->second;
+	}
+	return env;
+}
+
+// ----------------------------------
+
+
+
+int Request::hexadecimalToDecimal(string hexVal)
+{
+    int len = hexVal.size();
+ 
+    // Initializing base value to 1, i.e 16^0
+    int base = 1;
+ 
+    int dec_val = 0;
+ 
+    // Extracting characters as digits from last
+    // character
+    for (int i = len - 1; i >= 0; i--) {
+        // if character lies in '0'-'9', converting
+        // it to integral 0-9 by subtracting 48 from
+        // ASCII value
+        if (hexVal[i] >= '0' && hexVal[i] <= '9') {
+            dec_val += (int(hexVal[i]) - 48) * base;
+ 
+            // incrementing base by power
+            base = base * 16;
+        }
+ 
+        // if character lies in 'A'-'F' , converting
+        // it to integral 10 - 15 by subtracting 55
+        // from ASCII value
+        else if (hexVal[i] >= 'A' && hexVal[i] <= 'F') {
+            dec_val += (int(hexVal[i]) - 55) * base;
+ 
+            // incrementing base by power
+            base = base * 16;
+        }
+    }
+    return dec_val;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/23 18:10:59 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/24 13:18:27 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,9 @@ ServerManager::~ServerManager() {}
 /**
  * Only handles GET requests for now
 */
-void ServerManager::sendResponse(const int& client, Request& request)
+void ServerManager::ProcessResponse(Request& request, Response& res)
 {
+	this->envMap = request.modifyEnv(this->envMap);
 	std::map<std::string, std::string>  reqMap = request.getRequest();
 	ft::string url(  request.getReqUrl() );
 	
@@ -81,38 +82,56 @@ void ServerManager::sendResponse(const int& client, Request& request)
 		throw std::runtime_error("Error: Wrong host was found in the request");
 	const ServerTraits& conf = (*server_it).getConf();
 
-	std::string response;
-	ft::string res_body;
 
-	try {
-		response = "HTTP/1.1 200 OK" CRLF;
+
+
+
+
+
+
+
+	// if (request.isUrlCgi() == true)
+	// 	handleCgi(res, request);
+	// else
+	// {
+		res.setResponseHeader("200", "OK");
 		ft::string path = conf.root + url;
-		if (Server::is_dir(path.c_str()))
-		{
-			res_body = dirList(path);
-		}
-		else
-			res_body = ft::file_to_string(path);
+		res.setBody(path);
 		std::cout << "sending =============================>  {" << path << "}\n";
-	} catch (std::exception& e) {
-		response = "HTTP/1.1 404 Not Found" CRLF;
-		try {
-			res_body = ft::file_to_string("error_pages/404.html");
-		} catch (std::exception& e) {
-			std::cerr << "404.html not found!\n";
-		}
-	}
-	response +=
-		"Content-Type: text/html; charset=utf-8" CRLF
-		"Content-Length: " + ft::to_string(res_body.length()) + CRLF
-		CRLF
-	;
-	response += res_body;
-	send(client, response.c_str(), response.length(), 0);
+	// }	
+	
 }
 
-void ServerManager::run()
+
+Response ServerManager::ManageRequest(char *buffer)
 {
+	Request  request(buffer);
+	Response response;
+
+	try
+	{
+		request.parseRequest();
+		ProcessResponse(request, response); // server can be known from the request
+	}
+	catch(const std::exception& e)
+	{
+		if (e.what())
+		{
+			response.setResponseHeader("404", "Not Found");		
+			response.setBody("error_pages/404.html");
+		}
+		// else if (e.what() == "403")
+		// {
+			
+		// }
+	}
+	
+	return (response);
+}
+
+void ServerManager::run(char **envp)
+{
+	this->parseEnv(envp);
 	while (true)
 	{
 		// All servers and clients will be inside the poll.
@@ -140,31 +159,80 @@ void ServerManager::run()
 		}
 
 		// loop on the clients
+		// why NEW
 		for (std::vector<struct pollfd>::iterator
 			it = sockets.begin() + servers.size();
 			it != sockets.end();
 			++it)
 		{
 			struct pollfd& pfd = *it;
+
 			if (pfd.revents & POLLIN)
 			{
-				char buffer[30000] = {0};
+				char buffer[30000];
+
+                std::memset(buffer, 0, 30000);
 				int read_res = recv(pfd.fd, buffer, 29999, 0);
 				if (read_res < 0)
 				{
 					close(pfd.fd);
 					it = sockets.erase(it);
+                    // delete[] buffer;
 					continue ;
 				}
 				else
 				{
-					// Handle the client request
-					Request request(buffer);
-					request.parseRequest();
+            		Response res =  ManageRequest(buffer);
+					
 					if (pfd.revents & POLLOUT)
-						sendResponse(pfd.fd, request); // server can be known from the request
+                    	send(pfd.fd, res.getResponse().c_str(), res.getResponse().length(), 0);
+					// delete[] buffer;
 				}
 			}
 		}
 	}
+}
+
+std::string	ServerManager::strToUpper(std::string str)
+{
+    for(size_t i = 0; i < str.length(); i++) {
+        str[i] = toupper(str[i]);
+    }
+	return (str);
+}
+
+void	ServerManager::parseEnv(char **rawEnv)
+{
+	std::string str1;
+	std::string envStr;
+	bool	flag = false;
+
+	for (size_t i = 0; rawEnv[i]; i++)
+	{
+		envStr += rawEnv[i];
+		envStr += "\n";
+	}
+	std::stringstream str(envStr);
+	while (getline(str, str1, '\n'))
+	{
+		std::stringstream line(str1);
+		std::string key, value;
+		getline(line, key, '=');
+		getline(line, value);
+		std::map<std::string, std::string>::iterator it;
+		for (it = envMap.begin(); it != envMap.end(); ++it)
+		{
+			key = strToUpper(key);
+			if (key == it->first)
+				flag = true;
+		}
+		if (flag)
+			continue;
+		envMap[key] = value;
+	}
+}
+
+std::map<std::string, std::string> ServerManager::getEnv() const
+{
+	return envMap;
 }

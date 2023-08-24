@@ -26,6 +26,7 @@ class Request
 {
     private:
         std::map<std::string, std::string>  _request;
+		std::map<std::string, std::string>	_queryMap;
 		e_request_type						_type;
         std::string                         _buff;
         std::string                         _buffCopy;
@@ -41,15 +42,24 @@ class Request
         Request(const Request &object);
         Request &operator=(const Request &rhs);
         ~Request();
+
         void    parseRequest();
         bool    isWhiteSpace(std::string    str1);
 		void	parsePostBody();
+		void	parseHexReqUrl();
+		void	parseQueryUrl();
+		std::map<std::string, std::string> modifyEnv(std::map<std::string, std::string> env);
 
 		std::map<std::string, std::string> getRequest() const;
 		std::string getReqUrl() const;
 		std::string	getHost() const;
 		std::string getPostBody() const;
 		e_request_type getReqType() const;
+		std::string	strToUpper(std::string str);
+		std::map<std::string, std::string>	parseUnderScore();
+		std::string replaceChar(std::string str);
+
+		int hexadecimalToDecimal(string hexVal);
 
 		bool isUrlCgi() const;
 };
