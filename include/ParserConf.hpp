@@ -41,7 +41,7 @@ class ParserConf
 
 	public:
 		ParserConf();
-		ParserConf(ft::string& text);
+		ParserConf(ft::string& file);
 		ParserConf(const ParserConf& src);
 		ParserConf& operator = (const ParserConf& src);
 		~ParserConf();

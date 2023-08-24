@@ -18,18 +18,17 @@ int main(int argc, char **argv, char **envp)
 	(void)argv;
 	(void)envp;
 
+	if (argc > 2)
+		return (1);
 	try
 	{
-		// reading the file and storing in text
-		// ! Restructure this part here
-		std::fstream file("conf.ini", std::fstream::in);
-		std::stringstream textStream;
-		textStream << file.rdbuf();
-		file.close();
-		ft::string text = textStream.str();
-
+		ft::string file;
 		// Parsing for the configuration file
-		ParserConf parser(text);
+		if (argc == 2)
+			file = argv[1];
+		else
+			file = "conf.ini";
+		ParserConf parser(file);
 		std::vector<ServerTraits> conf = parser.parseFile();
 
 		// Starting the server here
