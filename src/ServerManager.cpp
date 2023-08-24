@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:18:27 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/24 13:59:41 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 }
 
 
-Response ServerManager::ManageRequest(char *buffer)
+Response ServerManager::ManageRequest(const string& buffer)
 {
 	Request  request(buffer);
 	Response response;
@@ -155,6 +155,7 @@ void ServerManager::run(char **envp)
 				if (client < 0)
 					throw std::runtime_error("Accept Error");
 				sockets.push_back( (struct pollfd) {client, POLLIN | POLLOUT, 0} );
+				requestBuilder[client] = "";
 			}
 		}
 
@@ -175,18 +176,20 @@ void ServerManager::run(char **envp)
 				int read_res = recv(pfd.fd, buffer, 29999, 0);
 				if (read_res < 0)
 				{
+					requestBuilder[pfd.fd].clear();
 					close(pfd.fd);
 					it = sockets.erase(it);
-                    // delete[] buffer;
 					continue ;
 				}
 				else
 				{
-            		Response res =  ManageRequest(buffer);
-					
+					requestBuilder[pfd.fd] += buffer;
+
 					if (pfd.revents & POLLOUT)
-                    	send(pfd.fd, res.getResponse().c_str(), res.getResponse().length(), 0);
-					// delete[] buffer;
+					{
+						Response res = ManageRequest(requestBuilder[pfd.fd]);
+						send(pfd.fd, res.getResponse().c_str(), res.getResponse().length(), 0);
+					}
 				}
 			}
 		}

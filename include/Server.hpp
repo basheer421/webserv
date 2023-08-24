@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:18:03 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:04:40 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/24 13:26:59 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,6 @@ public:
 	Server(const Server& src);
 	Server& operator = (const Server& src);
 	~Server();
-
-	void run(); // Throws
 
 	int getServerFd() const;
 	struct sockaddr *getAddress() const;

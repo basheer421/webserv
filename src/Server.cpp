@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/22 13:36:15 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/24 13:26:49 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,84 +54,6 @@ Server& Server::operator = (const Server& src)
 	this->serverFd = src.serverFd;
 	this->conf = src.conf;
 	return *this;
-}
-
-void Server::run()
-{
-	// std::cout << "Listening on port: " << htons(conf.listen_port) << "\n";
-	// while (true)
-	// {
-	// 	int client;
-		// struct pollfd pfds[FD_COUNT];
-
-		//* do this at the begining instead
-		/***************/
-		// pfds[0] = (struct pollfd) {serverFd, POLLIN, 0};
-		// int index = 0;
-		// for (std::list<int>::iterator it = clients.begin(); it != clients.end(); ++it)
-		// 	pfds[++index] = (struct pollfd) {*it, POLLIN | POLLOUT, 0};
-		/**************/
-
-		//* poll the sockets.array() with sockets.size(), -1 might be changed but -1 for now
-
-		// if (poll(pfds, clients.size() + 1, -1) < 0)
-		// 	throw ServerException("Poll Error");
-
-
-		/*
-			instead do a for loop for all servers and if anything is found add it to the end of 'sockets'
-		*/
-
-		// if (pfds[0].revents & POLLIN)
-		// {
-		// 	client = accept(serverFd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-		// 	if (client < 0)
-		// 		throw ServerException("AcceptException");
-		// 	clients.push_back(client);
-		// }
-
-		// We have 1 server so count will be 1 here, otherwise the server count.
-		/**
-		 * start from 'amount of servers' instead of 1
-		 * only
-		 */
-
-
-
-
-
-
-
-		// 	index = 1;
-		// 	for (std::list<int>::iterator it = clients.begin(); it != clients.end();) {
-		// 		int client_fd = *it;
-
-		//* 	"pfds[index] will be sockets[(*it).fd]"
-
-		// 		if (pfds[index].revents & POLLIN) {
-		//*		30000 is temp,
-		//* 	We should put (client_max_body_size + header size)
-		
-		// 			char buffer[30000] = {0};
-		// 			int read_res = recv(client_fd, buffer, 29999, 0);
-		// 			if (read_res <= 0) {
-		// 				it = clients.erase(it);
-		// 				close(client_fd);
-		// 				continue;
-		// 			} 
-		// 			else
-		// 			{
-		// 				// Handle the client request
-		// 				Request request(buffer);
-		// 				request.parseRequest();
-		// 				if (pfds[index].revents & POLLOUT)
-		// 					sendResponse(client_fd, request);
-		// 			}
-		// 		}
-		// 		++index;
-		// 		++it;
-		// 	}
-		// }
 }
 
 int Server::getServerFd() const { return serverFd; }

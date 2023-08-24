@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:04:38 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/24 13:59:56 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ private:
 	std::vector<Server> servers;
 	std::vector<struct pollfd> sockets;
 	std::map<std::string, std::string> envMap;
+	std::map<int, string> requestBuilder;
 
 
 public:
@@ -32,7 +33,7 @@ public:
 	~ServerManager();
 
 	void ProcessResponse(Request& request, Response& res);
-	Response ManageRequest(char *buffer);
+	Response ManageRequest(const string&buffer);
 
 	void run(char **envp); // Throws
     // void handleCgi(Response &res, Request &req);

@@ -22,7 +22,7 @@ FILES = lib/string/ft_string.cpp $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES))
 
 CXX		=	c++
 
-CXXFLAGS =	-Wall -Wextra -Werror -std=c++98 -fsanitize=address -g3
+CXXFLAGS =	-Wall -Wextra -Werror -std=c++98
 
 OBJS	=	$(FILES:.cpp=.o)
 
