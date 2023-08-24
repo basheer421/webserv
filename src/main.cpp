@@ -17,15 +17,29 @@ int main(int argc, char **argv, char **envp)
 	(void)argc;
 	(void)argv;
 	(void)envp;
-	std::fstream file("conf.ini", std::fstream::in);
-	std::stringstream textStream;
-	textStream << file.rdbuf();
-	file.close();
-	ft::string text = textStream.str();
-	ParserConf parser(text);
-	std::vector<ServerTraits> conf = parser.parseFile();
-	ServerManager serverManager(conf);
-	serverManager.parseEnv(envp);
-	serverManager.run();
+
+	try
+	{
+		// reading the file and storing in text
+		// ! Restructure this part here
+		std::fstream file("conf.ini", std::fstream::in);
+		std::stringstream textStream;
+		textStream << file.rdbuf();
+		file.close();
+		ft::string text = textStream.str();
+
+		// Parsing for the configuration file
+		ParserConf parser(text);
+		std::vector<ServerTraits> conf = parser.parseFile();
+
+		// Starting the server here
+		ServerManager serverManager(conf);
+		serverManager.run(envp);
+
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
     return (0);
 }

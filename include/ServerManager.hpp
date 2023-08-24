@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/23 20:36:52 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/24 12:45:04 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ public:
 	void ProcessResponse(Request& request, Response& res);
 	Response ManageRequest(char *buffer);
 
-	void run(); // Throws
+	void run(char **envp); // Throws
     // void handleCgi(Response &res, Request &req);
 
 	void	parseEnv(char **rawEnv);

@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/23 20:42:11 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/24 12:44:26 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,8 +129,9 @@ Response ServerManager::ManageRequest(char *buffer)
 	return (response);
 }
 
-void ServerManager::run()
+void ServerManager::run(char **envp)
 {
+	this->parseEnv(envp);
 	while (true)
 	{
 		// All servers and clients will be inside the poll.
