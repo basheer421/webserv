@@ -125,16 +125,14 @@ void	Request::parseQueryUrl()
 void    Request::parseRequest()
 {
 
-	// Replace all occurrences of '\r\n' with '\n' in the _buff string
     std::string::size_type pos = 0;
 	this->_buffCopy = _buff;
 	std::cout << _buff << std::endl;
     while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
     {
         _buff.replace(pos, 2, "\n");
-        pos += 1; // Move past the replaced '\n' to avoid an infinite loop
+        pos += 1;
     }
-
     std::stringstream str(_buff);
     std::string       str1;
     std::string       key;
@@ -176,6 +174,55 @@ void    Request::parseRequest()
 			this->_host = value;
         // std::cout << key << "{" << _request[key] << "}\n";
     }
+}
+
+std::map<std::string, std::string>	Request::parseUnderScore()
+{
+	std::map<std::string, std::string> mapCopy = _request;
+	std::map<std::string, std::string> mapC;
+	std::map<std::string, std::string>::iterator it;
+	for (it = mapCopy.begin(); it != mapCopy.end(); ++it)
+	{
+		std::string key = replaceChar(it->first);
+		key = strToUpper(key);
+		mapC[key] = it->second;
+	}
+	return (mapC);
+}
+
+std::map<std::string, std::string> Request::modifyEnv(std::map<std::string, std::string> env)
+{
+	std::map<std::string, std::string> updatedReq = parseUnderScore();
+	std::map<std::string, std::string>::iterator it1;
+	for (it1 = updatedReq.begin(); it1 != updatedReq.end(); ++it1)
+	{
+
+		env[it1->first] = it1->second;
+	}
+	for (it1 = _queryMap.begin(); it1 != _queryMap.end(); ++it1)
+	{
+		env[it1->first] = it1->second;
+	}
+	return env;
+}
+
+int Request::hexadecimalToDecimal(string hexVal)
+{
+    int len = hexVal.size();
+    int base = 1;
+    int dec_val = 0;
+
+    for (int i = len - 1; i >= 0; i--) {
+        if (hexVal[i] >= '0' && hexVal[i] <= '9') {
+            dec_val += (int(hexVal[i]) - 48) * base;
+            base = base * 16;
+        }
+        else if (hexVal[i] >= 'A' && hexVal[i] <= 'F') {
+            dec_val += (int(hexVal[i]) - 55) * base;
+            base = base * 16;
+        }
+    }
+    return dec_val;
 }
 
 std::map<std::string, std::string> Request::getRequest() const
@@ -223,73 +270,4 @@ std::string Request::replaceChar(std::string str)
 		str.replace(pos, 1, "_");
 	}
 	return(str);
-}
-
-std::map<std::string, std::string>	Request::parseUnderScore()
-{
-	std::map<std::string, std::string> mapCopy = _request;
-	std::map<std::string, std::string> mapC;
-	std::map<std::string, std::string>::iterator it;
-	for (it = mapCopy.begin(); it != mapCopy.end(); ++it)
-	{
-		std::string key = replaceChar(it->first);
-		key = strToUpper(key);
-		mapC[key] = it->second;
-	}
-	return (mapC);
-}
-
-std::map<std::string, std::string> Request::modifyEnv(std::map<std::string, std::string> env)
-{
-	std::map<std::string, std::string> updatedReq = parseUnderScore();
-	std::map<std::string, std::string>::iterator it1;
-	for (it1 = updatedReq.begin(); it1 != updatedReq.end(); ++it1)
-	{
-
-		env[it1->first] = it1->second;
-	}
-	for (it1 = _queryMap.begin(); it1 != _queryMap.end(); ++it1)
-	{
-		env[it1->first] = it1->second;
-	}
-	return env;
-}
-
-// ----------------------------------
-
-
-
-int Request::hexadecimalToDecimal(string hexVal)
-{
-    int len = hexVal.size();
- 
-    // Initializing base value to 1, i.e 16^0
-    int base = 1;
- 
-    int dec_val = 0;
- 
-    // Extracting characters as digits from last
-    // character
-    for (int i = len - 1; i >= 0; i--) {
-        // if character lies in '0'-'9', converting
-        // it to integral 0-9 by subtracting 48 from
-        // ASCII value
-        if (hexVal[i] >= '0' && hexVal[i] <= '9') {
-            dec_val += (int(hexVal[i]) - 48) * base;
- 
-            // incrementing base by power
-            base = base * 16;
-        }
- 
-        // if character lies in 'A'-'F' , converting
-        // it to integral 10 - 15 by subtracting 55
-        // from ASCII value
-        else if (hexVal[i] >= 'A' && hexVal[i] <= 'F') {
-            dec_val += (int(hexVal[i]) - 55) * base;
- 
-            // incrementing base by power
-            base = base * 16;
-        }
-    }
-    return dec_val;
 }
