@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:59:41 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/26 13:56:54 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,6 @@ void ServerManager::run(char **envp)
 		}
 
 		// loop on the clients
-		// why NEW
 		for (std::vector<struct pollfd>::iterator
 			it = sockets.begin() + servers.size();
 			it != sockets.end();
@@ -189,6 +188,7 @@ void ServerManager::run(char **envp)
 					{
 						Response res = ManageRequest(requestBuilder[pfd.fd]);
 						send(pfd.fd, res.getResponse().c_str(), res.getResponse().length(), 0);
+						requestBuilder[pfd.fd].clear();
 					}
 				}
 			}
