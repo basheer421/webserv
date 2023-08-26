@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:59:41 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/26 12:39:27 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,9 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 Response ServerManager::ManageRequest(const string& buffer)
 {
+	std::cout << "====================================================================================" << std::endl;
+	std::cout << buffer << std::endl;
+	std::cout << "====================================================================================" << std::endl;
 	Request  request(buffer);
 	Response response;
 
@@ -189,6 +192,7 @@ void ServerManager::run(char **envp)
 					{
 						Response res = ManageRequest(requestBuilder[pfd.fd]);
 						send(pfd.fd, res.getResponse().c_str(), res.getResponse().length(), 0);
+						requestBuilder[pfd.fd].clear();
 					}
 				}
 			}
