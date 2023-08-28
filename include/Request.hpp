@@ -57,6 +57,7 @@ class Request
 		std::string	getHost() const;
 		std::string getPostBody() const;
 		e_request_type getReqType() const;
+        std::string getCgiUrl() const;
 		std::string	strToUpper(std::string str);
 		std::map<std::string, std::string>	parseUnderScore();
 		std::string replaceChar(std::string str);

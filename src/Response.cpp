@@ -85,6 +85,16 @@ void	Response::setBody(std::string path)
 					CRLF;
 }
 
+void	Response::setCgiBody(std::string body)
+{
+	this->res_body.clear();
+	this->res_body = body;
+	this->content_len = res_body.length();
+	this->header += "Content-Length: " + ft::to_string(this->content_len) + CRLF
+					CRLF;
+}
+
+
 void	Response::setCode(std::string str)
 {
 	this->code = str;

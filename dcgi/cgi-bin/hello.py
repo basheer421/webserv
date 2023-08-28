@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 import sys
 import os
@@ -10,7 +10,7 @@ print("</body></html>")
 
 for name, value in os.environ.items():
     print("{0}: {1}".format(name, value), file=sys.stderr)
-    
+
 import cgi
 form = cgi.FieldStorage() # instantiate only once!
 name = form.getfirst('num', '1')

@@ -90,18 +90,24 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 
 
-	// if (request.isUrlCgi() == true)
-	// 	handleCgi(res, request);
-	// else
-	// {
+	if (request.isUrlCgi() == true)
+    {
+        Cgi cgi;
+        
+        cgi.SetEnv(this->envMap);
+        cgi.HandleCgi(res, request);
+    }
+	else
+	{
 		res.setResponseHeader("200", "OK");
 		ft::string path = conf.root + url;
 		res.setBody(path);
 		std::cout << "sending =============================>  {" << path << "}\n";
-	// }	
+	}	
 	
 }
 
+// set the appropriate response from the cgi.
 
 Response ServerManager::ManageRequest(const string& buffer)
 {
