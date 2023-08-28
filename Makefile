@@ -18,11 +18,11 @@ INCLUDE_FOLDERS = -I./include -I./lib/string
 
 FILES_NAMES = main.cpp ParserConf.cpp Server.cpp ServerManager.cpp Request.cpp Pages.cpp Response.cpp Cgi.cpp
 
-FILES = lib/string/ft_string.cpp $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES)) 
+FILES = lib/string/ft_string.cpp $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES))
 
 CXX		=	c++
 
-CXXFLAGS =	-Wall -Wextra -Werror -std=c++98 -fsanitize=address
+CXXFLAGS =	-Wall -Wextra -Werror -std=c++98 -g3 -fsanitize=address
 
 OBJS	=	$(FILES:.cpp=.o)
 

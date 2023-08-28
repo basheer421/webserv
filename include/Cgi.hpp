@@ -12,15 +12,15 @@ class Cgi{
 
         void SetEnv(std::map<std::string, std::string> &envMap);
         char **GetCharEnv();
-        
+
         void HandleCgi(Response &res, Request &req);
 
 
     private:
-    
+
         std::map<std::string, std::string> envMap;
-        const char *scriptpath;
-        
+        std::string scriptpath;
+
         void RunCgi(Response &res, Request &req);
 
 };

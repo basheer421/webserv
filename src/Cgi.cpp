@@ -48,7 +48,7 @@ char **Cgi::GetCharEnv(){
 
 void Cgi::HandleCgi(Response &res, Request &req)
 {
-    this->scriptpath = ("." + req.getCgiUrl()).c_str();
+    this->scriptpath = "." + req.getCgiUrl();
 
     this->RunCgi(res, req);
 }
@@ -61,13 +61,14 @@ void Cgi::RunCgi(Response &res, Request &req){
     FILE *parent_input = tmpfile();
     FILE *child_output = tmpfile();
 
-    int parent_in_fd = fileno(parent_input);
-    int child_out_fd = fileno(child_output);
-
     if (parent_input == NULL || child_output == NULL)
     {
         throw std::runtime_error("500");
     }
+
+    int parent_in_fd = fileno(parent_input);
+    int child_out_fd = fileno(child_output);
+
 
     // set post request file.
 
@@ -82,62 +83,61 @@ void Cgi::RunCgi(Response &res, Request &req){
 
     pid_t pid;
     (void) res;
-    // create child process 
+    // create child process
 
     pid = fork();
     if (pid == -1)
     {
         throw std::runtime_error("500");
     }
-    else
-    {
-        // set file descriptors for child process
-        // if execve fails then free and exit child process and return error.
+	// set file descriptors for child process
+	// if execve fails then free and exit child process and return error.
 
-        if (pid == 0) 
-        {
-            char *const *env = this->GetCharEnv();
-        // check for dup success
-            dup2(parent_in_fd, STDIN_FILENO);
-            dup2(child_out_fd, STDOUT_FILENO);
- 
-            std::cerr << this->scriptpath <<std::endl;
-            execve(this->scriptpath, NULL, env);
-            std::cout << "---------FAILED--------" << std::endl;
+	if (pid == 0)
+	{
+		char *const *env = this->GetCharEnv();
+	// check for dup success
+		dup2(parent_in_fd, STDIN_FILENO);
+		dup2(child_out_fd, STDOUT_FILENO);
 
-            for (int i = 0; env[i] != NULL; i++)
-                delete[] env[i];
-            delete[] env;
+		std::cerr << this->scriptpath <<std::endl;
+		execve(this->scriptpath.c_str(), NULL, env);
+		std::cout << "---------FAILED--------" << std::endl;
 
-            exit(-1);
-        }
+		for (int i = 0; env[i] != NULL; i++)
+			free(env[i]);
+		delete[] env;
 
-        // wait for child to end and then read from std output of the child process via pipe.
-        if (pid != 0)
-        {
-            int outchild;
-            outchild = waitpid(-1, NULL, 0); 
+		exit(-1);
+	}
+	// stop child process
+	//check for error
+	// wait for child to end and then read from std output of the child process via pipe.
+	if (pid != 0)
+	{
+		int outchild;
+		outchild = waitpid(-1, NULL, 0);
 
-            std::cout << outchild << std::endl;
-            char read_buffer[100];
-            std::string body;
+		std::cout << outchild << std::endl;
+		char read_buffer[101];
+		std::string body;
 
-            memset(read_buffer, 0, 100);
-            fseek(child_output, 0, SEEK_SET);
-            while (feof(child_output) == false)
-            {
-                fread(read_buffer, 100, 1, child_output);
-                body += read_buffer;
-                memset(read_buffer, 0, 100);
-            }
-            std::cerr << "---------TEST-------- "<<std::endl; 
-            std::cerr << body << std::endl;
-        }
-        fclose(parent_input); 
-        fclose(child_output);
-        close(child_out_fd);
-        close(parent_in_fd);
-    }
+		memset(read_buffer, 0, 101);
+		fseek(child_output, 0, SEEK_SET);
+		while (feof(child_output) == false)
+		{
+			fread(read_buffer, 100, 1, child_output);
+			body += read_buffer;
+			memset(read_buffer, 0, 101);
+		}
+		std::cerr << "---------TEST-------- "<<std::endl;
+		std::cerr << body << std::endl;
+	}
+	fclose(parent_input);
+	fclose(child_output);
+	close(child_out_fd);
+	close(parent_in_fd);
+
     std::cerr << "----LEAVING CGI----" << std::endl;
     // set response object.
 }

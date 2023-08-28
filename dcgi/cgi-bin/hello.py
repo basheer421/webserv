@@ -10,7 +10,7 @@ print("</body></html>")
 
 for name, value in os.environ.items():
     print("{0}: {1}".format(name, value), file=sys.stderr)
-    
+
 import cgi
 form = cgi.FieldStorage() # instantiate only once!
 name = form.getfirst('num', '1')
