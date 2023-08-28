@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/26 13:56:54 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/26 15:52:52 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,9 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 Response ServerManager::ManageRequest(const string& buffer)
 {
+	std::cout << "====================================================================================" << std::endl;
+	std::cout << buffer << std::endl;
+	std::cout << "====================================================================================" << std::endl;
 	Request  request(buffer);
 	Response response;
 

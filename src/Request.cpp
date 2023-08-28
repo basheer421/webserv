@@ -49,8 +49,41 @@ bool    Request::isWhiteSpace(std::string str1)
     return (true);
 }
 
+void	Request::parseChunkedBody()
+{
+		std::string	req = _buffCopy;
+		std::string::size_type pos2 = 0;
+		std::string	sub_string;
+		if ((pos2 = req.find("\r\n\r\n")) != std::string::npos)
+			sub_string = req.substr(pos2 + 4, req.length() - pos2 - 8);
+
+    	std::string::size_type pos1 = 0;
+		while ((pos1 = sub_string.find("\r\n", pos1)) != std::string::npos)
+		{
+			sub_string.replace(pos1, 2, "\n");
+			pos1 += 1;
+		}
+		std::stringstream res(sub_string);
+		std::string line;
+		std::string body;
+
+		while (getline(res, line, '\n'))
+		{
+			if (line[0] == '0' && line.length() == 1)
+				break ;
+			getline(res, line, '\n');
+			body += line;
+		}
+		_postBody = body;
+		std::cout << "===========================================================================" << std::endl;
+		std::cout << "{" << body << "}" << std::endl;
+		std::cout << "===========================================================================" << std::endl;
+}
+
 void	Request::parsePostBody()
 {
+	if (this->_type != POST)
+		return ;
     std::string::size_type pos = 0;
 	std::string	req = _buffCopy;
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["content-length:"].empty() == false && _postFlag == false)
@@ -69,6 +102,8 @@ void	Request::parsePostBody()
 		std::cout << "===========================================================================" << std::endl;
 		_postFlag = true;
 	}
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Transfer-Encoding:"] == "chunked")
+    	parseChunkedBody();
 }
 
 void	Request::parseHexReqUrl()
@@ -91,7 +126,7 @@ void	Request::parseHexReqUrl()
 void	Request::parseQueryUrl()
 {
 	unsigned int pos = 0;
-		bool	flag = false;
+	bool	flag = false;
 	pos = this->_reqUrl.find_first_of('?');
 	if (!pos)
 		return;
@@ -118,23 +153,35 @@ void	Request::parseQueryUrl()
 		if (flag)
 			continue;
 		_queryMap[key] = value;
-		// std::cout << key << "{" << _queryMap[key] << "}\n";
 	}	
+}
+
+void	Request::headerValidation()
+{
+	std::map<std::string, std::string>::iterator it;
+	for (it = this->_request.begin(); it != _request.end(); ++it)
+	{
+		std::map<std::string, std::string>::iterator it1;
+		std::map<std::string, std::string>::iterator it2 = it;
+		for (it1 = ++it2; it1 != _request.end(); ++it1)
+		{
+			if (it->first == it1->first)
+				std::cout << "duplicates" << std::endl;
+		}
+	}
 }
 
 void    Request::parseRequest()
 {
 
-	// Replace all occurrences of '\r\n' with '\n' in the _buff string
     std::string::size_type pos = 0;
 	this->_buffCopy = _buff;
 	std::cout << _buff << std::endl;
     while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
     {
         _buff.replace(pos, 2, "\n");
-        pos += 1; // Move past the replaced '\n' to avoid an infinite loop
+        pos += 1;
     }
-
     std::stringstream str(_buff);
     std::string       str1;
     std::string       key;
@@ -146,11 +193,6 @@ void    Request::parseRequest()
     {
         if ((str1.empty() || isWhiteSpace(str1)) && _type == GET)
             continue;
-		// if (_type == POST)
-		// {
-		// 	parsePostBody();
-		// 	return ;
-		// }
         std::stringstream   line(str1);
         getline(line, key, ' ');
         getline(line, value);
@@ -176,6 +218,57 @@ void    Request::parseRequest()
 			this->_host = value;
         // std::cout << key << "{" << _request[key] << "}\n";
     }
+	parsePostBody();
+	headerValidation();
+}
+
+std::map<std::string, std::string>	Request::parseUnderScore()
+{
+	std::map<std::string, std::string> mapCopy = _request;
+	std::map<std::string, std::string> mapC;
+	std::map<std::string, std::string>::iterator it;
+	for (it = mapCopy.begin(); it != mapCopy.end(); ++it)
+	{
+		std::string key = replaceChar(it->first);
+		key = strToUpper(key);
+		mapC[key] = it->second;
+	}
+	return (mapC);
+}
+
+std::map<std::string, std::string> Request::modifyEnv(std::map<std::string, std::string> env)
+{
+	std::map<std::string, std::string> updatedReq = parseUnderScore();
+	std::map<std::string, std::string>::iterator it1;
+	for (it1 = updatedReq.begin(); it1 != updatedReq.end(); ++it1)
+	{
+
+		env[it1->first] = it1->second;
+	}
+	for (it1 = _queryMap.begin(); it1 != _queryMap.end(); ++it1)
+	{
+		env[it1->first] = it1->second;
+	}
+	return env;
+}
+
+int Request::hexadecimalToDecimal(string hexVal)
+{
+    int len = hexVal.size();
+    int base = 1;
+    int dec_val = 0;
+
+    for (int i = len - 1; i >= 0; i--) {
+        if (hexVal[i] >= '0' && hexVal[i] <= '9') {
+            dec_val += (int(hexVal[i]) - 48) * base;
+            base = base * 16;
+        }
+        else if (hexVal[i] >= 'A' && hexVal[i] <= 'F') {
+            dec_val += (int(hexVal[i]) - 55) * base;
+            base = base * 16;
+        }
+    }
+    return dec_val;
 }
 
 std::map<std::string, std::string> Request::getRequest() const
@@ -236,73 +329,4 @@ std::string Request::replaceChar(std::string str)
 		str.replace(pos, 1, "_");
 	}
 	return(str);
-}
-
-std::map<std::string, std::string>	Request::parseUnderScore()
-{
-	std::map<std::string, std::string> mapCopy = _request;
-	std::map<std::string, std::string> mapC;
-	std::map<std::string, std::string>::iterator it;
-	for (it = mapCopy.begin(); it != mapCopy.end(); ++it)
-	{
-		std::string key = replaceChar(it->first);
-		key = strToUpper(key);
-		mapC[key] = it->second;
-	}
-	return (mapC);
-}
-
-std::map<std::string, std::string> Request::modifyEnv(std::map<std::string, std::string> env)
-{
-	std::map<std::string, std::string> updatedReq = parseUnderScore();
-	std::map<std::string, std::string>::iterator it1;
-	for (it1 = updatedReq.begin(); it1 != updatedReq.end(); ++it1)
-	{
-
-		env[it1->first] = it1->second;
-	}
-	for (it1 = _queryMap.begin(); it1 != _queryMap.end(); ++it1)
-	{
-		env[it1->first] = it1->second;
-	}
-	return env;
-}
-
-// ----------------------------------
-
-
-
-int Request::hexadecimalToDecimal(string hexVal)
-{
-    int len = hexVal.size();
- 
-    // Initializing base value to 1, i.e 16^0
-    int base = 1;
- 
-    int dec_val = 0;
- 
-    // Extracting characters as digits from last
-    // character
-    for (int i = len - 1; i >= 0; i--) {
-        // if character lies in '0'-'9', converting
-        // it to integral 0-9 by subtracting 48 from
-        // ASCII value
-        if (hexVal[i] >= '0' && hexVal[i] <= '9') {
-            dec_val += (int(hexVal[i]) - 48) * base;
- 
-            // incrementing base by power
-            base = base * 16;
-        }
- 
-        // if character lies in 'A'-'F' , converting
-        // it to integral 10 - 15 by subtracting 55
-        // from ASCII value
-        else if (hexVal[i] >= 'A' && hexVal[i] <= 'F') {
-            dec_val += (int(hexVal[i]) - 55) * base;
- 
-            // incrementing base by power
-            base = base * 16;
-        }
-    }
-    return dec_val;
 }

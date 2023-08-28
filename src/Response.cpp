@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/22 13:35:28 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/25 16:29:31 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,7 @@ void	Response::setResponseHeader(std::string code, std::string mssg)
 void	Response::setHeader()
 {
 	this->header.clear();
-	this->header += "HTTP/1.1 " + code + " " + mssg + CRLF
-					"Content-Type: " + content_type + "; charset=utf-8" CRLF;
+	this->header += "HTTP/1.1 " + code + " " + mssg + CRLF;
 }
 
 std::string	Response::getResponse()
@@ -64,16 +63,25 @@ std::string	Response::getResponse()
 void	Response::setBody(std::string path)
 {
 	std::string body;
+	std::string type;
+	size_t pos;
 
 	if (is_dir(path.c_str()))
 		body = dirList(path);
 	else
 		body = ft::file_to_string(path);
 
+	if ((pos = path.find_last_of('.')) != std::string::npos)
+	{
+		type = path.substr(pos + 1, path.length() - pos);
+	    std::cout << "===>" << path << "          =======> "<< type <<std::endl;
+		this->content_type = "text/" + type;
+	}
 	this->res_body.clear();
 	this->res_body = body;
 	this->content_len = res_body.length();
-	this->header += "Content-Length: " + ft::to_string(this->content_len) + CRLF
+	this->header += "Content-Type: " + content_type + "; charset=utf-8" CRLF
+					"Content-Length: " + ft::to_string(this->content_len) + CRLF
 					CRLF;
 }
 
