@@ -49,8 +49,41 @@ bool    Request::isWhiteSpace(std::string str1)
     return (true);
 }
 
+void	Request::parseChunkedBody()
+{
+		std::string	req = _buffCopy;
+		std::string::size_type pos2 = 0;
+		std::string	sub_string;
+		if ((pos2 = req.find("\r\n\r\n")) != std::string::npos)
+			sub_string = req.substr(pos2 + 4, req.length() - pos2 - 8);
+
+    	std::string::size_type pos1 = 0;
+		while ((pos1 = sub_string.find("\r\n", pos1)) != std::string::npos)
+		{
+			sub_string.replace(pos1, 2, "\n");
+			pos1 += 1;
+		}
+		std::stringstream res(sub_string);
+		std::string line;
+		std::string body;
+
+		while (getline(res, line, '\n'))
+		{
+			if (line[0] == '0' && line.length() == 1)
+				break ;
+			getline(res, line, '\n');
+			body += line;
+		}
+		_postBody = body;
+		std::cout << "===========================================================================" << std::endl;
+		std::cout << "{" << body << "}" << std::endl;
+		std::cout << "===========================================================================" << std::endl;
+}
+
 void	Request::parsePostBody()
 {
+	if (this->_type != POST)
+		return ;
     std::string::size_type pos = 0;
 	std::string	req = _buffCopy;
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["content-length:"].empty() == false && _postFlag == false)
@@ -69,6 +102,8 @@ void	Request::parsePostBody()
 		std::cout << "===========================================================================" << std::endl;
 		_postFlag = true;
 	}
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Transfer-Encoding:"] == "chunked")
+    	parseChunkedBody();
 }
 
 void	Request::parseHexReqUrl()
@@ -91,7 +126,7 @@ void	Request::parseHexReqUrl()
 void	Request::parseQueryUrl()
 {
 	unsigned int pos = 0;
-		bool	flag = false;
+	bool	flag = false;
 	pos = this->_reqUrl.find_first_of('?');
 	if (!pos)
 		return;
@@ -118,8 +153,22 @@ void	Request::parseQueryUrl()
 		if (flag)
 			continue;
 		_queryMap[key] = value;
-		// std::cout << key << "{" << _queryMap[key] << "}\n";
 	}	
+}
+
+void	Request::headerValidation()
+{
+	std::map<std::string, std::string>::iterator it;
+	for (it = this->_request.begin(); it != _request.end(); ++it)
+	{
+		std::map<std::string, std::string>::iterator it1;
+		std::map<std::string, std::string>::iterator it2 = it;
+		for (it1 = ++it2; it1 != _request.end(); ++it1)
+		{
+			if (it->first == it1->first)
+				std::cout << "duplicates" << std::endl;
+		}
+	}
 }
 
 void    Request::parseRequest()
@@ -144,11 +193,6 @@ void    Request::parseRequest()
     {
         if ((str1.empty() || isWhiteSpace(str1)) && _type == GET)
             continue;
-		// if (_type == POST)
-		// {
-		// 	parsePostBody();
-		// 	return ;
-		// }
         std::stringstream   line(str1);
         getline(line, key, ' ');
         getline(line, value);
@@ -174,6 +218,8 @@ void    Request::parseRequest()
 			this->_host = value;
         // std::cout << key << "{" << _request[key] << "}\n";
     }
+	parsePostBody();
+	headerValidation();
 }
 
 std::map<std::string, std::string>	Request::parseUnderScore()

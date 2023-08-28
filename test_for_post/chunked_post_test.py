@@ -5,9 +5,9 @@ server_host = "localhost"
 server_port = 8080
 
 # Sample data to send in chunks
-data = b"This is chunk 1\r\n" \
-       b"This is chunk 2\r\n" \
-       b"This is chunk 3\r\n" \
+data = b"This is fdhghfdghfdhfdhfdhfdhfchunk 1\r\n" \
+       b"This is dghfdhfghfdghfdghdfghdfhfghchunk 2\r\n" \
+       b"This is dfjdfjdfjfdjfdhjfdjfdjfdjfdjdfhjchunk 3\r\n" \
        b""
 
 # Create a connection to the server

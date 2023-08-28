@@ -46,8 +46,10 @@ class Request
         void    parseRequest();
         bool    isWhiteSpace(std::string    str1);
 		void	parsePostBody();
+		void	parseChunkedBody();
 		void	parseHexReqUrl();
 		void	parseQueryUrl();
+		void	headerValidation();
 		std::map<std::string, std::string> modifyEnv(std::map<std::string, std::string> env);
 
 		std::map<std::string, std::string> getRequest() const;

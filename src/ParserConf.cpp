@@ -39,7 +39,7 @@ void ParserConf::removeComment(ft::string& str)
 
 ParserConf::ParserConf(ft::string& input)
 {
-	std::fstream file(input, std::fstream::in);
+	std::ifstream file(input.c_str());
 	if (file.fail())
 		throw std::runtime_error("Error with config file");
 	std::stringstream textStream;

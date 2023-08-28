@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/26 12:39:27 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/26 15:52:52 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,6 @@ void ServerManager::run(char **envp)
 		}
 
 		// loop on the clients
-		// why NEW
 		for (std::vector<struct pollfd>::iterator
 			it = sockets.begin() + servers.size();
 			it != sockets.end();
