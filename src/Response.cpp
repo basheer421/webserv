@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/25 16:29:31 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/28 15:51:36 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,8 @@ void	Response::setCgiBody(std::string body)
 	this->res_body.clear();
 	this->res_body = body;
 	this->content_len = res_body.length();
-	this->header += "Content-Length: " + ft::to_string(this->content_len) + CRLF
+	this->header += "Content-Type: " + content_type + "; charset=utf-8" CRLF
+					"Content-Length: " + ft::to_string(this->content_len) + CRLF
 					CRLF;
 }
 
