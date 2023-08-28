@@ -45,6 +45,7 @@ char **Cgi::GetCharEnv(){
     // }
     return (charenv);
 }
+// add all the headers to the response
 
 void Cgi::HandleCgi(Response &res, Request &req)
 {
@@ -62,9 +63,7 @@ void Cgi::RunCgi(Response &res, Request &req){
     FILE *child_output = tmpfile();
 
     if (parent_input == NULL || child_output == NULL)
-    {
         throw std::runtime_error("500");
-    }
 
     int parent_in_fd = fileno(parent_input);
     int child_out_fd = fileno(child_output);
@@ -75,21 +74,16 @@ void Cgi::RunCgi(Response &res, Request &req){
     if (req.getReqType() == POST)
     {
        if (fputs(req.getPostBody().c_str(), parent_input) == EOF)
-       {
             throw std::runtime_error("500");
-       }
         fseek(parent_input, 0, SEEK_SET);
     }
 
     pid_t pid;
-    (void) res;
     // create child process
 
     pid = fork();
     if (pid == -1)
-    {
         throw std::runtime_error("500");
-    }
 	// set file descriptors for child process
 	// if execve fails then free and exit child process and return error.
 
@@ -123,21 +117,25 @@ void Cgi::RunCgi(Response &res, Request &req){
 		std::string body;
 
 		memset(read_buffer, 0, 101);
-		fseek(child_output, 0, SEEK_SET);
+		if (fseek(child_output, 0, SEEK_SET) != 0)
+            throw std::runtime_error("500");
 		while (feof(child_output) == false)
 		{
 			fread(read_buffer, 100, 1, child_output);
 			body += read_buffer;
 			memset(read_buffer, 0, 101);
 		}
-		std::cerr << "---------TEST-------- "<<std::endl;
+		std::cerr << "---------CGI RESPONSE BODY-------- "<<std::endl;
 		std::cerr << body << std::endl;
+
+        res.setResponseHeader("200", "OK");
+        res.setCgiBody(body);
 	}
 	fclose(parent_input);
 	fclose(child_output);
 	close(child_out_fd);
 	close(parent_in_fd);
 
-    std::cerr << "----LEAVING CGI----" << std::endl;
     // set response object.
+    std::cerr << "----LEAVING CGI----" << std::endl;
 }
