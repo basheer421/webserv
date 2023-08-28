@@ -208,6 +208,19 @@ bool Request::isUrlCgi() const
 	return _isUrlCgi;
 }
 
+std::string Request::getCgiUrl() const{
+
+    std::string path = this->getReqUrl();
+    std::string ret;
+
+    if (path.find_first_of('?') != std::string::npos)
+    {
+        ret = path.substr(0, path.find_first_of('?'));
+        return (ret);
+    }
+    return(path);
+}
+
 std::string	Request::strToUpper(std::string str)
 {
     for(size_t i = 0; i < str.length(); i++) {

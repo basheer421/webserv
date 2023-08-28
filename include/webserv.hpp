@@ -34,6 +34,7 @@
 #include "Request.hpp"
 #include "ServerManager.hpp"
 #include "Response.hpp"
+#include "Cgi.hpp"
 
 # define DEFAULT_PORT 8080
 # define CRLF "\r\n"

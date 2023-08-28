@@ -12,8 +12,9 @@
 
 #pragma once
 
-#include "webserv.hpp"
+#include "webserv.hpp" 
 
+class Cgi;
 class Server;
 class Request;
 class Response;
@@ -25,7 +26,6 @@ private:
 	std::map<std::string, std::string> envMap;
 	std::map<int, string> requestBuilder;
 
-
 public:
 	ServerManager(const std::vector<ServerTraits>& cnf);
 	ServerManager(const ServerManager& src);
@@ -35,10 +35,10 @@ public:
 	void ProcessResponse(Request& request, Response& res);
 	Response ManageRequest(const string&buffer);
 
-	void run(char **envp); // Throws
-    // void handleCgi(Response &res, Request &req);
+	void run(char **envp); // Throws 
+    // void handleCgi(Response &res, Request &req); 
 
-	void	parseEnv(char **rawEnv);
-	std::map<std::string, std::string> getEnv() const;
-	std::string	strToUpper(std::string str);
+	void	parseEnv(char **rawEnv); 
+	std::map<std::string, std::string> getEnv() const; 
+	std::string	strToUpper(std::string str); 
 };
