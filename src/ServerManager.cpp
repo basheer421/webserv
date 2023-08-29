@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/26 13:56:54 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/29 23:27:00 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,51 +57,110 @@ ServerManager& ServerManager::operator = (const ServerManager& src)
 
 ServerManager::~ServerManager() {}
 
-/**
- * Only handles GET requests for now
-*/
 void ServerManager::ProcessResponse(Request& request, Response& res)
 {
+	in_port_t req_port;
+	in_addr_t req_address;
+
 	this->envMap = request.modifyEnv(this->envMap);
 	std::map<std::string, std::string>  reqMap = request.getRequest();
 	ft::string url(  request.getReqUrl() );
-	
-	// will be like "localhost:8080"
-
-	in_port_t req_port;
-	in_addr_t req_address;
 	string host = request.getHost();
 
 	// Throws
 	setAddress(host, req_address, req_port);
-	std::cout << "------------host: " << htonl(req_address) << "------" << htons(req_port) << "-----\n";
-
 
 	std::vector<Server>::iterator server_it = findServer(servers.begin(), servers.end(), req_address, req_port);
 	if (server_it == servers.end())
-		throw std::runtime_error("Error: Wrong host was found in the request");
+		throw std::runtime_error("400");
 	const ServerTraits& conf = (*server_it).getConf();
+	ft::string path = conf.root + url;
 
+	/**
+	 * Checking if the url has the request method allowed
+	 * If not "405 Method Not Allowed" is throwed.
+	 * Searching for the given url inside limit_except for this path, if it's found then throw 405.
+	*/
+	std::map<ft::string, ServerRoute>::const_iterator route_it;
+	route_it = conf.routes.find(url);
+	if (route_it != conf.routes.end())
+	{
+		const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
+		if (std::find(foundDir.second.limit_except.begin(), foundDir.second.limit_except.end(), url) != foundDir.second.limit_except.end())
+			throw std::runtime_error("405");
+	}
 
+	/**
+	 * If the conf contains an index
+	 */
+	if (!conf.index.empty())
+	{
+		if (is_file(path.c_str()))
+		{
+			try {
+				res.setBody(path);
+				res.setResponseHeader("200", "OK");
+			} catch (std::exception& e) {
 
+				// This means that the body was not found so we throw 404
+				throw (std::runtime_error("404"));
+			}
+		}
+		else
+		{
+			// Didn't find the dir
+			if (route_it == conf.routes.end())
+				throw std::runtime_error("404");
 
+			// Found the dir
+			const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
+			if (foundDir.second.autoindex == true)
+			{
+				res.setBody(path, true);
+				res.setResponseHeader("200", "OK");
+				return ;
+			} else {
+				// try responding the index from index
+				// for (size_t i = 0; i < conf.index.size(); ++i)
+				// {
+				// 	if (is_file(conf.root + "/" + conf.index[i]))
+				// 	{
+				// 		res.setBody(conf.root + "/" + conf.index[i]);
+				// 		break ;
+				// 	}
+				// }
+			}
+			
+		}
+	}
+	// Doesn't have index
+	else
+	{
+		if (is_dir(path))
+			throw (std::runtime_error("404"));
+		if (is_file(path))
+		{
+			try {
+				res.setBody(path);
+				res.setResponseHeader("200", "OK");
+			} catch (std::exception& e) {
 
-
-
-
-
+				// This means that the body was not found so we throw 404
+				throw (std::runtime_error("404"));
+			}
+		}
+	}
 	// if (request.isUrlCgi() == true)
 	// 	handleCgi(res, request);
 	// else
 	// {
-		res.setResponseHeader("200", "OK");
-		ft::string path = conf.root + url;
-		res.setBody(path);
+		// res.setResponseHeader("200", "OK");
+		
+		// res.setBody(path);
 		std::cout << "sending =============================>  {" << path << "}\n";
 	// }	
 	
 }
-
 
 Response ServerManager::ManageRequest(const string& buffer)
 {
@@ -113,17 +172,33 @@ Response ServerManager::ManageRequest(const string& buffer)
 		request.parseRequest();
 		ProcessResponse(request, response); // server can be known from the request
 	}
-	catch(const std::exception& e)
+	catch(std::exception& e)
 	{
-		if (e.what())
+		int n = ft::from_string<int>(string(e.what()));
+		/**
+		 * More cases for the error codes can be added later on.
+		 */
+		switch (n)
 		{
-			response.setResponseHeader("404", "Not Found");		
-			response.setBody("error_pages/404.html");
+			case 400:
+				response.setResponseHeader("400", "Bad Request");
+				response.setBody("error_pages/400.html");
+				break;
+			case 403:
+				response.setResponseHeader("403", "Forbidden");
+				response.setBody("error_pages/403.html");
+				break;
+			case 404:
+				response.setResponseHeader("404", "Not Found");
+				response.setBody("error_pages/404.html");
+				break;
+			case 405:
+				response.setResponseHeader("405", "Method Not Allowed");
+				response.setBody("error_pages/405.html");
+				break;
+			default:
+				break;
 		}
-		// else if (e.what() == "403")
-		// {
-			
-		// }
 	}
 	
 	return (response);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/22 13:35:28 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/29 21:13:45 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,15 +61,15 @@ std::string	Response::getResponse()
 }	
 
 // check for file access.
-void	Response::setBody(std::string path)
+void	Response::setBody(const std::string& path, bool autoindex)
 {
 	std::string body;
 
-	if (is_dir(path.c_str()))
+	if (is_dir(path.c_str()) && autoindex)
 		body = dirList(path);
-	else
+	else if (!is_dir(path.c_str()))
 		body = ft::file_to_string(path);
-
+	std::cout << "body: \n" << body << "\n\n";
 	this->res_body.clear();
 	this->res_body = body;
 	this->content_len = res_body.length();
@@ -106,11 +106,20 @@ Response::~Response()
 {
 }
 
-int	Response::is_dir(const char *path)
+int	is_dir(const string path)
 {
 	struct stat	statbuf;
 
-	if (stat(path, &statbuf) != 0)
+	if (stat(path.c_str(), &statbuf) != 0)
 		return (0);
 	return (S_ISDIR(statbuf.st_mode));
+}
+
+int is_file(const string path)
+{
+	struct stat	statbuf;
+
+	if (stat(path.c_str(), &statbuf) != 0)
+		return (0);
+	return (S_ISREG(statbuf.st_mode));
 }

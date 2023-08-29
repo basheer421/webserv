@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:04:34 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/29 19:10:33 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <exception>
+#include <algorithm>
 #include <poll.h>
 #include <sys/stat.h>
 #include "ft_string.hpp"
