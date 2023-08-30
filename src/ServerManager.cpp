@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/31 01:05:00 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/31 02:12:54 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 {
 	this->envMap = request.modifyEnv(this->envMap);
 	std::map<std::string, std::string>  reqMap = request.getRequest();
-	ft::string url(  request.getReqUrl() );
-	
-	// will be like "localhost:8080"
+	const ft::string& url = request.getReqUrl();
 
 	in_port_t req_port;
 	in_addr_t req_address;
@@ -83,7 +81,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	/**
 	 * Checking if the url has the request method allowed
 	 * If not "405 Method Not Allowed" is throwed.
-	 * Searching for the given url inside limit_except for this path, if it's found then throw 405.
+	 * Searching for the given url inside limit_except for this path,
+	 * 	if it's found then throw 405.
 	*/
 	std::map<ft::string, ServerRoute>::const_iterator route_it;
 	route_it = conf.routes.find(url);
@@ -111,22 +110,18 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			throw std::runtime_error("405");
 	}
 
-	if (is_file(path.c_str()))
+	if (is_file(path))
 	{
-		try {
-			res.setResponseHeader("200", "OK");
-			res.setBody(path);
-			std::cout << res.getResponse() << "\n";
-			return ;
-		} catch (std::exception& e) {
-
-			// This means that the body was not found so we throw 404
-			throw (std::runtime_error("404"));
-		}
+		res.setResponseHeader("200", "OK");
+		res.setBody(path);
+		std::cout << res.getResponse() << "\n";
+		return ;
 	}
 
 	/**
 	 * If the conf contains an index
+	 * Note: This should be changed to handle multiple indexes
+	 * 	and to be by location block not server block.
 	 */
 	if (!conf.index.empty())
 	{
@@ -136,13 +131,9 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 		// Found the dir
 		const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
-		if (foundDir.second.autoindex == true)
+		if (foundDir.second.autoindex == false)
 		{
-			res.setResponseHeader("200", "OK");
-			res.setBody(path, true);
-			return ;
-		} else {
-			// try responding the index from index
+			// Responding with index
 			for (size_t i = 0; i < conf.index.size(); ++i)
 			{
 				if (is_file(conf.root + "/" + conf.index[i]))
@@ -152,9 +143,36 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 					return ;
 				}
 			}
-			throw (std::runtime_error("404"));
+		} else {
+
+			// Responding with autoindex
+			if (!is_dir(path))
+				throw (std::runtime_error("404"));
+			res.setResponseHeader("200", "OK");
+			res.setBody(path, true);
+			return ;
 		}
 	}
+	
+	/**
+	 * If the conf doesn't contain an index
+	*/
+	else
+	{
+		// Responding with autoindex if found
+		if (!is_dir(path))
+			throw (std::runtime_error("404"));
+		if (route_it == conf.routes.end())
+			throw std::runtime_error("404");
+		const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
+		if (foundDir.second.autoindex == false)
+			throw (std::runtime_error("404"));
+		res.setResponseHeader("200", "OK");
+		res.setBody(path, true);
+		return ;
+	}
+
+	// Should be already found, otherwise 500 is thrown.
 	throw (std::runtime_error("500"));	
 }
 
