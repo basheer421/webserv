@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/30 23:11:50 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/31 01:05:00 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	setAddress(host, req_address, req_port);
 	std::vector<Server>::iterator server_it = findServer(servers.begin(), servers.end(), req_address, req_port);
 	if (server_it == servers.end())
-		throw std::runtime_error("Error: Wrong host was found in the request");
+		throw std::runtime_error("400");
 	const ServerTraits& conf = (*server_it).getConf();
 	ft::string path = conf.root + url;
 
@@ -87,11 +87,27 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	*/
 	std::map<ft::string, ServerRoute>::const_iterator route_it;
 	route_it = conf.routes.find(url);
-
 	if (route_it != conf.routes.end())
 	{
+		string reqType;
+		switch (request.getReqType())
+		{
+			case GET:
+				reqType = "GET";
+				break;
+			case POST:
+				reqType = "POST";
+				break;
+			case DELETE:
+				reqType = "DELETE";
+				break;
+			default:
+				reqType = "GET";
+				break;
+		}
 		const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
-		if (std::find(foundDir.second.limit_except.begin(), foundDir.second.limit_except.end(), url) != foundDir.second.limit_except.end())
+		if (std::count(foundDir.second.limit_except.begin(),
+				foundDir.second.limit_except.end(), reqType) == 0)
 			throw std::runtime_error("405");
 	}
 
@@ -133,7 +149,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 				{
 					res.setResponseHeader("200", "OK");
 					res.setBody(conf.root + "/" + conf.index[i]);
-					break ;
+					return ;
 				}
 			}
 			throw (std::runtime_error("404"));
@@ -155,7 +171,12 @@ Response ServerManager::ManageRequest(const string& buffer)
 	catch(const std::exception& e)
 	{
 		string what = e.what();
-		if (what == "404")
+		if (what == "405")
+		{
+			response.setResponseHeader("405", "Method Not Allowed");
+			response.setBody("error_pages/405.html");
+		}
+		else if (what == "404")
 		{
 			response.setResponseHeader("404", "Not Found");
 			response.setBody("error_pages/404.html");
