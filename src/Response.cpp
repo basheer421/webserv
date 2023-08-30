@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/29 21:13:45 by bammar           ###   ########.fr       */
+/*   Updated: 2023/08/30 22:54:15 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,10 @@ void	Response::setResponseHeader(std::string code, std::string mssg)
 	this->setHeader();
 }
 
-// if the response doesn't have body content-lenght is zero
+// if the response doesn't have body content-length is zero
 void	Response::setHeader()
 {
-	this->header.clear();
-	this->header += "HTTP/1.1 " + code + " " + mssg + CRLF
+	this->header = "HTTP/1.1 " + code + " " + mssg + CRLF
 					"Content-Type: " + content_type + "; charset=utf-8" CRLF;
 }
 
@@ -67,9 +66,8 @@ void	Response::setBody(const std::string& path, bool autoindex)
 
 	if (is_dir(path.c_str()) && autoindex)
 		body = dirList(path);
-	else if (!is_dir(path.c_str()))
+	else if (is_file(path.c_str()))
 		body = ft::file_to_string(path);
-	std::cout << "body: \n" << body << "\n\n";
 	this->res_body.clear();
 	this->res_body = body;
 	this->content_len = res_body.length();
