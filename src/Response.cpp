@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/28 15:51:36 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/01 11:20:21 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Response::Response()
 	this->content_len = 0;
 	this->res_body = "";
 	this->res = "";
+	parseMimes();
 }
 
 Response::Response(Response const &object)
@@ -35,6 +36,29 @@ Response &Response::operator=(Response const &rhs)
 		//
 	}
 	return (*this);
+}
+
+void	Response::parseMimes()
+{
+	std::ifstream	mimieFile("mimes.txt");
+	std::string		line;
+	
+	if (mimieFile.fail())
+	{
+		std::cout << "Error opening file" << std::endl;
+		mimieFile.close();
+	}
+	getline(mimieFile, line);
+	while (!(mimieFile.eof()))
+	{
+		std::stringstream	str(line);
+		std::string			ext, type;
+		getline(str, ext, ' ');
+		getline(str, type);
+		this->mimes[ext] = type;
+		getline(mimieFile, line);
+	}
+	mimieFile.close();
 }
 
 void	Response::setResponseHeader(std::string code, std::string mssg)
@@ -70,12 +94,14 @@ void	Response::setBody(std::string path)
 		body = dirList(path);
 	else
 		body = ft::file_to_string(path);
-
-	if ((pos = path.find_last_of('.')) != std::string::npos)
+	
+	std::map<std::string, std::string>::iterator it;
+	for (it = this->mimes.begin(); it != this->mimes.end(); ++it)
 	{
-		type = path.substr(pos + 1, path.length() - pos);
-	    std::cout << "===>" << path << "          =======> "<< type <<std::endl;
-		this->content_type = "text/" + type;
+		if((pos = path.find_last_of('.')) != std::string::npos)
+			type = path.substr(pos, path.length() - pos);
+		if (it->first == type)
+			this->content_type = it->second;			 
 	}
 	this->res_body.clear();
 	this->res_body = body;

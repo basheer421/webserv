@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 14:05:44 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/24 13:04:41 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/31 18:06:37 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "webserv.hpp"
 #include <string>
+#include <map>
 
 class Response
 {
@@ -25,6 +26,7 @@ class Response
 		int			content_len;
 		std::string	res_body;
 		std::string res;
+		std::map<std::string, std::string>	mimes;
 
 	public:
 		Response();
@@ -42,5 +44,6 @@ class Response
 		void		setClen(int len);
 		void		setResponseHeader(std::string code, std::string mssg);
 		int			is_dir(const char *path);
+		void		parseMimes();
 		std::string	getResponse();
 };
