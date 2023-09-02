@@ -12,6 +12,8 @@
 
 NAME	=	webserv
 
+CPU_USAGE = 80
+
 SRCS_FOLDER = ./src
 
 INCLUDE_FOLDERS = -I./include -I./lib/string
@@ -43,4 +45,7 @@ fclean:	clean
 
 re:	fclean all
 
-.PHONY:	all clean fclean re
+run_limited: all
+	cpulimit -l $(CPU_USAGE) ./$(NAME) -f
+
+.PHONY:	all clean fclean reb

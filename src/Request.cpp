@@ -176,7 +176,7 @@ void    Request::parseRequest()
 
     std::string::size_type pos = 0;
 	this->_buffCopy = _buff;
-	std::cout << _buff << std::endl;
+	// std::cout << _buff << std::endl;
     while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
     {
         _buff.replace(pos, 2, "\n");
