@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/03 00:04:01 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/03 01:17:45 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,6 @@ bool ServerManager::redirect(const string& url, const ServerTraits& conf,
 
 	if (!foundDir.second.return_.empty())
 	{
-		std::cout << "Redirecting to: " << foundDir.second.return_ << std::endl;
 		res.setResponseHeader("301", "Moved Permanently");
 
 		// Last header
@@ -213,9 +212,6 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 Response ServerManager::ManageRequest(const string& buffer)
 {
-	std::cout << "====================================================================================" << std::endl;
-	std::cout << buffer << std::endl;
-	std::cout << "====================================================================================" << std::endl;
 	Request  request(buffer);
 	Response response;
 
@@ -224,7 +220,7 @@ Response ServerManager::ManageRequest(const string& buffer)
 		request.parseRequest();
 		ProcessResponse(request, response); // server can be known from the request
 	}
-	catch(const std::exception& e)
+	catch(const std::runtime_error& e)
 	{
 		string what = e.what();
 		if (what == "405")
@@ -254,12 +250,21 @@ Response ServerManager::ManageRequest(const string& buffer)
 			response.setBody("error_pages/500.html");
 		}
 	}
+	catch(const std::exception& e)
+	{
+		std::cerr << "Error: " << e.what() << std::endl;
+		response.setResponseHeader("500", "Internal Server Error");
+		response.setBody("error_pages/500.html");
+	}
 	return (response);
 }
 
 void ServerManager::run(char **envp)
 {
 	this->parseEnv(envp);
+
+	signal(SIGPIPE, SIG_IGN);
+
 	while (true)
 	{
 		// All servers and clients will be inside the poll.
@@ -297,10 +302,10 @@ void ServerManager::run(char **envp)
 
 			if (pfd.revents & POLLIN)
 			{
-				char buffer[30000];
+				char buffer[BUFFER_SIZE];
 
-                std::memset(buffer, 0, 30000);
-				int read_res = recv(pfd.fd, buffer, 29999, 0);
+                std::memset(buffer, 0, BUFFER_SIZE);
+				int read_res = recv(pfd.fd, buffer, BUFFER_SIZE - 1, 0);
 				if (read_res < 0)
 				{
 					requestBuilder[pfd.fd].clear();

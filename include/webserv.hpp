@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/03 00:10:02 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/03 01:07:06 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,3 +42,4 @@
 # define DEFAULT_PORT 8080
 # define CRLF "\r\n"
 # define FD_COUNT 255
+# define BUFFER_SIZE 1024

@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/03 00:02:59 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/03 00:47:01 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,6 @@ void	Response::setCgiBody(std::string body)
 					CRLF;
 }
 
-
 void	Response::setCode(std::string str)
 {
 	this->code = str;
@@ -123,6 +122,7 @@ std::string	Response::getHeader()
 	return (this->header);
 }
 
+// ِAppends a string to the header including CRLF
 void Response::appendHeader(const std::string& str)
 {
 	this->header += str + CRLF;
