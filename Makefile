@@ -16,13 +16,15 @@ SRCS_FOLDER = ./src
 
 INCLUDE_FOLDERS = -I./include -I./lib/string
 
-FILES_NAMES = main.cpp ParserConf.cpp Server.cpp ServerManager.cpp Request.cpp Pages.cpp Response.cpp
+FILES_NAMES = main.cpp ParserConf.cpp ServerTraits.cpp Server.cpp \
+	ServerManager.cpp \
+	Request.cpp Pages.cpp Response.cpp
 
 FILES = lib/string/ft_string.cpp $(addprefix $(SRCS_FOLDER)/,$(FILES_NAMES)) 
 
 CXX		=	c++
 
-CXXFLAGS =	-Wall -Wextra -Werror -std=c++98
+CXXFLAGS =	-Wall -Wextra -Werror -std=c++98 -g
 
 OBJS	=	$(FILES:.cpp=.o)
 

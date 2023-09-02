@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/31 00:42:17 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/02 13:19:54 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Response::Response()
 	this->content_len = 0;
 	this->res_body = "";
 	this->res = "";
+	setResponseHeader(this->code, this->mssg);
 }
 
 Response::Response(Response const &object)
@@ -100,6 +101,11 @@ void	Response::setClen(int len)
 std::string	Response::getHeader()
 {
 	return (this->header);
+}
+
+void Response::appendHeader(const std::string& str)
+{
+	this->header += str + CRLF;
 }
 
 Response::~Response()

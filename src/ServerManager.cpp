@@ -6,24 +6,11 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/31 02:12:54 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/02 13:44:32 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerManager.hpp"
-
-static std::vector<Server>::iterator findServer(std::vector<Server>::iterator start, std::vector<Server>::iterator end, in_addr_t address, in_port_t port)
-{
-	std::vector<Server>::iterator it;
-
-	for (it = start; it != end; ++it)
-	{
-		if ((((*it).getConf().listen_address == address) || ((*it).getConf().listen_address == htonl(INADDR_ANY)))
-			&& (*it).getConf().listen_port == port)
-			return (it);
-	}
-	return (it);
-}
 
 ServerManager::ServerManager(const std::vector<ServerTraits>& cnf)
 {
@@ -37,7 +24,6 @@ ServerManager::ServerManager(const std::vector<ServerTraits>& cnf)
 			0
 		});
 	}
-	
 }
 
 ServerManager::ServerManager(const ServerManager& src)
@@ -57,6 +43,77 @@ ServerManager& ServerManager::operator = (const ServerManager& src)
 
 ServerManager::~ServerManager() {}
 
+
+static std::vector<Server>::iterator findServer(std::vector<Server>::iterator start, std::vector<Server>::iterator end, in_addr_t address, in_port_t port)
+{
+	std::vector<Server>::iterator it;
+
+	for (it = start; it != end; ++it)
+	{
+		if ((((*it).getConf().listen_address == address)
+			|| ((*it).getConf().listen_address == htonl(INADDR_ANY)))
+			&& (*it).getConf().listen_port == port)
+			return (it);
+	}
+	return (it);
+}
+
+static void throwIfnotAllowed(const string& url, const ServerTraits& conf,
+	const Request& request)
+{
+	std::map<ft::string, ServerRoute>::const_iterator route_it;
+	route_it = conf.routes.find(url);
+	if (route_it == conf.routes.end())
+		return ;
+	const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
+	string reqType;
+	switch (request.getReqType())
+	{
+		case GET:
+			reqType = "GET";
+			break;
+		case POST:
+			reqType = "POST";
+			break;
+		case DELETE:
+			reqType = "DELETE";
+			break;
+		default:
+			reqType = "GET";
+			break;
+	}
+
+	// Checking if the request type is allowed
+	if (std::count(foundDir.second.limit_except.begin(),
+			foundDir.second.limit_except.end(), reqType) == 0)
+		throw std::runtime_error("405");
+}
+
+/**
+ * This should be changed in the future to handle multiple redirects.
+ * like 301 and 302.
+*/
+bool ServerManager::redirect(const string& url, const ServerTraits& conf,
+	Response& res)
+{
+	std::map<ft::string, ServerRoute>::const_iterator route_it;
+	route_it = conf.routes.find(url);
+	if (route_it == conf.routes.end())
+		return false;
+	const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
+
+	if (!foundDir.second.return_.empty())
+	{
+		std::cout << "Redirecting to: " << foundDir.second.return_ << std::endl;
+		res.setResponseHeader("301", "Moved Permanently");
+
+		// Last header
+		res.appendHeader("Location: " + foundDir.second.return_ + CRLF);
+		return true;
+	}
+	return false;
+}
+
 /**
  * Only handles GET requests for now
 */
@@ -70,67 +127,54 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	in_addr_t req_address;
 	string host = request.getHost();
 
-	// Throws
-	setAddress(host, req_address, req_port);
-	std::vector<Server>::iterator server_it = findServer(servers.begin(), servers.end(), req_address, req_port);
-	if (server_it == servers.end())
+	if (host.empty())
 		throw std::runtime_error("400");
-	const ServerTraits& conf = (*server_it).getConf();
+
+	// Throws 500
+	setAddress(host, req_address, req_port);
+
+	
+	std::vector<Server>::iterator serv_it = findServer(
+		servers.begin(), servers.end(), req_address, req_port);
+	if (serv_it == servers.end())
+		throw std::runtime_error("400");
+
+	// Getting the server
+	const ServerTraits& conf = (*serv_it).getConf();
+
 	ft::string path = conf.root + url;
 
-	/**
-	 * Checking if the url has the request method allowed
-	 * If not "405 Method Not Allowed" is throwed.
-	 * Searching for the given url inside limit_except for this path,
-	 * 	if it's found then throw 405.
-	*/
-	std::map<ft::string, ServerRoute>::const_iterator route_it;
-	route_it = conf.routes.find(url);
-	if (route_it != conf.routes.end())
-	{
-		string reqType;
-		switch (request.getReqType())
-		{
-			case GET:
-				reqType = "GET";
-				break;
-			case POST:
-				reqType = "POST";
-				break;
-			case DELETE:
-				reqType = "DELETE";
-				break;
-			default:
-				reqType = "GET";
-				break;
-		}
-		const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
-		if (std::count(foundDir.second.limit_except.begin(),
-				foundDir.second.limit_except.end(), reqType) == 0)
-			throw std::runtime_error("405");
-	}
+	// Checking if the url has the request method allowed
+	throwIfnotAllowed(url, conf, request);
+
+	// Checking if there's a redirect
+	if (redirect(url, conf, res))
+		return ;
 
 	if (is_file(path))
 	{
-		res.setResponseHeader("200", "OK");
 		res.setBody(path);
-		std::cout << res.getResponse() << "\n";
 		return ;
 	}
 
+	std::map<ft::string, ServerRoute>::const_iterator route_it(
+		conf.routes.find(url)
+	);
+
+	// Didn't find the dir
+	if (route_it == conf.routes.end())
+		throw std::runtime_error("404");
+	const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
+
 	/**
+	 * By now we know that the url is a directory.
+	 * 
 	 * If the conf contains an index
 	 * Note: This should be changed to handle multiple indexes
 	 * 	and to be by location block not server block.
 	 */
 	if (!conf.index.empty())
 	{
-		// Didn't find the dir
-		if (route_it == conf.routes.end())
-			throw std::runtime_error("404");
-
-		// Found the dir
-		const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
 		if (foundDir.second.autoindex == false)
 		{
 			// Responding with index
@@ -138,7 +182,6 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			{
 				if (is_file(conf.root + "/" + conf.index[i]))
 				{
-					res.setResponseHeader("200", "OK");
 					res.setBody(conf.root + "/" + conf.index[i]);
 					return ;
 				}
@@ -148,30 +191,22 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			// Responding with autoindex
 			if (!is_dir(path))
 				throw (std::runtime_error("404"));
-			res.setResponseHeader("200", "OK");
 			res.setBody(path, true);
 			return ;
 		}
 	}
-	
+
 	/**
 	 * If the conf doesn't contain an index
 	*/
 	else
 	{
 		// Responding with autoindex if found
-		if (!is_dir(path))
+		if (!is_dir(path) || foundDir.second.autoindex == false)
 			throw (std::runtime_error("404"));
-		if (route_it == conf.routes.end())
-			throw std::runtime_error("404");
-		const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
-		if (foundDir.second.autoindex == false)
-			throw (std::runtime_error("404"));
-		res.setResponseHeader("200", "OK");
 		res.setBody(path, true);
 		return ;
 	}
-
 	// Should be already found, otherwise 500 is thrown.
 	throw (std::runtime_error("500"));	
 }
@@ -211,11 +246,11 @@ Response ServerManager::ManageRequest(const string& buffer)
 		}
 		else
 		{
+			std::cerr << "Error: " << e.what() << std::endl;
 			response.setResponseHeader("500", "Internal Server Error");
 			response.setBody("error_pages/500.html");
 		}
 	}
-	
 	return (response);
 }
 
@@ -277,7 +312,8 @@ void ServerManager::run(char **envp)
 					if (pfd.revents & POLLOUT)
 					{
 						Response res = ManageRequest(requestBuilder[pfd.fd]);
-						send(pfd.fd, res.getResponse().c_str(), res.getResponse().length(), 0);
+						send(pfd.fd, res.getResponse().c_str(),
+							res.getResponse().length(), 0);
 						requestBuilder[pfd.fd].clear();
 					}
 				}

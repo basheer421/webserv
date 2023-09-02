@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 14:05:44 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/29 23:25:07 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/02 13:29:24 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Response
 		void		setClen(int len);
 		void		setResponseHeader(std::string code, std::string mssg);
 		std::string	getResponse();
+		void 		appendHeader(const std::string& str);
 };
 
 int	is_dir(const string path);
