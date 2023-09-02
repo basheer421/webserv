@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/02 13:44:32 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/03 00:04:01 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,6 +213,9 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 Response ServerManager::ManageRequest(const string& buffer)
 {
+	std::cout << "====================================================================================" << std::endl;
+	std::cout << buffer << std::endl;
+	std::cout << "====================================================================================" << std::endl;
 	Request  request(buffer);
 	Response response;
 

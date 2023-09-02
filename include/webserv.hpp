@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/29 19:10:33 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/03 00:10:02 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <exception>
 #include <algorithm>
 #include <poll.h>
@@ -35,6 +37,7 @@
 #include "Request.hpp"
 #include "ServerManager.hpp"
 #include "Response.hpp"
+#include "Cgi.hpp"
 
 # define DEFAULT_PORT 8080
 # define CRLF "\r\n"

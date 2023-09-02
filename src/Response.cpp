@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/02 13:19:54 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/03 00:02:59 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,8 +48,8 @@ void	Response::setResponseHeader(std::string code, std::string mssg)
 // if the response doesn't have body content-length is zero
 void	Response::setHeader()
 {
-	this->header = "HTTP/1.1 " + code + " " + mssg + CRLF
-					"Content-Type: " + content_type + "; charset=utf-8" CRLF;
+	this->header.clear();
+	this->header += "HTTP/1.1 " + code + " " + mssg + CRLF;
 }
 
 std::string	Response::getResponse()
@@ -64,6 +64,8 @@ std::string	Response::getResponse()
 void	Response::setBody(const std::string& path, bool autoindex)
 {
 	std::string body;
+	std::string type;
+	size_t pos;
 
 	if (is_dir(path.c_str()) && autoindex)
 		body = dirList(path);
@@ -71,12 +73,30 @@ void	Response::setBody(const std::string& path, bool autoindex)
 		body = ft::file_to_string(path);
 	else
 		throw ("404");
+
+	if ((pos = path.find_last_of('.')) != std::string::npos)
+	{
+		type = path.substr(pos + 1, path.length() - pos);
+		this->content_type = "text/" + type;
+	}
 	this->res_body.clear();
 	this->res_body = body;
 	this->content_len = res_body.length();
-	this->header += "Content-Length: " + ft::to_string(this->content_len) + CRLF
+	this->header += "Content-Type: " + content_type + "; charset=utf-8" CRLF
+					"Content-Length: " + ft::to_string(this->content_len) + CRLF
 					CRLF;
 }
+
+void	Response::setCgiBody(std::string body)
+{
+	this->res_body.clear();
+	this->res_body = body;
+	this->content_len = res_body.length();
+	this->header += "Content-Type: " + content_type + "; charset=utf-8" CRLF
+					"Content-Length: " + ft::to_string(this->content_len) + CRLF
+					CRLF;
+}
+
 
 void	Response::setCode(std::string str)
 {

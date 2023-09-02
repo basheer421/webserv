@@ -38,6 +38,7 @@ class Response
 		void		setCode(std::string str);
 		void		setMssg(std::string str);
 		void		setCtype(std::string str);
+        void        setCgiBody(std::string str);
 		void		setClen(int len);
 		void		setResponseHeader(std::string code, std::string mssg);
 		std::string	getResponse();
