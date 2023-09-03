@@ -83,7 +83,9 @@ void Cgi::RunCgi(Response &res, Request &req){
 
     pid = fork();
     if (pid == -1)
+    {
         throw std::runtime_error("500");
+    }
 	// set file descriptors for child process
 	// if execve fails then free and exit child process and return error.
 
@@ -95,7 +97,8 @@ void Cgi::RunCgi(Response &res, Request &req){
 		dup2(child_out_fd, STDOUT_FILENO);
 
 		std::cerr << this->scriptpath <<std::endl;
-		execve(this->scriptpath.c_str(), NULL, env);
+        char *const *argv = NULL;
+		execve(this->scriptpath.c_str(), argv, env);
 		std::cout << "---------FAILED--------" << std::endl;
 
 		for (int i = 0; env[i] != NULL; i++)
