@@ -14,6 +14,7 @@
 
 #include "webserv.hpp"
 #include <string>
+#include <map>
 
 class Response
 {
@@ -25,6 +26,7 @@ class Response
 		int			content_len;
 		std::string	res_body;
 		std::string res;
+		std::map<std::string, std::string>	mimes;
 
 	public:
 		Response();
@@ -41,6 +43,7 @@ class Response
         void        setCgiBody(std::string str);
 		void		setClen(int len);
 		void		setResponseHeader(std::string code, std::string mssg);
+		void		parseMimes();
 		std::string	getResponse();
 		void 		appendHeader(const std::string& str);
 };

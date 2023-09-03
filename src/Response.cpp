@@ -22,6 +22,7 @@ Response::Response()
 	this->res_body = "";
 	this->res = "";
 	setResponseHeader(this->code, this->mssg);
+	parseMimes();
 }
 
 Response::Response(Response const &object)
@@ -36,6 +37,29 @@ Response &Response::operator=(Response const &rhs)
 		//
 	}
 	return (*this);
+}
+
+void	Response::parseMimes()
+{
+	std::ifstream	mimieFile("mimes.txt");
+	std::string		line;
+	
+	if (mimieFile.fail())
+	{
+		std::cout << "Error opening file" << std::endl;
+		mimieFile.close();
+	}
+	getline(mimieFile, line);
+	while (!(mimieFile.eof()))
+	{
+		std::stringstream	str(line);
+		std::string			ext, type;
+		getline(str, ext, ' ');
+		getline(str, type);
+		this->mimes[ext] = type;
+		getline(mimieFile, line);
+	}
+	mimieFile.close();
 }
 
 void	Response::setResponseHeader(std::string code, std::string mssg)
@@ -73,11 +97,14 @@ void	Response::setBody(const std::string& path, bool autoindex)
 		body = ft::file_to_string(path);
 	else
 		throw ("404");
-
-	if ((pos = path.find_last_of('.')) != std::string::npos)
+	
+	std::map<std::string, std::string>::iterator it;
+	for (it = this->mimes.begin(); it != this->mimes.end(); ++it)
 	{
-		type = path.substr(pos + 1, path.length() - pos);
-		this->content_type = "text/" + type;
+		if((pos = path.find_last_of('.')) != std::string::npos)
+			type = path.substr(pos, path.length() - pos);
+		if (it->first == type)
+			this->content_type = it->second;			 
 	}
 	this->res_body.clear();
 	this->res_body = body;

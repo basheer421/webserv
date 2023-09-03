@@ -71,8 +71,16 @@ void	Request::parseChunkedBody()
 		{
 			if (line[0] == '0' && line.length() == 1)
 				break ;
-			getline(res, line, '\n');
-			body += line;
+			std::string::size_type posN = line.find('\n');
+			string	num = line.substr(0, posN);
+			size_t body_len = ft::from_string<int>(num);
+			std::string appendBody;
+			while (appendBody.length() < body_len)
+			{
+				getline(res, line, '\n');
+				appendBody += line;
+			}
+			body += appendBody;
 		}
 		_postBody = body;
 		std::cout << "===========================================================================" << std::endl;
@@ -132,6 +140,7 @@ void	Request::parseQueryUrl()
 		return;
 	std::string str;
 	str = this->_reqUrl.substr(pos + 1, (this->_reqUrl.length() - pos));
+	this->_reqUrl = this->_reqUrl.substr(0, pos);
 
     std::stringstream str1(str);
     std::string       pair;
@@ -158,16 +167,22 @@ void	Request::parseQueryUrl()
 
 void	Request::headerValidation()
 {
-	std::map<std::string, std::string>::iterator it;
-	for (it = this->_request.begin(); it != _request.end(); ++it)
+	if (_type == DEFAULT)
+		throw std::runtime_error("400");
+	if (_type == POST)
 	{
-		std::map<std::string, std::string>::iterator it1;
-		std::map<std::string, std::string>::iterator it2 = it;
-		for (it1 = ++it2; it1 != _request.end(); ++it1)
+		std::map<std::string, std::string>::iterator it;
+		bool	flagClen = false;
+		bool	flagEnc = false;
+		for (it = this->_request.begin(); it != _request.end(); ++it)
 		{
-			if (it->first == it1->first)
-				std::cout << "duplicates" << std::endl;
+			if (it->first == "content-length:")
+				flagClen = true;
+			if (it->first == "Transfer-Encoding:")
+				flagEnc = true;
 		}
+		if (flagClen == flagEnc)
+			throw std::runtime_error("400");
 	}
 }
 
@@ -176,31 +191,29 @@ void    Request::parseRequest()
 
     std::string::size_type pos = 0;
 	this->_buffCopy = _buff;
-	// std::cout << _buff << std::endl;
     while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
     {
         _buff.replace(pos, 2, "\n");
         pos += 1;
     }
-    std::stringstream str(_buff);
+	std::stringstream str(_buff);
     std::string       str1;
     std::string       key;
     std::string       value;
     bool              first = true;
 
-
     while (getline(str, str1, '\n'))
     {
-        if ((str1.empty() || isWhiteSpace(str1)) && _type == GET)
-            continue;
-        std::stringstream   line(str1);
-        getline(line, key, ' ');
-        getline(line, value);
+		if ((str1.empty() || isWhiteSpace(str1)) && _type == GET)
+			continue;
+		std::stringstream   line(str1);
+		getline(line, key, ' ');
+		getline(line, value);
 		this->_request[key] = value;
         if (first)
-        {
-            std::stringstream   url(value);
-            getline(url, _reqUrl, ' ');
+		{
+			std::stringstream   url(value);
+			getline(url, _reqUrl, ' ');
 			parseHexReqUrl();
 			parseQueryUrl();
 			if (key.find("GET") != std::string::npos)
@@ -213,13 +226,12 @@ void    Request::parseRequest()
 			if (pos_idx != std::string::npos)
 				this->_isUrlCgi = true;
             first = false;
-        }
+		}
 		if (key == "Host:")
 			this->_host = value;
-        // std::cout << key << "{" << _request[key] << "}\n";
     }
-	parsePostBody();
 	headerValidation();
+	parsePostBody();
 }
 
 std::map<std::string, std::string>	Request::parseUnderScore()

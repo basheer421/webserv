@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 15:14:46 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/28 15:15:24 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/08/31 18:03:24 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,48 +174,77 @@
 // }
 
 
+// #include <iostream>
+// #include <string>
+// #include <sstream>
+// #include <vector>
+// #include <cstdlib> // For strtol
+
+// int main() {
+//     std::string httpResponse = "HTTP/1.1 200 OK\r\n"
+//                                "Transfer-Encoding: chunked\r\n"
+//                                "\r\n"
+//                                "4\r\n"
+//                                "This\r\n"
+//                                "6\r\n"
+//                                " is the\r\n"
+//                                "7\r\n"
+//                                " response\r\n"
+//                                "0\r\n"
+//                                "\r\n";
+// 	int	pos;
+// 	std::string	sub_string;
+// 	if ((pos = httpResponse.find("\r\n\r\n")) != std::string::npos)
+// 		sub_string = httpResponse.substr(pos + 4, httpResponse.length() - pos - 8);
+
+// 	int pos1;
+// 	while ((pos1 = sub_string.find("\r\n", pos1)) != std::string::npos)
+//     {
+//         sub_string.replace(pos1, 2, "\n");
+//         pos1 += 1;
+//     }
+// 	std::stringstream res(sub_string);
+// 	std::string line;
+// 	std::string body;
+
+// 	while (getline(res, line, '\n'))
+// 	{
+// 		if (line[0] == '0' && line.length() == 1)
+// 			break ;
+// 		getline(res, line, '\n');
+// 		body += line;
+// 	}
+// 	std::cout << body << std::endl;
+// }
+
 #include <iostream>
 #include <string>
+#include <map>
 #include <sstream>
-#include <vector>
-#include <cstdlib> // For strtol
+#include <fstream>
 
-int main() {
-    std::string httpResponse = "HTTP/1.1 200 OK\r\n"
-                               "Transfer-Encoding: chunked\r\n"
-                               "\r\n"
-                               "4\r\n"
-                               "This\r\n"
-                               "6\r\n"
-                               " is the\r\n"
-                               "7\r\n"
-                               " response\r\n"
-                               "0\r\n"
-                               "\r\n";
-	int	pos;
-	std::string	sub_string;
-	if ((pos = httpResponse.find("\r\n\r\n")) != std::string::npos)
-		sub_string = httpResponse.substr(pos + 4, httpResponse.length() - pos - 8);
-
-	int pos1;
-	while ((pos1 = sub_string.find("\r\n", pos1)) != std::string::npos)
-    {
-        sub_string.replace(pos1, 2, "\n");
-        pos1 += 1;
-    }
-	std::stringstream res(sub_string);
-	std::string line;
-	std::string body;
-
-	while (getline(res, line, '\n'))
+int main()
+{
+	std::ifstream	mimieFile("mimes.txt");
+	std::string		line;
+	std::map<std::string, std::string> mimes;
+	
+	if (mimieFile.fail())
 	{
-		if (line[0] == '0' && line.length() == 1)
-			break ;
-		getline(res, line, '\n');
-		body += line;
+		std::cout << "Error opening file" << std::endl;
+		mimieFile.close();
 	}
-	std::cout << body << std::endl;
+	getline(mimieFile, line);
+	while (!(mimieFile.eof()))
+	{
+		
+		std::stringstream	str(line);
+		std::string			ext, type;
+		getline(str, ext, ' ');
+		getline(str, type);
+		mimes[ext] = type;
+		getline(mimieFile, line);
+	}
+	mimieFile.close();
+	return (0);
 }
-
-
-

@@ -31,7 +31,7 @@ int main(int argc, char **argv, char **envp)
 		ParserConf parser(file);
 		std::vector<ServerTraits> conf = parser.parseFile();
 
-		// Starting the server here
+		// Starting the server here // while loop here maybe to keep the server running 
 		ServerManager serverManager(conf);
 		serverManager.run(envp);
 
