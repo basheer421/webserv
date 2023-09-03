@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/03 01:17:45 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/03 18:26:35 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,10 +159,10 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	std::map<ft::string, ServerRoute>::const_iterator route_it(
 		conf.routes.find(url)
 	);
-
 	// Didn't find the dir
 	if (route_it == conf.routes.end())
 		throw std::runtime_error("404");
+
 	const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
 
 	/**
@@ -185,6 +185,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 					return ;
 				}
 			}
+			throw (std::runtime_error("404"));
 		} else {
 
 			// Responding with autoindex
