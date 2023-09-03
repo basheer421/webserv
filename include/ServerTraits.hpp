@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   ServerTraits.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 17:39:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:04:37 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/02 03:13:03 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <vector>
+#include <map>
 #include <ft_string.hpp>
 #include <netinet/in.h>
 
@@ -37,6 +38,8 @@ using namespace ft;
  */
 struct ServerRoute
 {
+	ServerRoute();
+
 	std::vector<string> limit_except;
 	bool autoindex;
 	std::vector<string> try_files;

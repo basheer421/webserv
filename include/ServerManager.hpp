@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:59:56 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/02 02:28:41 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ public:
 
 	void ProcessResponse(Request& request, Response& res);
 	Response ManageRequest(const string&buffer);
+	bool redirect(const string& url, const ServerTraits& conf,
+		Response& response);
 
 	void run(char **envp); // Throws 
     // void handleCgi(Response &res, Request &req); 

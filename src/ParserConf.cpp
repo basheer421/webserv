@@ -209,7 +209,7 @@ void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port)
 {
     std::vector<ft::string> vec = confAdrss.split(':');
     if (vec.size() != 1 && vec.size() != 2)
-        throw std::runtime_error("Bad Address: Invalid format");
+        throw std::runtime_error("500"); // Bad Address: Invalid format
 
     // Only port provided
     if (vec.size() == 1)
@@ -217,7 +217,7 @@ void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port)
 		address = htonl(INADDR_ANY);
         port = ft::from_string<in_port_t>(vec.at(0));
         if (port <= 0)
-            throw std::runtime_error("Bad Address: Invalid port number");
+            throw std::runtime_error("500"); // Bad Address: Invalid format
         port = htons(port);
         return;
     }

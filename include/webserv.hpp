@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:04:34 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/03 01:07:06 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <exception>
+#include <algorithm>
 #include <poll.h>
 #include <sys/stat.h>
 #include "ft_string.hpp"
@@ -39,3 +42,4 @@
 # define DEFAULT_PORT 8080
 # define CRLF "\r\n"
 # define FD_COUNT 255
+# define BUFFER_SIZE 1024
