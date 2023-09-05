@@ -114,11 +114,11 @@ void Cgi::RunCgi(Response &res, Request &req){
 	{
 		int outchild;
 		outchild = waitpid(-1, NULL, 0);
-        if (WIFEXITED(outchild) == false)
-        {
-            std::cerr << "TEST" << std::endl;
-            throw std::runtime_error("500");
-        }
+        // if (WIFEXITED(outchild) == false)
+        // {
+        //     std::cerr << "TEST" << std::endl;
+        //     throw std::runtime_error("500");
+        // }
 
 		std::cout << outchild << std::endl;
 		char read_buffer[101];

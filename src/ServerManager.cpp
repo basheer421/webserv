@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/05 16:26:52 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/05 16:46:18 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,15 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 	if (is_file(path))
 	{
-		res.setBody(path);
+		if (request.isUrlCgi())
+		{
+			Cgi cgi;
+
+			cgi.SetEnv(this->envMap);
+			cgi.HandleCgi(res, request);
+		}
+		else
+			res.setBody(path);
 		return ;
 	}
 
