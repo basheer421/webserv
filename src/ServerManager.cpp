@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/03 18:26:35 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/05 16:46:18 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,13 +113,9 @@ bool ServerManager::redirect(const string& url, const ServerTraits& conf,
 	return false;
 }
 
-/**
- * Only handles GET requests for now
-*/
 void ServerManager::ProcessResponse(Request& request, Response& res)
 {
 	this->envMap = request.modifyEnv(this->envMap);
-	std::map<std::string, std::string>  reqMap = request.getRequest();
 	const ft::string& url = request.getReqUrl();
 
 	in_port_t req_port;
@@ -152,7 +148,15 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 	if (is_file(path))
 	{
-		res.setBody(path);
+		if (request.isUrlCgi())
+		{
+			Cgi cgi;
+
+			cgi.SetEnv(this->envMap);
+			cgi.HandleCgi(res, request);
+		}
+		else
+			res.setBody(path);
 		return ;
 	}
 
@@ -174,26 +178,25 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	 */
 	if (!conf.index.empty())
 	{
-		if (foundDir.second.autoindex == false)
+		// Responding with index
+		for (size_t i = 0; i < conf.index.size(); ++i)
 		{
-			// Responding with index
-			for (size_t i = 0; i < conf.index.size(); ++i)
+			if (is_file(conf.root + "/" + conf.index[i]))
 			{
-				if (is_file(conf.root + "/" + conf.index[i]))
-				{
-					res.setBody(conf.root + "/" + conf.index[i]);
-					return ;
-				}
+				res.setBody(conf.root + "/" + conf.index[i]);
+				return ;
 			}
-			throw (std::runtime_error("404"));
-		} else {
+		}
 
-			// Responding with autoindex
+		// Responding with autoindex if found
+		if (foundDir.second.autoindex == true)
+		{
 			if (!is_dir(path))
 				throw (std::runtime_error("404"));
 			res.setBody(path, true);
 			return ;
 		}
+		throw (std::runtime_error("404"));
 	}
 
 	/**
@@ -208,7 +211,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		return ;
 	}
 	// Should be already found, otherwise 500 is thrown.
-	throw (std::runtime_error("500"));	
+	throw (std::runtime_error("500"));
 }
 
 Response ServerManager::ManageRequest(const string& buffer)
