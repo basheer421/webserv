@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/05 16:46:18 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/06 14:39:21 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			cgi.HandleCgi(res, request);
 		}
 		else
-			res.setBody(path);
+			res.setBody(path, request.getReqUrl());
 		return ;
 	}
 
@@ -164,6 +164,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		conf.routes.find(url)
 	);
 	// Didn't find the dir
+	std::cout << url << std::endl;
 	if (route_it == conf.routes.end())
 		throw std::runtime_error("404");
 
@@ -183,7 +184,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		{
 			if (is_file(conf.root + "/" + conf.index[i]))
 			{
-				res.setBody(conf.root + "/" + conf.index[i]);
+				res.setBody(conf.root + "/" + conf.index[i], request.getReqUrl());
 				return ;
 			}
 		}
@@ -193,7 +194,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		{
 			if (!is_dir(path))
 				throw (std::runtime_error("404"));
-			res.setBody(path, true);
+			res.setBody(path, request.getReqUrl(), true);
 			return ;
 		}
 		throw (std::runtime_error("404"));
@@ -207,7 +208,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		// Responding with autoindex if found
 		if (!is_dir(path) || foundDir.second.autoindex == false)
 			throw (std::runtime_error("404"));
-		res.setBody(path, true);
+		res.setBody(path, request.getReqUrl(), true);
 		return ;
 	}
 	// Should be already found, otherwise 500 is thrown.
@@ -230,35 +231,35 @@ Response ServerManager::ManageRequest(const string& buffer)
 		if (what == "405")
 		{
 			response.setResponseHeader("405", "Method Not Allowed");
-			response.setBody("error_pages/405.html");
+			response.setErrBody(getErrPage("405", "Method Not Allowed"));
 		}
 		else if (what == "404")
 		{
 			response.setResponseHeader("404", "Not Found");
-			response.setBody("error_pages/404.html");
+			response.setErrBody(getErrPage("404", "Not Found"));
 		}
 		else if (what == "403")
 		{
 			response.setResponseHeader("403", "Not Found");
-			response.setBody("error_pages/403.html");
+			response.setErrBody(getErrPage("403", "Not Found"));
 		}
 		else if (what == "400")
 		{
 			response.setResponseHeader("400", "Not Found");
-			response.setBody("error_pages/400.html");
+			response.setErrBody(getErrPage("400", "Not Found"));
 		}
 		else
 		{
 			std::cerr << "Error: " << e.what() << std::endl;
 			response.setResponseHeader("500", "Internal Server Error");
-			response.setBody("error_pages/500.html");
+			response.setErrBody(getErrPage("500", "Internal Server Error"));
 		}
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << "Error: " << e.what() << std::endl;
 		response.setResponseHeader("500", "Internal Server Error");
-		response.setBody("error_pages/500.html");
+		response.setErrBody(getErrPage("500", "Internal Server Error"));
 	}
 	return (response);
 }

@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 15:14:46 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/31 18:03:24 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/06 13:45:49 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,28 +223,63 @@
 #include <sstream>
 #include <fstream>
 
+// int main()
+// {
+// 	std::ifstream	mimieFile("mimes.txt");
+// 	std::string		line;
+// 	std::map<std::string, std::string> mimes;
+	
+// 	if (mimieFile.fail())
+// 	{
+// 		std::cout << "Error opening file" << std::endl;
+// 		mimieFile.close();
+// 	}
+// 	getline(mimieFile, line);
+// 	while (!(mimieFile.eof()))
+// 	{
+		
+// 		std::stringstream	str(line);
+// 		std::string			ext, type;
+// 		getline(str, ext, ' ');
+// 		getline(str, type);
+// 		mimes[ext] = type;
+// 		getline(mimieFile, line);
+// 	}
+// 	mimieFile.close();
+// 	return (0);
+// }
+
+const	std::string	getErrPage(std::string code, std::string mssg)
+{
+	std::string	html = "<!DOCTYPE html>"
+						"<html lang=\"en\">"
+						"<head>"
+						"	<meta charset=\"UTF-8\">"
+						"	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+						"	<title>" + code + " " + mssg + "</title>"
+						""
+						"	<style>"
+						"		h1 {"
+						"			text-align: center;"
+						"			margin-top: 40px;"
+						"			color: red;"
+						"		}"
+						"		h3 {"
+						"			text-align: center;"
+						"		}"
+						""
+						"	</style>"
+						"</head>"
+						"<body>"
+						"	<h1>" + code + " " + mssg + "</h1>"
+						"	<hr>"
+						"	<h3>webserv server</h3>"
+						"</body>"
+						"</html>";
+
+	return (html);
+}
 int main()
 {
-	std::ifstream	mimieFile("mimes.txt");
-	std::string		line;
-	std::map<std::string, std::string> mimes;
-	
-	if (mimieFile.fail())
-	{
-		std::cout << "Error opening file" << std::endl;
-		mimieFile.close();
-	}
-	getline(mimieFile, line);
-	while (!(mimieFile.eof()))
-	{
-		
-		std::stringstream	str(line);
-		std::string			ext, type;
-		getline(str, ext, ' ');
-		getline(str, type);
-		mimes[ext] = type;
-		getline(mimieFile, line);
-	}
-	mimieFile.close();
-	return (0);
+	std::cout << getErrPage("404", "Not Found") << std::endl;
 }

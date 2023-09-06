@@ -6,14 +6,14 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 15:14:46 by mkhan             #+#    #+#             */
-/*   Updated: 2023/08/16 12:34:14 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/06 14:31:37 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Pages.hpp"
 #include <dirent.h>
 
-const	std::string	dirList(std::string	path)
+const	std::string	dirList(std::string	path, std::string reqURL)
 {
 	std::string html = "<html>"
 						"<head>"                                                                                  
@@ -34,9 +34,40 @@ const	std::string	dirList(std::string	path)
 	while (dirElement)
 	{
 		const	std::string &filename = dirElement->d_name;
-		html += "<li><a href=\"\">" + filename + "</a></li>";
+		html += "<li><a href=\"" + reqURL + filename +  "\">" + filename + "</a></li>";
 		dirElement = readdir(dirptr);
 	}
 	closedir(dirptr);
 	return html + "</ul><hr></body></html>";
+}
+
+const	std::string	getErrPage(std::string code, std::string mssg)
+{
+	std::string	html = "<!DOCTYPE html>"
+						"<html lang=\"en\">"
+						"<head>"
+						"	<meta charset=\"UTF-8\">"
+						"	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+						"	<title>" + code + " " + mssg + "</title>"
+						""
+						"	<style>"
+						"		h1 {"
+						"			text-align: center;"
+						"			margin-top: 40px;"
+						"			color: red;"
+						"		}"
+						"		h3 {"
+						"			text-align: center;"
+						"		}"
+						""
+						"	</style>"
+						"</head>"
+						"<body>"
+						"	<h1>" + code + " " + mssg + "</h1>"
+						"	<hr>"
+						"	<h3>webserv server</h3>"
+						"</body>"
+						"</html>";
+
+	return (html);
 }
