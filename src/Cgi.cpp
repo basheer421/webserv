@@ -111,16 +111,32 @@ void Cgi::RunCgi(Response &res, Request &req){
 	}
 
 	// stop child process
-	//check for error
+	// check for error
 	// wait for child to end and then read from std output of the child process via pipe.
 
 	if (pid != 0)
 	{
-		int outchild;
-		outchild = waitpid(-1, NULL, 0);
-        // if (WIFEXITED(outchild) == false)
+		int     outchild = 0;
+        double  time = 0;
+
+        clock_t start = clock();
+        while (outchild == 0)
+        {
+            // check for if kill fails
+		    outchild = waitpid(-1, NULL, WNOHANG);
+            clock_t end = clock();
+            time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+            std::cerr << "outchild: " << outchild << "time :" << time << std::endl;
+            
+            if (time > 6)
+            {
+                kill(pid, SIGTERM);
+                throw std::runtime_error("500");
+            }
+        }
+
+        // if (WIFEXITED(outchild) != true)
         // {
-        //     std::cerr << "TEST" << std::endl;
         //     throw std::runtime_error("500");
         // }
 
@@ -143,6 +159,7 @@ void Cgi::RunCgi(Response &res, Request &req){
         res.setResponseHeader("200", "OK");
         res.setCgiBody(body);
 	}
+
 	fclose(parent_input);
 	fclose(child_output);
 	close(child_out_fd);

@@ -29,6 +29,8 @@
 #include <algorithm>
 #include <poll.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <signal.h>
 #include "ft_string.hpp"
 #include "ServerTraits.hpp"
 #include "ParserConf.hpp"
