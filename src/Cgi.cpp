@@ -68,14 +68,14 @@ void Cgi::RunCgi(Response &res, Request &req){
     int parent_in_fd = fileno(parent_input);
     int child_out_fd = fileno(child_output);
 
-
     // set post request file.
 
     if (req.getReqType() == POST)
     {
        if (fputs(req.getPostBody().c_str(), parent_input) == EOF)
             throw std::runtime_error("500");
-        fseek(parent_input, 0, SEEK_SET);
+       if  (fseek(parent_input, 0, SEEK_SET) == -1)
+            throw std::runtime_error("500");
     }
 
     pid_t pid;
@@ -93,8 +93,10 @@ void Cgi::RunCgi(Response &res, Request &req){
 	{
 		char *const *env = this->GetCharEnv();
 	// check for dup success
-		dup2(parent_in_fd, STDIN_FILENO);
-		dup2(child_out_fd, STDOUT_FILENO);
+    	if (dup2(parent_in_fd, STDIN_FILENO) == -1)
+            throw std::runtime_error("500");
+        if (dup2(child_out_fd, STDOUT_FILENO) == -1)
+            throw std::runtime_error("500");
 
 		std::cerr << this->scriptpath <<std::endl;
         char *const *argv = NULL;
