@@ -46,6 +46,7 @@ class Request
         void    parseRequest();
         bool    isWhiteSpace(std::string    str1);
 		void	parsePostBody();
+		void	fileUpload();
 		void	parseChunkedBody();
 		void	parseHexReqUrl();
 		void	parseQueryUrl();

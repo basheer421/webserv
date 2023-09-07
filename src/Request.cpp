@@ -88,6 +88,10 @@ void	Request::parseChunkedBody()
 		std::cout << "===========================================================================" << std::endl;
 }
 
+void	Request::fileUpload()
+{
+}
+
 void	Request::parsePostBody()
 {
 	if (this->_type != POST)
@@ -112,6 +116,8 @@ void	Request::parsePostBody()
 	}
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Transfer-Encoding:"] == "chunked")
     	parseChunkedBody();
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Content-Type:"].find("multipart/form-data") != std::string::npos)
+    	fileUpload();
 }
 
 void	Request::parseHexReqUrl()
@@ -178,6 +184,8 @@ void	Request::headerValidation()
 		{
 			if (it->first == "content-length:")
 				flagClen = true;
+			if (it->first == "Content-Length:")
+				flagClen = true;
 			if (it->first == "Transfer-Encoding:")
 				flagEnc = true;
 		}
@@ -191,7 +199,6 @@ void    Request::parseRequest()
 
     std::string::size_type pos = 0;
 	this->_buffCopy = _buff;
-	std::cout << _buff << std::endl;
     while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
     {
         _buff.replace(pos, 2, "\n");
@@ -231,6 +238,9 @@ void    Request::parseRequest()
 		if (key == "Host:")
 			this->_host = value;
     }
+	std::cout << "===========================================================================" << std::endl;
+	std::cout << _buffCopy << std::endl;
+	std::cout << "===========================================================================" << std::endl;
 	headerValidation();
 	parsePostBody();
 }
