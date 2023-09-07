@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 14:05:44 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/02 13:29:24 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/06 14:28:19 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,16 +36,17 @@ class Response
 
 		std::string	getHeader();
 		void		setHeader();
-		void		setBody(const std::string& path, bool autoindex=false);
+		void		setBody(const std::string& path, const std::string& reqURL, bool autoindex=false);
 		void		setCode(std::string str);
 		void		setMssg(std::string str);
 		void		setCtype(std::string str);
-        void        setCgiBody(std::string str);
+		void		setCgiBody(std::string str);
+		void		setErrBody(std::string body);
 		void		setClen(int len);
 		void		setResponseHeader(std::string code, std::string mssg);
 		void		parseMimes();
 		std::string	getResponse();
-		void 		appendHeader(const std::string& str);
+		void		appendHeader(const std::string& str);
 };
 
 int	is_dir(const string path);

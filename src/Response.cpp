@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/03 00:47:01 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/06 14:29:28 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,14 +85,14 @@ std::string	Response::getResponse()
 }	
 
 // check for file access.
-void	Response::setBody(const std::string& path, bool autoindex)
+void	Response::setBody(const std::string& path, const std::string& reqURL, bool autoindex)
 {
 	std::string body;
 	std::string type;
 	size_t pos;
 
 	if (is_dir(path.c_str()) && autoindex)
-		body = dirList(path);
+		body = dirList(path, reqURL);
 	else if (is_file(path.c_str()))
 		body = ft::file_to_string(path);
 	else
@@ -115,6 +115,16 @@ void	Response::setBody(const std::string& path, bool autoindex)
 }
 
 void	Response::setCgiBody(std::string body)
+{
+	this->res_body.clear();
+	this->res_body = body;
+	this->content_len = res_body.length();
+	this->header += "Content-Type: " + content_type + "; charset=utf-8" CRLF
+					"Content-Length: " + ft::to_string(this->content_len) + CRLF
+					CRLF;
+}
+
+void	Response::setErrBody(std::string body)
 {
 	this->res_body.clear();
 	this->res_body = body;
