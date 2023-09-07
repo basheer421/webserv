@@ -109,9 +109,11 @@ void Cgi::RunCgi(Response &res, Request &req){
 
 		exit(-1);
 	}
+
 	// stop child process
 	//check for error
 	// wait for child to end and then read from std output of the child process via pipe.
+
 	if (pid != 0)
 	{
 		int outchild;
@@ -123,17 +125,17 @@ void Cgi::RunCgi(Response &res, Request &req){
         // }
 
 		std::cout << outchild << std::endl;
-		char read_buffer[101];
+		char read_buffer[CGI_BUFF];
 		std::string body;
 
-		memset(read_buffer, 0, 101);
+		memset(read_buffer, 0, CGI_BUFF);
 		if (fseek(child_output, 0, SEEK_SET) != 0)
             throw std::runtime_error("500");
 		while (feof(child_output) == false)
 		{
-			fread(read_buffer, 100, 1, child_output);
+			fread(read_buffer, (CGI_BUFF - 1), 1, child_output);
 			body += read_buffer;
-			memset(read_buffer, 0, 101);
+			memset(read_buffer, 0, CGI_BUFF);
 		}
 		std::cerr << "---------CGI RESPONSE BODY-------- "<<std::endl;
 		std::cerr << body << std::endl;

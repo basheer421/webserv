@@ -2,6 +2,7 @@
 #define CGI_HPP
 #include "webserv.hpp"
 
+#define CGI_BUFF 10001
 class Cgi{
 
     public:
