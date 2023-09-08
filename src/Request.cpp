@@ -301,7 +301,7 @@ std::map<std::string, std::string> Request::getRequest() const
 
 std::string Request::getReqUrl() const
 {
-	return _reqUrl;
+	return ft::string(_reqUrl).replace_all(" ", "%20");
 }
 
 std::string Request::getPostBody() const
@@ -311,7 +311,7 @@ std::string Request::getPostBody() const
 
 std::string	Request::getHost() const
 {
-	return _host;
+	return ft::string(_host).replace_all(" ", "%20");
 }
 
 e_request_type	Request::getReqType() const

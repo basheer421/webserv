@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_string.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 23:19:23 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/29 19:13:09 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/09 00:45:51 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,19 @@ namespace ft
 	string string::strip(char c)
 	{
 		return lstrip(c).rstrip(c);
+	}
+
+	string string::replace_all(const string& from, const string& to)
+	{
+		string cpy(*this);
+		size_t	index = 0;
+		
+		while ((index = cpy.find(from, index)) != std::string::npos)
+		{
+			cpy.replace(index, from.length(), to);
+			index += to.length();
+		}
+		return (cpy);
 	}
 
 	string file_to_string(const string file_name)
