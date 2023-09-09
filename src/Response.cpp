@@ -84,6 +84,12 @@ std::string	Response::getResponse()
 	return (res);
 }	
 
+std::string Response::getbody()
+{
+    return (res_body);
+}
+
+
 // check for file access.
 void	Response::setBody(const std::string& path, const std::string& reqURL, bool autoindex)
 {

@@ -39,10 +39,6 @@ char **Cgi::GetCharEnv(){
         charenv[i] = strdup(temp.c_str());
         b++;
     }
-    // for (int i = 0; (size_t)i < size; i++)
-    // {
-    //     std::cout << charenv[i] << std::endl;
-    // }
     return (charenv);
 }
 // add all the headers to the response
@@ -55,9 +51,7 @@ void Cgi::HandleCgi(Response &res, Request &req)
 }
 
 void Cgi::RunCgi(Response &res, Request &req){
-    std::cerr << "----ENTERING CGI----" << std::endl;
-
-    // create temp files for the child and parent.
+    std::cout << "---------CGI--------" << std::endl;
 
     FILE *parent_input = tmpfile();
     FILE *child_output = tmpfile();
@@ -68,8 +62,6 @@ void Cgi::RunCgi(Response &res, Request &req){
     int parent_in_fd = fileno(parent_input);
     int child_out_fd = fileno(child_output);
 
-    // set post request file.
-
     if (req.getReqType() == POST)
     {
        if (fputs(req.getPostBody().c_str(), parent_input) == EOF)
@@ -79,7 +71,6 @@ void Cgi::RunCgi(Response &res, Request &req){
     }
 
     pid_t pid;
-    // create child process
 
     pid = fork();
     if (pid == -1)
@@ -92,7 +83,7 @@ void Cgi::RunCgi(Response &res, Request &req){
 	if (pid == 0)
 	{
 		char *const *env = this->GetCharEnv();
-	// check for dup success
+	
     	if (dup2(parent_in_fd, STDIN_FILENO) == -1)
             throw std::runtime_error("500");
         if (dup2(child_out_fd, STDOUT_FILENO) == -1)
@@ -118,15 +109,16 @@ void Cgi::RunCgi(Response &res, Request &req){
 	{
 		int     outchild = 0;
         double  time = 0;
+        int status = 0;
 
         clock_t start = clock();
         while (outchild == 0)
         {
             // check for if kill fails
-		    outchild = waitpid(-1, NULL, WNOHANG);
+		    outchild = waitpid(-1, &status, WNOHANG);
             clock_t end = clock();
             time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
-            std::cerr << "outchild: " << outchild << "time :" << time << std::endl;
+            // std::cerr << "outchild: " << outchild << "time :" << time << std::endl;
             
             if (time > 6)
             {
@@ -135,14 +127,15 @@ void Cgi::RunCgi(Response &res, Request &req){
             }
         }
 
-        // if (WIFEXITED(outchild) != true)
-        // {
-        //     throw std::runtime_error("500");
-        // }
+        if (WIFEXITED(status) != true)
+        {
+            throw std::runtime_error("500");
+        }
 
 		std::cout << outchild << std::endl;
 		char read_buffer[CGI_BUFF];
-		std::string body;
+        std::string head = "";
+		std::string body = "";
 
 		memset(read_buffer, 0, CGI_BUFF);
 		if (fseek(child_output, 0, SEEK_SET) != 0)
@@ -153,11 +146,28 @@ void Cgi::RunCgi(Response &res, Request &req){
 			body += read_buffer;
 			memset(read_buffer, 0, CGI_BUFF);
 		}
-		std::cerr << "---------CGI RESPONSE BODY-------- "<<std::endl;
-		std::cerr << body << std::endl;
+		// std::cerr << body << std::endl;
+        // parse response.
+    
+        if (body.find("\r\n\r\n") != std::string::npos)
+        {
+            head = body.substr(0, body.find("\r\n\r\n"));
+            body.erase(0, (body.find("\r\n\r\n") + 4));
 
-        res.setResponseHeader("200", "OK");
-        res.setCgiBody(body);
+            res.setResponseHeader("200", "OK");
+            res.appendHeader(head);
+            res.setCgiBody(body);
+
+            // std::cout << "-------S------" << std::endl;
+
+            // std::cout << "HEAD: " << res.getHeader() << std::endl;
+            // std::cout << "BODY: " << res.getbody() << std::endl;
+        }
+        else
+        {
+            res.setResponseHeader("200", "OK");
+            res.setCgiBody(body);
+        }
 	}
 
 	fclose(parent_input);
@@ -166,5 +176,4 @@ void Cgi::RunCgi(Response &res, Request &req){
 	close(parent_in_fd);
 
     // set response object.
-    std::cerr << "----LEAVING CGI----" << std::endl;
 }

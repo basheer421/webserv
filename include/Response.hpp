@@ -46,6 +46,7 @@ class Response
 		void		setResponseHeader(std::string code, std::string mssg);
 		void		parseMimes();
 		std::string	getResponse();
+        std::string getbody();
 		void		appendHeader(const std::string& str);
 };
 
