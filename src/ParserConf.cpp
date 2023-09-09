@@ -31,6 +31,11 @@ void ParserConf::replaceSpaces(ft::string& str)
 	}
 }
 
+void replaceSpacesWithPercents(ft::string& str)
+{
+	str = str.replace_all(" ", "%20");
+}
+
 // Sets the end of the str to be ';' exclusive
 void ParserConf::removeComment(ft::string& str)
 {
@@ -72,7 +77,8 @@ bool ParserConf::isModuleName(ft::string& str)
 	return (*(str.begin()) == '[' && *(str.end() - 1) == ']');
 }
 
-void ParserConf::fillRouteValue(ServerRoute& route, string& name, std::vector<string>& segments)
+void ParserConf::fillRouteValue(ServerRoute& route, string& name,
+	std::vector<string>& segments)
 {
 	if (name == "limit_except")
 		route.limit_except = segments;
@@ -186,8 +192,13 @@ std::vector<ServerTraits> ParserConf::parseFile()
 			ft::string name = segments.front();
 			segments.erase(segments.begin());
 
+			std::for_each(segments.begin(), segments.end(),
+				replaceSpacesWithPercents);
+
 			if (isRoute)
-				fillRouteValue(file.back().routes[lastModlName.split(' ').back()], name, segments);
+				fillRouteValue(file.back().routes[
+					lastModlName.split(' ').back()],
+					name, segments);
 			else
 				fillServerValue(file.back(), name, segments);
 		}
