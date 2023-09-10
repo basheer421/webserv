@@ -35,6 +35,8 @@ class Request
 		bool								_isUrlCgi;
 		bool								_postFlag;
 		std::string							_postBody;
+		size_t								_contLen;
+		bool								_postChunked;
 
     public:
         Request();
@@ -43,25 +45,27 @@ class Request
         Request &operator=(const Request &rhs);
         ~Request();
 
-        void    parseRequest();
-        bool    isWhiteSpace(std::string    str1);
+		void	parseRequest(bool flag=false);
+        bool	isWhiteSpace(std::string    str1);
 		void	parsePostBody();
 		void	fileUpload();
 		void	parseChunkedBody();
 		void	parseHexReqUrl();
 		void	parseQueryUrl();
 		void	headerValidation();
-		std::map<std::string, std::string> modifyEnv(std::map<std::string, std::string> env);
+		std::map<std::string, std::string>	modifyEnv(std::map<std::string, std::string> env);
 
-		std::map<std::string, std::string> getRequest() const;
-		std::string getReqUrl() const;
-		std::string	getHost() const;
-		std::string getPostBody() const;
-		e_request_type getReqType() const;
-        std::string getCgiUrl() const;
-		std::string	strToUpper(std::string str);
+		std::map<std::string, std::string>	getRequest() const;
+		std::string							getReqUrl() const;
+		std::string							getHost() const;
+		std::string							getPostBody() const;
+		e_request_type						getReqType() const;
+        std::string							getCgiUrl() const;
+		std::string							strToUpper(std::string str);
 		std::map<std::string, std::string>	parseUnderScore();
-		std::string replaceChar(std::string str);
+		std::string							replaceChar(std::string str);
+		size_t								getContLen();
+		int									getHeaderLength();
 
 		int hexadecimalToDecimal(string hexVal);
 

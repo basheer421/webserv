@@ -83,9 +83,9 @@ void	Request::parseChunkedBody()
 			body += appendBody;
 		}
 		_postBody = body;
-		std::cout << "===========================================================================" << std::endl;
-		std::cout << "{" << body << "}" << std::endl;
-		std::cout << "===========================================================================" << std::endl;
+		// std::cout << "===========================================================================" << std::endl;
+		// std::cout << "{" << body << "}" << std::endl;
+		// std::cout << "===========================================================================" << std::endl;
 }
 
 void	Request::fileUpload()
@@ -109,9 +109,9 @@ void	Request::parsePostBody()
 			pos1 += 1; // Move past the replaced '\n' to avoid an infinite loop
 		}
 		_postBody = body;
-		std::cout << "===========================================================================" << std::endl;
-		std::cout << "{" << body << "}" << std::endl;
-		std::cout << "===========================================================================" << std::endl;
+		// std::cout << "===========================================================================" << std::endl;
+		// std::cout << "{" << body << "}" << std::endl;
+		// std::cout << "===========================================================================" << std::endl;
 		_postFlag = true;
 	}
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Transfer-Encoding:"] == "chunked")
@@ -194,7 +194,7 @@ void	Request::headerValidation()
 	}
 }
 
-void    Request::parseRequest()
+void    Request::parseRequest(bool	flag)
 {
 
     std::string::size_type pos = 0;
@@ -237,12 +237,30 @@ void    Request::parseRequest()
 		}
 		if (key == "Host:")
 			this->_host = value;
+		if (key == "Content-Length:" || key == "content-length:")
+			this->_contLen = ft::from_string<int>(value);
     }
-	std::cout << "===========================================================================" << std::endl;
-	std::cout << _buffCopy << std::endl;
-	std::cout << "===========================================================================" << std::endl;
-	headerValidation();
-	parsePostBody();
+	if (flag)
+	{
+		std::cout << "===========================================================================" << std::endl;
+		std::cout << _buffCopy << std::endl;
+		std::cout << "===========================================================================" << std::endl;
+		headerValidation();
+		parsePostBody();
+	}
+}
+
+int	Request::getHeaderLength()
+{
+	size_t		pos;
+	std::string	header;
+	int			headerLen;
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos)
+	{
+		header = this->_buffCopy.substr(0, pos);
+	}
+	headerLen = header.length();
+	return (headerLen);
 }
 
 std::map<std::string, std::string>	Request::parseUnderScore()
@@ -317,6 +335,11 @@ std::string	Request::getHost() const
 e_request_type	Request::getReqType() const
 {
 	return (_type);
+}
+
+size_t	Request::getContLen()
+{
+	return(_contLen);
 }
 
 bool Request::isUrlCgi() const

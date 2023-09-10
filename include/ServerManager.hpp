@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/02 02:28:41 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/10 13:54:47 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,8 @@ public:
 	void run(char **envp); // Throws 
     // void handleCgi(Response &res, Request &req); 
 
-	void	parseEnv(char **rawEnv); 
+	void	parseEnv(char **rawEnv);
+	bool	partialRequest(std::string	buff);
 	std::map<std::string, std::string> getEnv() const; 
 	std::string	strToUpper(std::string str); 
 };

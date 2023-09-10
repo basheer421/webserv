@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/09 00:52:25 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/10 15:29:35 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,9 +167,9 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		conf.routes.find(url)
 	);
 	// Didn't find the dir
-	std::cout << url << std::endl;
 	if (route_it == conf.routes.end())
 		throw std::runtime_error("404");
+	std::cout << url << std::endl;
 
 	const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
 
@@ -225,7 +225,7 @@ Response ServerManager::ManageRequest(const string& buffer)
 
 	try
 	{
-		request.parseRequest();
+		request.parseRequest(true);
 		ProcessResponse(request, response); // server can be known from the request
 	}
 	catch(const std::runtime_error& e)
@@ -324,8 +324,7 @@ void ServerManager::run(char **envp)
 				else
 				{
 					requestBuilder[pfd.fd] += buffer;
-
-					if (pfd.revents & POLLOUT)
+					if (pfd.revents & POLLOUT && partialRequest(requestBuilder[pfd.fd]))
 					{
 						Response res = ManageRequest(requestBuilder[pfd.fd]);
 						send(pfd.fd, res.getResponse().c_str(),
@@ -336,6 +335,21 @@ void ServerManager::run(char **envp)
 			}
 		}
 	}
+}
+
+bool	ServerManager::partialRequest(std::string	buff)
+{
+	std::string	first("");
+	bool		flag;
+	first = buff;
+	Request	req(first);
+	req.parseRequest();
+	std::map<std::string, std::string> reqMap = req.getRequest();
+	if (reqMap["Transfer-Encoding:"] == "chunked")
+		flag = true;
+	if ((buff.length() < (req.getContLen() + req.getHeaderLength())) && req.getReqType() == POST && !flag)
+		return (false);
+	return (true);
 }
 
 std::string	ServerManager::strToUpper(std::string str)
