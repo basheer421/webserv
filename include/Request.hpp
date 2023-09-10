@@ -36,7 +36,6 @@ class Request
 		bool								_postFlag;
 		std::string							_postBody;
 		size_t								_contLen;
-		bool								_postChunked;
 
     public:
         Request();
