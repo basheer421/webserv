@@ -32,11 +32,10 @@ class Request
         std::string                         _buffCopy;
         std::string                         _reqUrl;
 		std::string							_host;
-		std::string							_postBody;
-		size_t								_contLen;
 		bool								_isUrlCgi;
 		bool								_postFlag;
-		bool								_isFileUpload;
+		std::string							_postBody;
+		size_t								_contLen;
 
     public:
         Request();
