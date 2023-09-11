@@ -15,11 +15,11 @@
 // curl -X POST -H "Transfer-Encoding: chunked" --data-binary @- http://localhost:8080 < data.txt
 // Command to send a chunked post request to the server. The body will be in the data.txt
 
-Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false)
+Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false)
 {
 }
 
-Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false)
+Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false)
 {
 }
 
@@ -90,6 +90,33 @@ void	Request::parseChunkedBody()
 
 void	Request::fileUpload()
 {
+	string cont_length = _request["Content-Length:"];
+
+	size_t	pos3 = this->_buffCopy.find("filename=");
+	std::string fileName;
+	if (pos3 != std::string::npos)
+	{
+		std::string str = this->_buffCopy.substr(pos3 + 1, ft::from_string<int>(cont_length));
+		size_t	pos = str.find("\"");
+		if (pos != std::string::npos)
+		{
+			str = str.substr(pos, ft::from_string<int>(cont_length));
+			str = str.substr(str.find("\"") + 1, ft::from_string<int>(cont_length));
+			str = str.substr(0, str.find("\""));
+			fileName = str;
+		}
+	}
+	else
+	{
+		size_t	pos = this->_reqUrl.find_last_of('/');
+		fileName = this->_reqUrl.substr(pos + 1, this->_reqUrl.length());
+	}
+	mkdir("webservfileupload", 0777);
+	std::ofstream	outfile("webservfileupload/" + fileName);
+	std::string	body = _buffCopy.substr(this->getHeaderLength() + 4, ft::from_string<int>(cont_length));
+	std::string::size_type pos1 = body.find("\r\n\r\n");
+	body = body.substr(pos1 + 4, ft::from_string<int>(cont_length));
+	outfile << body;
 }
 
 void	Request::parsePostBody()
@@ -116,7 +143,7 @@ void	Request::parsePostBody()
 	}
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Transfer-Encoding:"] == "chunked")
     	parseChunkedBody();
-	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Content-Type:"].find("multipart/form-data") != std::string::npos)
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && this->_isFileUpload)
     	fileUpload();
 }
 
@@ -239,6 +266,8 @@ void    Request::parseRequest(bool	flag)
 			this->_host = value;
 		if (key == "Content-Length:" || key == "content-length:")
 			this->_contLen = ft::from_string<int>(value);
+		if (key == "Content-Type:" && value.find("multipart/form-data") != std::string::npos)
+			this->_isFileUpload = true;
     }
 	if (flag)
 	{
