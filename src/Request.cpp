@@ -90,25 +90,32 @@ void	Request::parseChunkedBody()
 
 void	Request::fileUpload()
 {
-	size_t	pos = this->_reqUrl.find_last_of('/');
-	std::string	fileName = this->_reqUrl.substr(pos + 1, this->_reqUrl.length());
-	std::ofstream	outfile("webservfileupload/" + fileName);
-
 	string cont_length = _request["Content-Length:"];
 
-
+	size_t	pos3 = this->_buffCopy.find("filename=");
+	std::string fileName;
+	if (pos3 != std::string::npos)
+	{
+		std::string str = this->_buffCopy.substr(pos3 + 1, ft::from_string<int>(cont_length));
+		size_t	pos = str.find("\"");
+		if (pos != std::string::npos)
+		{
+			str = str.substr(pos, ft::from_string<int>(cont_length));
+			str = str.substr(str.find("\"") + 1, ft::from_string<int>(cont_length));
+			str = str.substr(0, str.find("\""));
+			fileName = str;
+		}
+	}
+	else
+	{
+		size_t	pos = this->_reqUrl.find_last_of('/');
+		fileName = this->_reqUrl.substr(pos + 1, this->_reqUrl.length());
+	}
+	mkdir("webservfileupload", 0777);
+	std::ofstream	outfile("webservfileupload/" + fileName);
 	std::string	body = _buffCopy.substr(this->getHeaderLength() + 4, ft::from_string<int>(cont_length));
 	std::string::size_type pos1 = body.find("\r\n\r\n");
 	body = body.substr(pos1 + 4, ft::from_string<int>(cont_length));
-	std::string::size_type pos2 = body.find_last_of("\r\n\r\n");
-	std::string::size_type pos1 = 0;
-	while ((pos1 = body.find("\r\n", pos1)) != std::string::npos)
-	{
-		body.replace(pos1, 2, "\n");
-		pos1 += 1; // Move past the replaced '\n' to avoid an infinite loop
-	}
-	body = body.substr(0, pos2);
-	std::cout << body.length() << "===================" << ft::from_string<int>(cont_length) << std::endl;
 	outfile << body;
 }
 
