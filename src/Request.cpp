@@ -257,6 +257,10 @@ void    Request::parseRequest(bool	flag)
 				this->_type = POST;
 			else if (key.find("DELETE") != std::string::npos)
 				this->_type = DELETE;
+			else if (key.find("PUT") != std::string::npos)
+				this->_type = PUT;
+			else if (key.find("HEAD") != std::string::npos)
+				this->_type = HEAD;
 			std::size_t	pos_idx = _reqUrl.find("/cgi-bin");
 			if (pos_idx != std::string::npos)
 				this->_isUrlCgi = true;
