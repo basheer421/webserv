@@ -39,6 +39,7 @@ class Request
 		bool								_isUrlCgi;
 		bool								_postFlag;
 		bool								_isFileUpload;
+		std::string							_putCode;
 
 	public:
 		Request();
@@ -57,11 +58,12 @@ class Request
 		std::string							getPostBody() const;
 		std::string							getCgiUrl() const;
 		std::string							strToUpper(std::string str);
+		std::string							getPutCode() const;
 		std::string							replaceChar(std::string str);
 
+		size_t								getContLen();
 		int									getHeaderLength();
 		int									hexadecimalToDecimal(string hexVal);
-		size_t								getContLen();
 		bool								isWhiteSpace(std::string	str1);
 		bool								isUrlCgi() const;
 		void								parseRequest(bool flag=false);
@@ -71,4 +73,5 @@ class Request
 		void								parseHexReqUrl();
 		void								parseQueryUrl();
 		void								headerValidation();
+		void								setReqType(const std::string &key);
 };

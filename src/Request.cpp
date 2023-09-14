@@ -15,12 +15,14 @@
 // curl -X POST -H "Transfer-Encoding: chunked" --data-binary @- http://localhost:8080 < data.txt
 // Command to send a chunked post request to the server. The body will be in the data.txt
 
-Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false)
+Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200")
 {
+	this->_contLen = 0;
 }
 
-Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false)
+Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200")
 {
+	this->_contLen = 0;
 }
 
 Request::Request(const Request &object)
@@ -116,6 +118,8 @@ void	Request::fileUpload()
 	std::string	body = _buffCopy.substr(this->getHeaderLength() + 4, ft::from_string<int>(cont_length));
 	std::string::size_type pos1 = body.find("\r\n\r\n");
 	body = body.substr(pos1 + 4, ft::from_string<int>(cont_length));
+	if (!outfile.good())
+		this->_putCode = "201";
 	outfile << body;
 }
 
@@ -221,6 +225,20 @@ void	Request::headerValidation()
 	}
 }
 
+void	Request::setReqType(const std::string &key)
+{
+	if (key.find("GET") != std::string::npos)
+		this->_type = GET;
+	else if (key.find("POST") != std::string::npos)
+		this->_type = POST;
+	else if (key.find("DELETE") != std::string::npos)
+		this->_type = DELETE;
+	else if (key.find("PUT") != std::string::npos)
+		this->_type = PUT;
+	else if (key.find("HEAD") != std::string::npos)
+		this->_type = HEAD;
+}
+
 void    Request::parseRequest(bool	flag)
 {
 
@@ -251,16 +269,7 @@ void    Request::parseRequest(bool	flag)
 			getline(url, _reqUrl, ' ');
 			parseHexReqUrl();
 			parseQueryUrl();
-			if (key.find("GET") != std::string::npos)
-				this->_type = GET;
-			else if (key.find("POST") != std::string::npos)
-				this->_type = POST;
-			else if (key.find("DELETE") != std::string::npos)
-				this->_type = DELETE;
-			else if (key.find("PUT") != std::string::npos)
-				this->_type = PUT;
-			else if (key.find("HEAD") != std::string::npos)
-				this->_type = HEAD;
+			setReqType(key);
 			std::size_t	pos_idx = _reqUrl.find("/cgi-bin");
 			if (pos_idx != std::string::npos)
 				this->_isUrlCgi = true;
@@ -378,6 +387,11 @@ size_t	Request::getContLen()
 bool Request::isUrlCgi() const
 {
 	return _isUrlCgi;
+}
+
+std::string	Request::getPutCode() const
+{
+	return (this->_putCode);
 }
 
 std::string Request::getCgiUrl() const{
