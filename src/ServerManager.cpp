@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/12 16:30:37 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/14 17:49:20 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,7 +303,7 @@ void ServerManager::run(char **envp)
 		// loop on the clients
 		for (std::vector<struct pollfd>::iterator
 			it = sockets.begin() + servers.size();
-			it != sockets.end();
+			it < sockets.end();
 			++it)
 		{
 			struct pollfd& pfd = *it;
@@ -319,7 +319,6 @@ void ServerManager::run(char **envp)
 					requestBuilder[pfd.fd].clear();
 					close(pfd.fd);
 					it = sockets.erase(it);
-					continue ;
 				}
 				else
 				{
