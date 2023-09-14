@@ -20,8 +20,23 @@ Cgi::~Cgi(){
 
 }
 
-void Cgi::SetEnv(std::map<std::string, std::string> &envMap){
+void Cgi::SetEnv(std::map<std::string, std::string> &envMap, Response &res, Request &req){
+    (void) res;
+    
     this->envMap = envMap;
+    this->envMap["AUTH_TYPE"] = "null";
+    this->envMap["CONTENT_LENGTH"] = this->envMap["HTTP_CONTENT_LENGTH"];
+    this->envMap["CONTENT_TYPE"] = this->envMap["HTTP_CONTENT_TYPE"];
+    this->envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
+    this->envMap["PATH_INFO"] = req.getCgiUrl();
+    // this->envMap["PATH_INFO"] = "CGI/1.1";
+
+
+    for (std::map<std::string, std::string>::iterator  i = this->envMap.begin(); i != this->envMap.end(); i++)
+    {
+        std::cout << i->first << "=" << i->second << std::endl;
+    }
+
 }
 
 char **Cgi::GetCharEnv(){
@@ -46,7 +61,6 @@ char **Cgi::GetCharEnv(){
 void Cgi::HandleCgi(Response &res, Request &req)
 {
     this->scriptpath = "." + req.getCgiUrl();
-
     this->RunCgi(res, req);
 }
 

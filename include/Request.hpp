@@ -74,4 +74,5 @@ class Request
 		void								parseQueryUrl();
 		void								headerValidation();
 		void								setReqType(const std::string &key);
+        std::string                         replaceotherChar(std::string str);
 };

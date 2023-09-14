@@ -313,7 +313,9 @@ std::map<std::string, std::string>	Request::parseUnderScore()
 	for (it = mapCopy.begin(); it != mapCopy.end(); ++it)
 	{
 		std::string key = replaceChar(it->first);
+		key = replaceotherChar(it->first);
 		key = strToUpper(key);
+        key = "HTTP_" + key;
 		mapC[key] = it->second;
 	}
 	return (mapC);
@@ -420,6 +422,15 @@ std::string Request::replaceChar(std::string str)
 	for (size_t pos = str.find('-'); pos != std::string::npos; pos = str.find('-'))
 	{
 		str.replace(pos, 1, "_");
+	}
+	return(str);
+}
+
+std::string Request::replaceotherChar(std::string str)
+{
+	for (size_t pos = str.find(':'); pos != std::string::npos; pos = str.find(':'))
+	{
+		str.replace(pos, 1, "");
 	}
 	return(str);
 }
