@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/15 15:55:07 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/15 21:35:56 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,20 @@ static string getDir(string path)
 	return (path);
 }
 
+static ServerRoute getRoute(string url, const ServerTraits& conf)
+{
+	std::map<ft::string, ServerRoute>::const_iterator route_it;
+	route_it = conf.routes.find(url);
+	if (route_it == conf.routes.end())
+	{
+		string dir = getDir(url);
+		route_it = conf.routes.find(dir);
+		if (route_it == conf.routes.end())
+			throw std::runtime_error("404");
+	}
+	return route_it->second;
+}
+
 void ServerManager::ProcessResponse(Request& request, Response& res)
 {
 	this->envMap = request.modifyEnv(this->envMap);
@@ -140,11 +154,10 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Getting the server
 	const ServerTraits& conf = (*serv_it).getConf();
 
-	// Getting the dir
-	ft::string path = getDir(url);
-	if (conf.routes.count(path) == 0)
-		throw std::runtime_error("404");
-	ServerRoute route = conf.routes.at(path);
+
+	ServerRoute route = getRoute(url, conf);
+
+	string path;
 
 	// Changing the path to be the full path
 	path = route.root + url;
@@ -172,10 +185,15 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			res.setBody(path, request.getReqUrl());
 		return ;
 	}
+	
+
+	if (!is_dir(path))
+		throw (std::runtime_error("404"));
 
 	/**
 	 * By now we know that the url is a directory.
 	 */
+
 	if (!route.index.empty())
 	{
 		// Responding with index
