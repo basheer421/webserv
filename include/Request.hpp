@@ -40,6 +40,8 @@ class Request
 		bool								_postFlag;
 		bool								_isFileUpload;
 		std::string							_putCode;
+		std::string							_queryString;
+		std::string							queryURl;
 
 	public:
 		Request();
@@ -60,6 +62,9 @@ class Request
 		std::string							strToUpper(std::string str);
 		std::string							getPutCode() const;
 		std::string							replaceChar(std::string str);
+		std::string							getQueryString() const;
+		std::string							getStrRequestType() const;
+		std::string							getQueryUrl() const;
 
 		size_t								getContLen();
 		int									getHeaderLength();

@@ -15,12 +15,12 @@
 // curl -X POST -H "Transfer-Encoding: chunked" --data-binary @- http://localhost:8080 < data.txt
 // Command to send a chunked post request to the server. The body will be in the data.txt
 
-Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200")
+Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200"), _queryString(""), queryURl("")
 {
 	this->_contLen = 0;
 }
 
-Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200")
+Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200"), _queryString(""), queryURl("")
 {
 	this->_contLen = 0;
 }
@@ -170,17 +170,20 @@ void	Request::parseHexReqUrl()
 
 void	Request::parseQueryUrl()
 {
-	unsigned int pos = 0;
+	std::size_t pos = 0;
 	bool	flag = false;
 	pos = this->_reqUrl.find_first_of('?');
 	if (!pos)
 		return;
 	std::string str;
-	str = this->_reqUrl.substr(pos + 1, (this->_reqUrl.length() - pos));
+	if (pos != std::string::npos)
+		str = this->_reqUrl.substr(pos + 1, (this->_reqUrl.length() - pos));
+	this->_queryString = str;
+	this->queryURl = this->_reqUrl;
 	this->_reqUrl = this->_reqUrl.substr(0, pos);
 
     std::stringstream str1(str);
-    std::string       pair;
+    std::string       pair;	
 	while (getline(str1, pair, '&'))
 	{
 		std::stringstream line(pair);
@@ -316,6 +319,7 @@ std::map<std::string, std::string>	Request::parseUnderScore()
 		key = replaceotherChar(it->first);
 		key = strToUpper(key);
         key = "HTTP_" + key;
+		key = ft::string(key).replace_all("-", "_");
 		mapC[key] = it->second;
 	}
 	return (mapC);
@@ -356,6 +360,22 @@ int Request::hexadecimalToDecimal(string hexVal)
     return dec_val;
 }
 
+std::string		Request::getStrRequestType() const
+{
+	if (this->_type == GET)
+		return ("GET");
+	if (this->_type == POST)
+		return ("POST");
+	if (this->_type == DELETE)
+		return ("DELETE");
+	if (this->_type == PUT)
+		return ("PUT");
+	if (this->_type == HEAD)
+		return ("HEAD");
+	return ("DEFAULT");
+}
+
+
 std::map<std::string, std::string> Request::getRequest() const
 {
 	return (_request);
@@ -366,9 +386,19 @@ std::string Request::getReqUrl() const
 	return ft::string(_reqUrl).replace_all(" ", "%20");
 }
 
+std::string	Request::getQueryString() const
+{
+	return (this->_queryString);
+}
+
 std::string Request::getPostBody() const
 {
 	return _postBody;
+}
+
+std::string	Request::getQueryUrl() const
+{
+	return (queryURl);
 }
 
 std::string	Request::getHost() const

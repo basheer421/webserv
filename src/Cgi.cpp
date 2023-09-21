@@ -28,14 +28,22 @@ void Cgi::SetEnv(std::map<std::string, std::string> &envMap, Response &res, Requ
     this->envMap["CONTENT_LENGTH"] = this->envMap["HTTP_CONTENT_LENGTH"];
     this->envMap["CONTENT_TYPE"] = this->envMap["HTTP_CONTENT_TYPE"];
     this->envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
-    this->envMap["PATH_INFO"] = req.getCgiUrl();
-    // this->envMap["PATH_INFO"] = "CGI/1.1";
+    this->envMap["PATH_INFO"] = req.getReqUrl();
+    this->envMap["PATH_TRANSLATED"] = req.getReqUrl();
+    this->envMap["QUERY_STRING"] = req.getQueryString();
+    this->envMap["REQUEST_METHOD"] = req.getStrRequestType();
+    this->envMap["REQUEST_URI"] = req.getQueryUrl();
+    this->envMap["SCRIPT_NAME"] = req.getReqUrl();
+    this->envMap["SERVER_NAME"] = "WEBSERV";
+    this->envMap["SERVER_PORT"] = "8080";
+    this->envMap["SERVER_PROTOCOL"] = "HTTP/1.1";
+    this->envMap["SERVER_SOFTWARE"] = "Webserv/1.0";
+    this->envMap["REDIRECT_STATUS"] = "200";
 
-
-    for (std::map<std::string, std::string>::iterator  i = this->envMap.begin(); i != this->envMap.end(); i++)
-    {
-        std::cout << i->first << "=" << i->second << std::endl;
-    }
+    // for (std::map<std::string, std::string>::iterator  i = this->envMap.begin(); i != this->envMap.end(); i++)
+    // {
+    //     std::cout << i->first << "=" << i->second << std::endl;
+    // }
 
 }
 
@@ -97,6 +105,11 @@ void Cgi::RunCgi(Response &res, Request &req){
 	if (pid == 0)
 	{
 		char *const *env = this->GetCharEnv();
+		for (size_t i = 0; env[i] != NULL; i++)
+		{
+			std::cout << env[i] << std::endl;
+		}
+		
 	
     	if (dup2(parent_in_fd, STDIN_FILENO) == -1)
             throw std::runtime_error("500");
