@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 17:39:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/14 19:20:32 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/21 18:52:01 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ struct ServerRoute
 
 	std::vector<string> limit_except;
 	bool autoindex;
-	// std::vector<string> try_files;
 	string return_;
 	std::vector<string> index;
 	string root;
@@ -67,7 +66,7 @@ struct ServerRoute
 */
 struct ServerTraits
 {
-	// string root;
+	string root;
 	// std::vector<string> index;
 	in_addr_t listen_address;
 	in_port_t listen_port;

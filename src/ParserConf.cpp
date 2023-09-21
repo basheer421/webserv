@@ -116,6 +116,12 @@ void ParserConf::fillServerValue(ServerTraits& server, string& name, std::vector
 			throw std::runtime_error("Parse Error: 'listen' should have 1 value");
 		setAddress(segments.front(), server.listen_address, server.listen_port);
 	}
+	else if (name == "root")
+	{
+		if (segments.size() > 1)
+			throw std::runtime_error("Parse Error: 'root' should have 1 value");
+		server.root = segments.front();
+	}
 	else if (name == "server_name")
 	{
 		server.server_name = segments;

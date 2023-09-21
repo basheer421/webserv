@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/15 21:35:56 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/21 23:22:50 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,13 +106,24 @@ bool ServerManager::redirect(const ServerRoute& route, Response& res)
 	return false;
 }
 
+/**
+ * @brief Get the Dir (if there's a file name it will remove it)
+ * 
+ * "/home/index.html" -> "/home"
+ * "/index.html" -> ""
+ * 
+ * @param path 
+ * @return string 
+ */
 static string getDir(string path)
 {
-	size_t pos = path.find('/');
+	size_t pos = path.rfind('/');
 	if (pos == std::string::npos)
 		path = "";
 	else
-		path.resize(pos + 1);
+		path = path.substr(0, pos);
+	if (path.empty())
+		path = "/";
 	return (path);
 }
 
@@ -128,6 +139,30 @@ static ServerRoute getRoute(string url, const ServerTraits& conf)
 			throw std::runtime_error("404");
 	}
 	return route_it->second;
+}
+
+/**
+ * /home is rooted to /var/html
+ * http://localhost:8080/home/hello.html -> will serve /var/html/hello.html file
+ * 
+ * /world is rooted to /var
+ * .../hello/world/index.html -> /hello/var/index.html
+ * 
+ * /hello is rooted to /var 
+ * but this will not change anything
+ * it should be rooted by exact path like /hello/world/
+ */
+static string getPath(string url, const ServerRoute& conf)
+{
+	// size_t pos = url.rfind(url);
+	// if (pos == std::string::npos)
+	// 	throw std::runtime_error("500");
+	
+	// string path = conf.root + url;
+
+	
+	// path = path.replace_all("%20", " ");
+	// return path;
 }
 
 void ServerManager::ProcessResponse(Request& request, Response& res)
@@ -156,14 +191,13 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 
 	ServerRoute route = getRoute(url, conf);
+	if (route.root.empty())
+		route.root = conf.root;
 
 	string path;
 
 	// Changing the path to be the full path
-	path = route.root + url;
-
-	// Getting back the spaces
-	path = path.replace_all("%20", " ");
+	path = getPath(url, route);
 
 	// Checking if the url has the request method allowed
 	throwIfnotAllowed(url, conf, request);
