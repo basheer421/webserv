@@ -66,9 +66,9 @@ char **Cgi::GetCharEnv(){
 }
 // add all the headers to the response
 
-void Cgi::HandleCgi(Response &res, Request &req)
+void Cgi::HandleCgi(Response &res, Request &req, std::string rooturl)
 {
-    this->scriptpath = "." + req.getCgiUrl();
+    this->scriptpath = rooturl + req.getCgiUrl();
     this->RunCgi(res, req);
 }
 
@@ -105,11 +105,6 @@ void Cgi::RunCgi(Response &res, Request &req){
 	if (pid == 0)
 	{
 		char *const *env = this->GetCharEnv();
-		for (size_t i = 0; env[i] != NULL; i++)
-		{
-			std::cout << env[i] << std::endl;
-		}
-		
 	
     	if (dup2(parent_in_fd, STDIN_FILENO) == -1)
             throw std::runtime_error("500");

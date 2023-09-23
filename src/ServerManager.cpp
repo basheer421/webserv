@@ -168,7 +168,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			Cgi cgi;
 
 			cgi.SetEnv(this->envMap, res, request);
-			cgi.HandleCgi(res, request);
+			cgi.HandleCgi(res, request, conf.root);
 		}
         else
 		    res.setBody(path, request);

@@ -14,7 +14,7 @@ class Cgi{
         void SetEnv(std::map<std::string, std::string> &envMap, Response &res, Request &req);
         char **GetCharEnv();
 
-        void HandleCgi(Response &res, Request &req);
+        void HandleCgi(Response &res, Request &req, std::string rooturl);
 
     private:
 
