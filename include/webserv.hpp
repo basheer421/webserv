@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/10 17:57:20 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/14 18:26:06 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,4 +45,4 @@
 # define DEFAULT_PORT 8080
 # define CRLF "\r\n"
 # define FD_COUNT 255
-# define BUFFER_SIZE 1024
+# define BUFFER_SIZE 216000

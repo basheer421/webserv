@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/14 17:47:38 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/23 12:05:03 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,17 +149,24 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	if (redirect(url, conf, res))
 		return ;
 
+	if (request.getReqType() == POST || request.getReqType() == PUT)
+	{
+		if (request.getPutCode() == "201")
+			res.setResponseHeader("201", "Created");
+		// return ;
+	}
+
 	if (is_file(path))
 	{
 		if (request.isUrlCgi())
 		{
 			Cgi cgi;
 
-			cgi.SetEnv(this->envMap);
+			cgi.SetEnv(this->envMap, res, request);
 			cgi.HandleCgi(res, request);
 		}
-		else
-			res.setBody(path, request.getReqUrl());
+        else
+		    res.setBody(path, request);
 		return ;
 	}
 
@@ -172,7 +179,6 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	std::cout << url << std::endl;
 
 	const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
-
 	/**
 	 * By now we know that the url is a directory.
 	 * 
@@ -187,7 +193,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		{
 			if (is_file(conf.root + "/" + conf.index[i]))
 			{
-				res.setBody(conf.root + "/" + conf.index[i], request.getReqUrl());
+				res.setBody(conf.root + "/" + conf.index[i], request);
 				return ;
 			}
 		}
@@ -197,7 +203,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		{
 			if (!is_dir(path))
 				throw (std::runtime_error("404"));
-			res.setBody(path, request.getReqUrl(), true);
+			res.setBody(path, request, true);
 			return ;
 		}
 		throw (std::runtime_error("404"));
@@ -211,7 +217,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		// Responding with autoindex if found
 		if (!is_dir(path) || foundDir.second.autoindex == false)
 			throw (std::runtime_error("404"));
-		res.setBody(path, request.getReqUrl(), true);
+		res.setBody(path, request, true);
 		return ;
 	}
 	// Should be already found, otherwise 500 is thrown.
@@ -234,35 +240,35 @@ Response ServerManager::ManageRequest(const string& buffer)
 		if (what == "405")
 		{
 			response.setResponseHeader("405", "Method Not Allowed");
-			response.setErrBody(getErrPage("405", "Method Not Allowed"));
+			response.setErrBody(getErrPage("405", "Method Not Allowed"), request);
 		}
 		else if (what == "404")
 		{
 			response.setResponseHeader("404", "Not Found");
-			response.setErrBody(getErrPage("404", "Not Found"));
+			response.setErrBody(getErrPage("404", "Not Found"), request);
 		}
 		else if (what == "403")
 		{
-			response.setResponseHeader("403", "Not Found");
-			response.setErrBody(getErrPage("403", "Not Found"));
+			response.setResponseHeader("403", "Forbidden");
+			response.setErrBody(getErrPage("403", "Forbidden"), request);
 		}
 		else if (what == "400")
 		{
-			response.setResponseHeader("400", "Not Found");
-			response.setErrBody(getErrPage("400", "Not Found"));
+			response.setResponseHeader("400", "Bad Request");
+			response.setErrBody(getErrPage("400", "Bad Request"), request);
 		}
 		else
 		{
 			std::cerr << "Error: " << e.what() << std::endl;
 			response.setResponseHeader("500", "Internal Server Error");
-			response.setErrBody(getErrPage("500", "Internal Server Error"));
+			response.setErrBody(getErrPage("500", "Internal Server Error"), request);
 		}
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << "Error: " << e.what() << std::endl;
 		response.setResponseHeader("500", "Internal Server Error");
-		response.setErrBody(getErrPage("500", "Internal Server Error"));
+		response.setErrBody(getErrPage("500", "Internal Server Error"), request);
 	}
 	return (response);
 }
@@ -270,7 +276,7 @@ Response ServerManager::ManageRequest(const string& buffer)
 void ServerManager::run(char **envp)
 {
 	this->parseEnv(envp);
-
+	this->isReqComplete = false;
 	signal(SIGPIPE, SIG_IGN);
 
 	while (true)
@@ -308,7 +314,7 @@ void ServerManager::run(char **envp)
 		{
 			struct pollfd& pfd = *it;
 
-			if (pfd.revents & POLLIN)
+			if (pfd.revents & POLLIN && this->isReqComplete == false)
 			{
 				char buffer[BUFFER_SIZE];
 
@@ -321,22 +327,25 @@ void ServerManager::run(char **envp)
 					it = sockets.erase(it);
 				}
 				else
-				{
 					requestBuilder[pfd.fd] += buffer;
-					if (pfd.revents & POLLOUT && partialRequest(requestBuilder[pfd.fd]))
-					{
-						Response res = ManageRequest(requestBuilder[pfd.fd]);
-						send(pfd.fd, res.getResponse().c_str(),
-							res.getResponse().length(), 0);
-						requestBuilder[pfd.fd].clear();
-					}
-				}
+				this->isReqComplete = partialRequest(requestBuilder[pfd.fd]);
+			}
+			else if (pfd.revents & POLLOUT && this->isReqComplete == true)
+			{
+				Response res = ManageRequest(requestBuilder[pfd.fd]);
+				// std::cout << "===========================================================================" << std::endl;
+				// std::cout << res.getResponse() << std::endl;
+				// std::cout << "===========================================================================" << std::endl;
+				send(pfd.fd, res.getResponse().c_str(),
+					res.getResponse().length(), 0);
+				requestBuilder[pfd.fd].clear();
+				this->isReqComplete = false;
 			}
 		}
 	}
 }
 
-bool	ServerManager::partialRequest(std::string	buff)
+bool	ServerManager::partialRequest(std::string buff)
 {
 	std::string	first("");
 	bool		flag;
@@ -344,8 +353,16 @@ bool	ServerManager::partialRequest(std::string	buff)
 	Request	req(first);
 	req.parseRequest();
 	std::map<std::string, std::string> reqMap = req.getRequest();
+	if (buff.find("\r\n\r\n") == std::string::npos)
+		return (false);
+	if (buff.empty())
+		return (false);
 	if (reqMap["Transfer-Encoding:"] == "chunked")
+	{
+		if (buff.find("0" CRLF CRLF) == std::string::npos)
+			return (false);
 		flag = true;
+	}
 	if ((buff.length() < (req.getContLen() + req.getHeaderLength())) && req.getReqType() == POST && !flag)
 		return (false);
 	return (true);

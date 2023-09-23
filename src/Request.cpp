@@ -15,12 +15,14 @@
 // curl -X POST -H "Transfer-Encoding: chunked" --data-binary @- http://localhost:8080 < data.txt
 // Command to send a chunked post request to the server. The body will be in the data.txt
 
-Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false)
+Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200"), _queryString(""), queryURl("")
 {
+	this->_contLen = 0;
 }
 
-Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false)
+Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200"), _queryString(""), queryURl("")
 {
+	this->_contLen = 0;
 }
 
 Request::Request(const Request &object)
@@ -116,6 +118,8 @@ void	Request::fileUpload()
 	std::string	body = _buffCopy.substr(this->getHeaderLength() + 4, ft::from_string<int>(cont_length));
 	std::string::size_type pos1 = body.find("\r\n\r\n");
 	body = body.substr(pos1 + 4, ft::from_string<int>(cont_length));
+	if (!outfile.good())
+		this->_putCode = "201";
 	outfile << body;
 }
 
@@ -166,17 +170,20 @@ void	Request::parseHexReqUrl()
 
 void	Request::parseQueryUrl()
 {
-	unsigned int pos = 0;
+	std::size_t pos = 0;
 	bool	flag = false;
 	pos = this->_reqUrl.find_first_of('?');
 	if (!pos)
 		return;
 	std::string str;
-	str = this->_reqUrl.substr(pos + 1, (this->_reqUrl.length() - pos));
+	if (pos != std::string::npos)
+		str = this->_reqUrl.substr(pos + 1, (this->_reqUrl.length() - pos));
+	this->_queryString = str;
+	this->queryURl = this->_reqUrl;
 	this->_reqUrl = this->_reqUrl.substr(0, pos);
 
     std::stringstream str1(str);
-    std::string       pair;
+    std::string       pair;	
 	while (getline(str1, pair, '&'))
 	{
 		std::stringstream line(pair);
@@ -221,6 +228,20 @@ void	Request::headerValidation()
 	}
 }
 
+void	Request::setReqType(const std::string &key)
+{
+	if (key.find("GET") != std::string::npos)
+		this->_type = GET;
+	else if (key.find("POST") != std::string::npos)
+		this->_type = POST;
+	else if (key.find("DELETE") != std::string::npos)
+		this->_type = DELETE;
+	else if (key.find("PUT") != std::string::npos)
+		this->_type = PUT;
+	else if (key.find("HEAD") != std::string::npos)
+		this->_type = HEAD;
+}
+
 void    Request::parseRequest(bool	flag)
 {
 
@@ -251,12 +272,7 @@ void    Request::parseRequest(bool	flag)
 			getline(url, _reqUrl, ' ');
 			parseHexReqUrl();
 			parseQueryUrl();
-			if (key.find("GET") != std::string::npos)
-				this->_type = GET;
-			else if (key.find("POST") != std::string::npos)
-				this->_type = POST;
-			else if (key.find("DELETE") != std::string::npos)
-				this->_type = DELETE;
+			setReqType(key);
 			std::size_t	pos_idx = _reqUrl.find("/cgi-bin");
 			if (pos_idx != std::string::npos)
 				this->_isUrlCgi = true;
@@ -300,7 +316,10 @@ std::map<std::string, std::string>	Request::parseUnderScore()
 	for (it = mapCopy.begin(); it != mapCopy.end(); ++it)
 	{
 		std::string key = replaceChar(it->first);
+		key = replaceotherChar(it->first);
 		key = strToUpper(key);
+        key = "HTTP_" + key;
+		key = ft::string(key).replace_all("-", "_");
 		mapC[key] = it->second;
 	}
 	return (mapC);
@@ -341,6 +360,22 @@ int Request::hexadecimalToDecimal(string hexVal)
     return dec_val;
 }
 
+std::string		Request::getStrRequestType() const
+{
+	if (this->_type == GET)
+		return ("GET");
+	if (this->_type == POST)
+		return ("POST");
+	if (this->_type == DELETE)
+		return ("DELETE");
+	if (this->_type == PUT)
+		return ("PUT");
+	if (this->_type == HEAD)
+		return ("HEAD");
+	return ("DEFAULT");
+}
+
+
 std::map<std::string, std::string> Request::getRequest() const
 {
 	return (_request);
@@ -351,9 +386,19 @@ std::string Request::getReqUrl() const
 	return ft::string(_reqUrl).replace_all(" ", "%20");
 }
 
+std::string	Request::getQueryString() const
+{
+	return (this->_queryString);
+}
+
 std::string Request::getPostBody() const
 {
 	return _postBody;
+}
+
+std::string	Request::getQueryUrl() const
+{
+	return (queryURl);
 }
 
 std::string	Request::getHost() const
@@ -374,6 +419,11 @@ size_t	Request::getContLen()
 bool Request::isUrlCgi() const
 {
 	return _isUrlCgi;
+}
+
+std::string	Request::getPutCode() const
+{
+	return (this->_putCode);
 }
 
 std::string Request::getCgiUrl() const{
@@ -402,6 +452,15 @@ std::string Request::replaceChar(std::string str)
 	for (size_t pos = str.find('-'); pos != std::string::npos; pos = str.find('-'))
 	{
 		str.replace(pos, 1, "_");
+	}
+	return(str);
+}
+
+std::string Request::replaceotherChar(std::string str)
+{
+	for (size_t pos = str.find(':'); pos != std::string::npos; pos = str.find(':'))
+	{
+		str.replace(pos, 1, "");
 	}
 	return(str);
 }

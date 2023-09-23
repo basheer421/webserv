@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 15:14:46 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/06 13:45:49 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/13 12:55:22 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,37 +249,57 @@
 // 	return (0);
 // }
 
-const	std::string	getErrPage(std::string code, std::string mssg)
-{
-	std::string	html = "<!DOCTYPE html>"
-						"<html lang=\"en\">"
-						"<head>"
-						"	<meta charset=\"UTF-8\">"
-						"	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-						"	<title>" + code + " " + mssg + "</title>"
-						""
-						"	<style>"
-						"		h1 {"
-						"			text-align: center;"
-						"			margin-top: 40px;"
-						"			color: red;"
-						"		}"
-						"		h3 {"
-						"			text-align: center;"
-						"		}"
-						""
-						"	</style>"
-						"</head>"
-						"<body>"
-						"	<h1>" + code + " " + mssg + "</h1>"
-						"	<hr>"
-						"	<h3>webserv server</h3>"
-						"</body>"
-						"</html>";
+// const	std::string	getErrPage(std::string code, std::string mssg)
+// {
+// 	std::string	html = "<!DOCTYPE html>"
+// 						"<html lang=\"en\">"
+// 						"<head>"
+// 						"	<meta charset=\"UTF-8\">"
+// 						"	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+// 						"	<title>" + code + " " + mssg + "</title>"
+// 						""
+// 						"	<style>"
+// 						"		h1 {"
+// 						"			text-align: center;"
+// 						"			margin-top: 40px;"
+// 						"			color: red;"
+// 						"		}"
+// 						"		h3 {"
+// 						"			text-align: center;"
+// 						"		}"
+// 						""
+// 						"	</style>"
+// 						"</head>"
+// 						"<body>"
+// 						"	<h1>" + code + " " + mssg + "</h1>"
+// 						"	<hr>"
+// 						"	<h3>webserv server</h3>"
+// 						"</body>"
+// 						"</html>";
 
-	return (html);
+// 	return (html);
+// }
+// int main()
+// {
+// 	std::cout << getErrPage("404", "Not Found") << std::endl;
+// }
+
+bool file_exists(const std::string &filename) {
+  std::ifstream file(filename);
+  return file.good();
 }
-int main()
-{
-	std::cout << getErrPage("404", "Not Found") << std::endl;
+
+
+int main() {
+  std::string filename = "example.txt";
+
+
+  if (file_exists(filename)) {
+  std::cout << "The file '" << filename << "' exists." << std::endl;
+  } else {
+  std::cout << "The file '" << filename << "' does not exist." << std::endl;
+  }
+
+
+  return 0;
 }
