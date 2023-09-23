@@ -293,6 +293,22 @@ void    Request::parseRequest(bool	flag)
 		headerValidation();
 		parsePostBody();
 	}
+	if (getReqType() == DELETE)
+		setDeleteURL();
+}
+
+std::string	Request::getDeleteURL() const
+{
+	return (this->deleteURl);
+}
+
+void	Request::setDeleteURL()
+{
+	std::size_t pos;
+
+	pos = this->getReqUrl().find_last_of("/");
+	if (pos != std::string::npos)
+		this->deleteURl = this->getReqUrl().substr(pos + 1, this->getReqUrl().length());
 }
 
 int	Request::getHeaderLength()

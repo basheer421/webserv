@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/13 12:27:26 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/23 14:13:41 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,8 @@ void	Response::setBody(const std::string& path, const Request &request, bool aut
 
 	if (is_dir(path.c_str()) && autoindex)
 		body = dirList(path, request.getReqUrl());
+	else if (is_dir(path.c_str()) && request.getReqType() ==  DELETE)
+		body = dirList(path, request.getReqUrl());
 	else if (is_file(path.c_str()))
 		body = ft::file_to_string(path);
 	else
@@ -116,6 +118,11 @@ void	Response::setBody(const std::string& path, const Request &request, bool aut
 	this->content_len = res_body.length();
 	if (request.getReqType() == HEAD)
 		this->res_body.clear();
+	if (request.getReqType() == DELETE)
+	{
+		if (remove(request.getDeleteURL().c_str()) != 0)
+			throw std::runtime_error("400");
+	}
 	this->header += "Content-Type: " + content_type + "; charset=utf-8" CRLF
 					"Content-Length: " + ft::to_string(this->content_len) + CRLF
 					CRLF;

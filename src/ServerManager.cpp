@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/23 12:05:03 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/23 14:05:29 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,11 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	if (redirect(url, conf, res))
 		return ;
 
+	if (request.getReqType() == DELETE)
+	{
+		res.setBody(path, request);
+		return ;
+	}
 	if (request.getReqType() == POST || request.getReqType() == PUT)
 	{
 		if (request.getPutCode() == "201")
@@ -333,9 +338,9 @@ void ServerManager::run(char **envp)
 			else if (pfd.revents & POLLOUT && this->isReqComplete == true)
 			{
 				Response res = ManageRequest(requestBuilder[pfd.fd]);
-				// std::cout << "===========================================================================" << std::endl;
-				// std::cout << res.getResponse() << std::endl;
-				// std::cout << "===========================================================================" << std::endl;
+				std::cout << "===========================================================================" << std::endl;
+				std::cout << res.getResponse() << std::endl;
+				std::cout << "===========================================================================" << std::endl;
 				send(pfd.fd, res.getResponse().c_str(),
 					res.getResponse().length(), 0);
 				requestBuilder[pfd.fd].clear();

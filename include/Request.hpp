@@ -42,6 +42,7 @@ class Request
 		std::string							_putCode;
 		std::string							_queryString;
 		std::string							queryURl;
+		std::string							deleteURl;
 
 	public:
 		Request();
@@ -65,7 +66,9 @@ class Request
 		std::string							getQueryString() const;
 		std::string							getStrRequestType() const;
 		std::string							getQueryUrl() const;
+		std::string							getDeleteURL() const;
 
+		void								setDeleteURL();
 		size_t								getContLen();
 		int									getHeaderLength();
 		int									hexadecimalToDecimal(string hexVal);

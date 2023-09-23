@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/14 18:26:06 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/23 13:41:38 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <string>
 #include <sstream>
 #include <list>
+#include <stdio.h>
 #include <vector>
 #include <map>
 #include <sys/socket.h>
