@@ -137,6 +137,9 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Getting the server
 	const ServerTraits& conf = (*serv_it).getConf();
 
+    if (conf.client_max_body_size < (request.getContLen() + request.getHeaderLength()))
+        throw std::runtime_error("400");
+
 	ft::string path = (conf.root + url);
 
 	// Getting back the spaces
