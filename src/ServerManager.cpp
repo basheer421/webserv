@@ -278,10 +278,10 @@ Response ServerManager::ManageRequest(const string& buffer)
 	return (response);
 }
 
+
 void ServerManager::run(char **envp)
 {
 	this->parseEnv(envp);
-	this->isReqComplete = false;
 	signal(SIGPIPE, SIG_IGN);
 
 	while (true)
@@ -308,6 +308,7 @@ void ServerManager::run(char **envp)
 					throw std::runtime_error("Accept Error");
 				sockets.push_back( (struct pollfd) {client, POLLIN | POLLOUT, 0} );
 				requestBuilder[client] = "";
+                isReqCompleteMap[client] = false;
 			}
 		}
 
@@ -319,7 +320,7 @@ void ServerManager::run(char **envp)
 		{
 			struct pollfd& pfd = *it;
 
-			if (pfd.revents & POLLIN && this->isReqComplete == false)
+			if (pfd.revents & POLLIN && isReqCompleteMap[pfd.fd] == false)
 			{
 				char buffer[BUFFER_SIZE];
 
@@ -333,18 +334,18 @@ void ServerManager::run(char **envp)
 				}
 				else
 					requestBuilder[pfd.fd] += buffer;
-				this->isReqComplete = partialRequest(requestBuilder[pfd.fd]);
+				isReqCompleteMap[pfd.fd] = partialRequest(requestBuilder[pfd.fd]);
 			}
-			else if (pfd.revents & POLLOUT && this->isReqComplete == true)
+			else if (pfd.revents & POLLOUT && isReqCompleteMap[pfd.fd] == true)
 			{
 				Response res = ManageRequest(requestBuilder[pfd.fd]);
-				std::cout << "===========================================================================" << std::endl;
-				std::cout << res.getResponse() << std::endl;
-				std::cout << "===========================================================================" << std::endl;
+				// std::cout << "===========================================================================" << std::endl;
+				// std::cout << res.getResponse() << std::endl;
+				// std::cout << "===========================================================================" << std::endl;
 				send(pfd.fd, res.getResponse().c_str(),
 					res.getResponse().length(), 0);
 				requestBuilder[pfd.fd].clear();
-				this->isReqComplete = false;
+				isReqCompleteMap[pfd.fd] = false;
 			}
 		}
 	}

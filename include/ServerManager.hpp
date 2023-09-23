@@ -25,7 +25,7 @@ private:
 	std::vector<struct pollfd> sockets;
 	std::map<std::string, std::string> envMap;
 	std::map<int, string> requestBuilder;
-	bool					isReqComplete;
+    std::map<int, bool> isReqCompleteMap;
 
 public:
 	ServerManager(const std::vector<ServerTraits>& cnf);
