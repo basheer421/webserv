@@ -3,14 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   ServerTraits.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/02 03:08:40 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/02 03:11:15 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/23 22:52:02 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerTraits.hpp"
+
+ServerTraits::ServerTraits()
+{
+	routes["/"].root = root;
+}
 
 ServerRoute::ServerRoute()
 {

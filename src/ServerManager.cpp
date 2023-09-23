@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/21 23:22:50 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/23 22:59:21 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,50 +119,29 @@ static string getDir(string path)
 {
 	size_t pos = path.rfind('/');
 	if (pos == std::string::npos)
-		path = "";
+		throw std::runtime_error("400");
 	else
 		path = path.substr(0, pos);
-	if (path.empty())
-		path = "/";
 	return (path);
 }
 
-static ServerRoute getRoute(string url, const ServerTraits& conf)
+static ServerRoute getRoute(string& url, const ServerTraits& conf)
 {
 	std::map<ft::string, ServerRoute>::const_iterator route_it;
 	route_it = conf.routes.find(url);
-	if (route_it == conf.routes.end())
+	while (route_it == conf.routes.end() && !url.empty())
 	{
-		string dir = getDir(url);
-		route_it = conf.routes.find(dir);
+		url = getDir(url);
+		route_it = conf.routes.find(url);
+	}
+	if (route_it == conf.routes.end() && url.empty())
+	{
+		url = "/";
+		route_it = conf.routes.find(url);
 		if (route_it == conf.routes.end())
-			throw std::runtime_error("404");
+			throw std::runtime_error("500");
 	}
 	return route_it->second;
-}
-
-/**
- * /home is rooted to /var/html
- * http://localhost:8080/home/hello.html -> will serve /var/html/hello.html file
- * 
- * /world is rooted to /var
- * .../hello/world/index.html -> /hello/var/index.html
- * 
- * /hello is rooted to /var 
- * but this will not change anything
- * it should be rooted by exact path like /hello/world/
- */
-static string getPath(string url, const ServerRoute& conf)
-{
-	// size_t pos = url.rfind(url);
-	// if (pos == std::string::npos)
-	// 	throw std::runtime_error("500");
-	
-	// string path = conf.root + url;
-
-	
-	// path = path.replace_all("%20", " ");
-	// return path;
 }
 
 void ServerManager::ProcessResponse(Request& request, Response& res)
@@ -173,6 +152,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	in_port_t req_port;
 	in_addr_t req_address;
 	string host = request.getHost();
+
+	
 
 	if (host.empty())
 		throw std::runtime_error("400");
@@ -189,15 +170,16 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Getting the server
 	const ServerTraits& conf = (*serv_it).getConf();
 
-
-	ServerRoute route = getRoute(url, conf);
+	
+	string routeUrl = url;
+	ServerRoute route = getRoute(routeUrl, conf);
 	if (route.root.empty())
 		route.root = conf.root;
 
 	string path;
 
 	// Changing the path to be the full path
-	path = getPath(url, route);
+	path = route.root + "/" + url.substr(routeUrl.length());
 
 	// Checking if the url has the request method allowed
 	throwIfnotAllowed(url, conf, request);
