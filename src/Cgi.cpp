@@ -142,10 +142,10 @@ void Cgi::RunCgi(Response &res, Request &req){
             time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
             // std::cerr << "outchild: " << outchild << "time :" << time << std::endl;
             
-            if (time > 6)
+            if (time > 4)
             {
                 kill(pid, SIGTERM);
-                throw std::runtime_error("500");
+                throw std::runtime_error("408");
             }
         }
 

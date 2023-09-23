@@ -12,6 +12,8 @@
 
 #include "ServerManager.hpp"
 
+bool isExit = false;
+
 ServerManager::ServerManager(const std::vector<ServerTraits>& cnf)
 {
 	for (size_t i = 0; i < cnf.size(); ++i)
@@ -265,6 +267,13 @@ Response ServerManager::ManageRequest(const string& buffer)
 			response.setResponseHeader("400", "Bad Request");
 			response.setErrBody(getErrPage("400", "Bad Request"), request);
 		}
+        else if (what == "408")
+		{
+            std::cout << "IAM HERE BRO" << std::endl;
+			response.setResponseHeader("408", "Request Timeout");
+            response.appendHeader("Connection: close");
+			response.setErrBody(getErrPage("408", "Request Timeout"), request);
+		}
 		else
 		{
 			std::cerr << "Error: " << e.what() << std::endl;
@@ -281,18 +290,27 @@ Response ServerManager::ManageRequest(const string& buffer)
 	return (response);
 }
 
+static void handle_exit(int sig)
+{
+    (void)sig;
+    isExit = true;
+    std::cout << "is inside handle exit\n";
+    // exit(-1);
+}
 
 void ServerManager::run(char **envp)
 {
 	this->parseEnv(envp);
 	signal(SIGPIPE, SIG_IGN);
+    signal(SIGINT, handle_exit);
 
-	while (true)
+	while (!isExit)
 	{
+        
 		// All servers and clients will be inside the poll.
-		if (poll(sockets.data(), sockets.size(), -1) < 0)
+		if (poll(sockets.data(), sockets.size(), -1) < 0){
 			throw std::runtime_error("Poll Error");
-
+        }
 		/**
 		 * loop through servers and check if any is ready to read
 		 * 	and then accept the connection.
@@ -342,9 +360,9 @@ void ServerManager::run(char **envp)
 			else if (pfd.revents & POLLOUT && isReqCompleteMap[pfd.fd] == true)
 			{
 				Response res = ManageRequest(requestBuilder[pfd.fd]);
-				// std::cout << "===========================================================================" << std::endl;
-				// std::cout << res.getResponse() << std::endl;
-				// std::cout << "===========================================================================" << std::endl;
+				std::cout << "===========================================================================" << std::endl;
+				std::cout << res.getResponse() << std::endl;
+				std::cout << "===========================================================================" << std::endl;
 				send(pfd.fd, res.getResponse().c_str(),
 					res.getResponse().length(), 0);
 				requestBuilder[pfd.fd].clear();

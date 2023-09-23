@@ -18,6 +18,7 @@ class Cgi;
 class Server;
 class Request;
 class Response;
+
 class ServerManager
 {
 private:

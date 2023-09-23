@@ -34,6 +34,8 @@ int main(int argc, char **argv, char **envp)
 		// Starting the server here // while loop here maybe to keep the server running 
 		ServerManager serverManager(conf);
 		serverManager.run(envp);
+        std::cerr << "EXITED" << std::endl;
+
 
 	}
 	catch(const std::exception& e)
