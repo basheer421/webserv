@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/14 18:37:23 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/23 12:05:03 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,7 +276,7 @@ Response ServerManager::ManageRequest(const string& buffer)
 void ServerManager::run(char **envp)
 {
 	this->parseEnv(envp);
-
+	this->isReqComplete = false;
 	signal(SIGPIPE, SIG_IGN);
 
 	while (true)
@@ -314,7 +314,7 @@ void ServerManager::run(char **envp)
 		{
 			struct pollfd& pfd = *it;
 
-			if (pfd.revents & POLLIN)
+			if (pfd.revents & POLLIN && this->isReqComplete == false)
 			{
 				char buffer[BUFFER_SIZE];
 
@@ -327,19 +327,19 @@ void ServerManager::run(char **envp)
 					it = sockets.erase(it);
 				}
 				else
-				{
 					requestBuilder[pfd.fd] += buffer;
-					if (pfd.revents & POLLOUT && partialRequest(requestBuilder[pfd.fd]))
-					{
-						Response res = ManageRequest(requestBuilder[pfd.fd]);
-						// std::cout << "===========================================================================" << std::endl;
-						// std::cout << res.getResponse() << std::endl;
-						// std::cout << "===========================================================================" << std::endl;
-						send(pfd.fd, res.getResponse().c_str(),
-							res.getResponse().length(), 0);
-						requestBuilder[pfd.fd].clear();
-					}
-				}
+				this->isReqComplete = partialRequest(requestBuilder[pfd.fd]);
+			}
+			else if (pfd.revents & POLLOUT && this->isReqComplete == true)
+			{
+				Response res = ManageRequest(requestBuilder[pfd.fd]);
+				// std::cout << "===========================================================================" << std::endl;
+				// std::cout << res.getResponse() << std::endl;
+				// std::cout << "===========================================================================" << std::endl;
+				send(pfd.fd, res.getResponse().c_str(),
+					res.getResponse().length(), 0);
+				requestBuilder[pfd.fd].clear();
+				this->isReqComplete = false;
 			}
 		}
 	}
@@ -353,12 +353,14 @@ bool	ServerManager::partialRequest(std::string buff)
 	Request	req(first);
 	req.parseRequest();
 	std::map<std::string, std::string> reqMap = req.getRequest();
+	if (buff.find("\r\n\r\n") == std::string::npos)
+		return (false);
 	if (buff.empty())
-		return false;
+		return (false);
 	if (reqMap["Transfer-Encoding:"] == "chunked")
 	{
 		if (buff.find("0" CRLF CRLF) == std::string::npos)
-			return false;
+			return (false);
 		flag = true;
 	}
 	if ((buff.length() < (req.getContLen() + req.getHeaderLength())) && req.getReqType() == POST && !flag)
