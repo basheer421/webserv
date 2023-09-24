@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 17:28:05 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/24 18:01:38 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,16 +191,10 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	if (redirect(route, res))
 		return ;
 
-	if (request.getReqType() == DELETE)
+	if (request.getReqType() == DELETE || request.getReqType() == POST || request.getReqType() == PUT)
 	{
 		res.setBody(path, request);
 		return ;
-	}
-	if (request.getReqType() == POST || request.getReqType() == PUT)
-	{
-		if (request.getPutCode() == "201")
-			res.setResponseHeader("201", "Created");
-		// return ;
 	}
 
 	if (is_file(path))
@@ -212,8 +206,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			cgi.SetEnv(this->envMap, res, request);
 			cgi.HandleCgi(res, request, conf.root);
 		}
-        else
-		    res.setBody(path, request);
+		else
+			res.setBody(path, request);
 		return ;
 	}
 
