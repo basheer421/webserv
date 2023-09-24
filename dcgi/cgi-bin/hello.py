@@ -5,6 +5,7 @@ import os
 import cgi
 import time
 
+
 print("Content-type: text/html\r\n\r")
 print("<html><body>")
 print("<h1>Hello World!</h1>")
@@ -15,6 +16,10 @@ print("</body></html>")
 
 
 form = cgi.FieldStorage() # instantiate only once!
-name = form.getfirst('num', '1')
+if "name" not in form:
+	print("<H1>Error<H1>")
+	return
+print("<p>name:", form["name"].value)
+name = form.getfirst('name', '1')
 print(name, file=sys.stderr)
-time.sleep(20)
+time.sleep(2)
