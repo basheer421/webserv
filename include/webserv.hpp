@@ -6,16 +6,18 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 20:07:27 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/10 15:24:51 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/23 13:41:38 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <sstream>
 #include <list>
+#include <stdio.h>
 #include <vector>
 #include <map>
 #include <sys/socket.h>
@@ -44,4 +46,5 @@
 # define DEFAULT_PORT 8080
 # define CRLF "\r\n"
 # define FD_COUNT 255
-# define BUFFER_SIZE 1024
+# define BUFFER_SIZE 216000
+

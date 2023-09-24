@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/14 22:04:39 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 12:54:10 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ class Cgi;
 class Server;
 class Request;
 class Response;
+
 class ServerManager
 {
 private:
@@ -25,6 +26,7 @@ private:
 	std::vector<struct pollfd> sockets;
 	std::map<std::string, std::string> envMap;
 	std::map<int, string> requestBuilder;
+    std::map<int, bool> isReqCompleteMap;
 
 public:
 	ServerManager(const std::vector<ServerTraits>& cnf);

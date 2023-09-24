@@ -6,11 +6,13 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/23 22:59:21 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 12:55:22 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerManager.hpp"
+
+bool isExit = false;
 
 ServerManager::ServerManager(const std::vector<ServerTraits>& cnf)
 {
@@ -175,6 +177,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	ServerRoute route = getRoute(routeUrl, conf);
 	if (route.root.empty())
 		route.root = conf.root;
+    if (conf.client_max_body_size < (request.getContLen() + request.getHeaderLength()))
+        throw std::runtime_error("400");
 
 	string path;
 
@@ -188,23 +192,42 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	if (redirect(route, res))
 		return ;
 
+	if (request.getReqType() == DELETE)
+	{
+		res.setBody(path, request);
+		return ;
+	}
+	if (request.getReqType() == POST || request.getReqType() == PUT)
+	{
+		if (request.getPutCode() == "201")
+			res.setResponseHeader("201", "Created");
+		// return ;
+	}
+
 	if (is_file(path))
 	{
 		if (request.isUrlCgi())
 		{
 			Cgi cgi;
 
-			cgi.SetEnv(this->envMap);
-			cgi.HandleCgi(res, request);
+			cgi.SetEnv(this->envMap, res, request);
+			cgi.HandleCgi(res, request, conf.root);
 		}
-		else
-			res.setBody(path, request.getReqUrl());
+        else
+		    res.setBody(path, request);
 		return ;
 	}
 	
 
 	if (!is_dir(path))
 		throw (std::runtime_error("404"));
+
+	std::map<ft::string, ServerRoute>::const_iterator route_it(
+		conf.routes.find(url)
+	);
+	// Didn't find the dir
+	if (route_it == conf.routes.end())
+		throw std::runtime_error("404");
 
 	/**
 	 * By now we know that the url is a directory.
@@ -227,7 +250,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		{
 			if (!is_dir(path))
 				throw (std::runtime_error("404"));
-			res.setBody(path, request.getReqUrl(), true);
+			res.setBody(path, request, true);
 			return ;
 		}
 		throw (std::runtime_error("404"));
@@ -241,7 +264,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		// Responding with autoindex if found
 		if (!is_dir(path) || route.autoindex == false)
 			throw (std::runtime_error("404"));
-		res.setBody(path, request.getReqUrl(), true);
+		res.setBody(path, request, true);
 		return ;
 	}
 	// Should be already found, otherwise 500 is thrown.
@@ -264,51 +287,67 @@ Response ServerManager::ManageRequest(const string& buffer)
 		if (what == "405")
 		{
 			response.setResponseHeader("405", "Method Not Allowed");
-			response.setErrBody(getErrPage("405", "Method Not Allowed"));
+			response.setErrBody(getErrPage("405", "Method Not Allowed"), request);
 		}
 		else if (what == "404")
 		{
 			response.setResponseHeader("404", "Not Found");
-			response.setErrBody(getErrPage("404", "Not Found"));
+			response.setErrBody(getErrPage("404", "Not Found"), request);
 		}
 		else if (what == "403")
 		{
-			response.setResponseHeader("403", "Not Found");
-			response.setErrBody(getErrPage("403", "Not Found"));
+			response.setResponseHeader("403", "Forbidden");
+			response.setErrBody(getErrPage("403", "Forbidden"), request);
 		}
 		else if (what == "400")
 		{
-			response.setResponseHeader("400", "Not Found");
-			response.setErrBody(getErrPage("400", "Not Found"));
+			response.setResponseHeader("400", "Bad Request");
+			response.setErrBody(getErrPage("400", "Bad Request"), request);
+		}
+        else if (what == "408")
+		{
+            std::cout << "IAM HERE BRO" << std::endl;
+			response.setResponseHeader("408", "Request Timeout");
+            response.appendHeader("Connection: close");
+			response.setErrBody(getErrPage("408", "Request Timeout"), request);
 		}
 		else
 		{
 			std::cerr << "Error: " << e.what() << std::endl;
 			response.setResponseHeader("500", "Internal Server Error");
-			response.setErrBody(getErrPage("500", "Internal Server Error"));
+			response.setErrBody(getErrPage("500", "Internal Server Error"), request);
 		}
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << "Error: " << e.what() << std::endl;
 		response.setResponseHeader("500", "Internal Server Error");
-		response.setErrBody(getErrPage("500", "Internal Server Error"));
+		response.setErrBody(getErrPage("500", "Internal Server Error"), request);
 	}
 	return (response);
+}
+
+static void handle_exit(int sig)
+{
+    (void)sig;
+    isExit = true;
+    std::cout << "is inside handle exit\n";
+    // exit(-1);
 }
 
 void ServerManager::run(char **envp)
 {
 	this->parseEnv(envp);
-
 	signal(SIGPIPE, SIG_IGN);
+    signal(SIGINT, handle_exit);
 
-	while (true)
+	while (!isExit)
 	{
+        
 		// All servers and clients will be inside the poll.
-		if (poll(sockets.data(), sockets.size(), -1) < 0)
+		if (poll(sockets.data(), sockets.size(), -1) < 0){
 			throw std::runtime_error("Poll Error");
-
+        }
 		/**
 		 * loop through servers and check if any is ready to read
 		 * 	and then accept the connection.
@@ -327,18 +366,19 @@ void ServerManager::run(char **envp)
 					throw std::runtime_error("Accept Error");
 				sockets.push_back( (struct pollfd) {client, POLLIN | POLLOUT, 0} );
 				requestBuilder[client] = "";
+                isReqCompleteMap[client] = false;
 			}
 		}
 
 		// loop on the clients
 		for (std::vector<struct pollfd>::iterator
 			it = sockets.begin() + servers.size();
-			it != sockets.end();
+			it < sockets.end();
 			++it)
 		{
 			struct pollfd& pfd = *it;
 
-			if (pfd.revents & POLLIN)
+			if (pfd.revents & POLLIN && isReqCompleteMap[pfd.fd] == false)
 			{
 				char buffer[BUFFER_SIZE];
 
@@ -349,25 +389,27 @@ void ServerManager::run(char **envp)
 					requestBuilder[pfd.fd].clear();
 					close(pfd.fd);
 					it = sockets.erase(it);
-					continue ;
 				}
 				else
-				{
 					requestBuilder[pfd.fd] += buffer;
-					if (pfd.revents & POLLOUT && partialRequest(requestBuilder[pfd.fd]))
-					{
-						Response res = ManageRequest(requestBuilder[pfd.fd]);
-						send(pfd.fd, res.getResponse().c_str(),
-							res.getResponse().length(), 0);
-						requestBuilder[pfd.fd].clear();
-					}
-				}
+				isReqCompleteMap[pfd.fd] = partialRequest(requestBuilder[pfd.fd]);
+			}
+			else if (pfd.revents & POLLOUT && isReqCompleteMap[pfd.fd] == true)
+			{
+				Response res = ManageRequest(requestBuilder[pfd.fd]);
+				std::cout << "===========================================================================" << std::endl;
+				std::cout << res.getResponse() << std::endl;
+				std::cout << "===========================================================================" << std::endl;
+				send(pfd.fd, res.getResponse().c_str(),
+					res.getResponse().length(), 0);
+				requestBuilder[pfd.fd].clear();
+				isReqCompleteMap[pfd.fd] = false;
 			}
 		}
 	}
 }
 
-bool	ServerManager::partialRequest(std::string	buff)
+bool	ServerManager::partialRequest(std::string buff)
 {
 	std::string	first("");
 	bool		flag;
@@ -375,8 +417,16 @@ bool	ServerManager::partialRequest(std::string	buff)
 	Request	req(first);
 	req.parseRequest();
 	std::map<std::string, std::string> reqMap = req.getRequest();
+	if (buff.find("\r\n\r\n") == std::string::npos)
+		return (false);
+	if (buff.empty())
+		return (false);
 	if (reqMap["Transfer-Encoding:"] == "chunked")
+	{
+		if (buff.find("0" CRLF CRLF) == std::string::npos)
+			return (false);
 		flag = true;
+	}
 	if ((buff.length() < (req.getContLen() + req.getHeaderLength())) && req.getReqType() == POST && !flag)
 		return (false);
 	return (true);

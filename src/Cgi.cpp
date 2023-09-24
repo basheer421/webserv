@@ -20,8 +20,31 @@ Cgi::~Cgi(){
 
 }
 
-void Cgi::SetEnv(std::map<std::string, std::string> &envMap){
+void Cgi::SetEnv(std::map<std::string, std::string> &envMap, Response &res, Request &req){
+    (void) res;
+    
     this->envMap = envMap;
+    this->envMap["AUTH_TYPE"] = "null";
+    this->envMap["CONTENT_LENGTH"] = this->envMap["HTTP_CONTENT_LENGTH"];
+    this->envMap["CONTENT_TYPE"] = this->envMap["HTTP_CONTENT_TYPE"];
+    this->envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
+    this->envMap["PATH_INFO"] = req.getReqUrl();
+    this->envMap["PATH_TRANSLATED"] = req.getReqUrl();
+    this->envMap["QUERY_STRING"] = req.getQueryString();
+    this->envMap["REQUEST_METHOD"] = req.getStrRequestType();
+    this->envMap["REQUEST_URI"] = req.getQueryUrl();
+    this->envMap["SCRIPT_NAME"] = req.getReqUrl();
+    this->envMap["SERVER_NAME"] = "WEBSERV";
+    this->envMap["SERVER_PORT"] = "8080";
+    this->envMap["SERVER_PROTOCOL"] = "HTTP/1.1";
+    this->envMap["SERVER_SOFTWARE"] = "Webserv/1.0";
+    this->envMap["REDIRECT_STATUS"] = "200";
+
+    // for (std::map<std::string, std::string>::iterator  i = this->envMap.begin(); i != this->envMap.end(); i++)
+    // {
+    //     std::cout << i->first << "=" << i->second << std::endl;
+    // }
+
 }
 
 char **Cgi::GetCharEnv(){
@@ -43,10 +66,9 @@ char **Cgi::GetCharEnv(){
 }
 // add all the headers to the response
 
-void Cgi::HandleCgi(Response &res, Request &req)
+void Cgi::HandleCgi(Response &res, Request &req, std::string rooturl)
 {
-    this->scriptpath = "." + req.getCgiUrl();
-
+    this->scriptpath = rooturl + req.getCgiUrl();
     this->RunCgi(res, req);
 }
 
@@ -120,10 +142,10 @@ void Cgi::RunCgi(Response &res, Request &req){
             time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
             // std::cerr << "outchild: " << outchild << "time :" << time << std::endl;
             
-            if (time > 6)
+            if (time > 4)
             {
                 kill(pid, SIGTERM);
-                throw std::runtime_error("500");
+                throw std::runtime_error("408");
             }
         }
 
