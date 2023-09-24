@@ -129,7 +129,7 @@ void	Request::parsePostBody()
 		return ;
     std::string::size_type pos = 0;
 	std::string	req = _buffCopy;
-	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["content-length:"].empty() == false && _postFlag == false)
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && (_request["content-length:"].empty() == false || _request["Content-Length:"].empty() == false) && _postFlag == false)
 	{
         string cont_length = _request["content-length:"];
 		std::string	body = req.substr(pos, ft::from_string<int>(cont_length));
@@ -287,9 +287,9 @@ void    Request::parseRequest(bool	flag)
     }
 	if (flag)
 	{
-		// std::cout << "===========================================================================" << std::endl;
-		// std::cout << _buffCopy << std::endl;
-		// std::cout << "===========================================================================" << std::endl;
+		std::cout << "===========================================================================" << std::endl;
+		std::cout << _buffCopy << std::endl;
+		std::cout << "===========================================================================" << std::endl;
 		headerValidation();
 		parsePostBody();
 	}

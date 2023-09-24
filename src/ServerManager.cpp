@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 19:17:59 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/24 21:17:54 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -193,7 +193,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Getting the server
 	const ServerTraits& conf = (*serv_it).getConf();
 
-	if (url.back() == '/')
+	if (url.back() == '/' && url.size() > 1)
 		url.resize(url.size() - 1);
 	string routeUrl = url;
 	ServerRoute route = getRoute(routeUrl, conf);
