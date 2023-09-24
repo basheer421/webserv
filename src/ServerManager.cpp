@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 21:17:54 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/24 21:38:36 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,6 +205,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 	// Changing the path to be the full path
 	string path = route.root + "/" + url.substr(routeUrl.length());
+	if (path.back() == '/')
+		path.resize(path.size() - 1);
 	std::cout << "PATH: " << path << std::endl;
 	
 
@@ -216,7 +218,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	if (redirect(route, res))
 		return ;
 
-	if (request.getReqType() == DELETE || request.getReqType() == POST || request.getReqType() == PUT)
+	if ((request.getReqType() == DELETE || request.getReqType() == POST || request.getReqType() == PUT) && !request.isUrlCgi())
 	{
 		res.setBody(path, request);
 		return ;
