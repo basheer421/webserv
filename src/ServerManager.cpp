@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/23 14:05:29 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/24 12:55:22 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,24 +95,55 @@ static void throwIfnotAllowed(const string& url, const ServerTraits& conf,
  * This should be changed in the future to handle multiple redirects.
  * like 301 and 302.
 */
-bool ServerManager::redirect(const string& url, const ServerTraits& conf,
-	Response& res)
+bool ServerManager::redirect(const ServerRoute& route, Response& res)
 {
-	std::map<ft::string, ServerRoute>::const_iterator route_it;
-	route_it = conf.routes.find(url);
-	if (route_it == conf.routes.end())
-		return false;
-	const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
-
-	if (!foundDir.second.return_.empty())
+	if (!route.return_.empty())
 	{
 		res.setResponseHeader("301", "Moved Permanently");
 
 		// Last header
-		res.appendHeader("Location: " + foundDir.second.return_ + CRLF);
+		res.appendHeader("Location: " + route.return_ + CRLF);
 		return true;
 	}
 	return false;
+}
+
+/**
+ * @brief Get the Dir (if there's a file name it will remove it)
+ * 
+ * "/home/index.html" -> "/home"
+ * "/index.html" -> ""
+ * 
+ * @param path 
+ * @return string 
+ */
+static string getDir(string path)
+{
+	size_t pos = path.rfind('/');
+	if (pos == std::string::npos)
+		throw std::runtime_error("400");
+	else
+		path = path.substr(0, pos);
+	return (path);
+}
+
+static ServerRoute getRoute(string& url, const ServerTraits& conf)
+{
+	std::map<ft::string, ServerRoute>::const_iterator route_it;
+	route_it = conf.routes.find(url);
+	while (route_it == conf.routes.end() && !url.empty())
+	{
+		url = getDir(url);
+		route_it = conf.routes.find(url);
+	}
+	if (route_it == conf.routes.end() && url.empty())
+	{
+		url = "/";
+		route_it = conf.routes.find(url);
+		if (route_it == conf.routes.end())
+			throw std::runtime_error("500");
+	}
+	return route_it->second;
 }
 
 void ServerManager::ProcessResponse(Request& request, Response& res)
@@ -123,6 +154,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	in_port_t req_port;
 	in_addr_t req_address;
 	string host = request.getHost();
+
+	
 
 	if (host.empty())
 		throw std::runtime_error("400");
@@ -139,19 +172,24 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Getting the server
 	const ServerTraits& conf = (*serv_it).getConf();
 
+	
+	string routeUrl = url;
+	ServerRoute route = getRoute(routeUrl, conf);
+	if (route.root.empty())
+		route.root = conf.root;
     if (conf.client_max_body_size < (request.getContLen() + request.getHeaderLength()))
         throw std::runtime_error("400");
 
-	ft::string path = (conf.root + url);
+	string path;
 
-	// Getting back the spaces
-	path = path.replace_all("%20", " ");
+	// Changing the path to be the full path
+	path = route.root + "/" + url.substr(routeUrl.length());
 
 	// Checking if the url has the request method allowed
 	throwIfnotAllowed(url, conf, request);
 
 	// Checking if there's a redirect
-	if (redirect(url, conf, res))
+	if (redirect(route, res))
 		return ;
 
 	if (request.getReqType() == DELETE)
@@ -179,6 +217,10 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		    res.setBody(path, request);
 		return ;
 	}
+	
+
+	if (!is_dir(path))
+		throw (std::runtime_error("404"));
 
 	std::map<ft::string, ServerRoute>::const_iterator route_it(
 		conf.routes.find(url)
@@ -186,30 +228,25 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Didn't find the dir
 	if (route_it == conf.routes.end())
 		throw std::runtime_error("404");
-	std::cout << url << std::endl;
 
-	const std::pair<ft::string, ServerRoute>& foundDir = *route_it;
 	/**
 	 * By now we know that the url is a directory.
-	 * 
-	 * If the conf contains an index
-	 * Note: This should be changed to handle multiple indexes
-	 * 	and to be by location block not server block.
 	 */
-	if (!conf.index.empty())
+
+	if (!route.index.empty())
 	{
 		// Responding with index
-		for (size_t i = 0; i < conf.index.size(); ++i)
+		for (size_t i = 0; i < route.index.size(); ++i)
 		{
-			if (is_file(conf.root + "/" + conf.index[i]))
+			if (is_file(route.root + "/" + route.index[i]))
 			{
-				res.setBody(conf.root + "/" + conf.index[i], request);
+				res.setBody(route.root + "/" + route.index[i], request.getReqUrl());
 				return ;
 			}
 		}
 
 		// Responding with autoindex if found
-		if (foundDir.second.autoindex == true)
+		if (route.autoindex == true)
 		{
 			if (!is_dir(path))
 				throw (std::runtime_error("404"));
@@ -225,7 +262,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	else
 	{
 		// Responding with autoindex if found
-		if (!is_dir(path) || foundDir.second.autoindex == false)
+		if (!is_dir(path) || route.autoindex == false)
 			throw (std::runtime_error("404"));
 		res.setBody(path, request, true);
 		return ;
