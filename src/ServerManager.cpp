@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 15:04:15 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 15:10:02 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,8 +155,6 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	in_addr_t req_address;
 	string host = request.getHost();
 
-	
-
 	if (host.empty())
 		throw std::runtime_error("400");
 
@@ -188,7 +186,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Checking if the url has the request method allowed
 	throwIfnotAllowed(url, conf, request);
 
-	// throw (ErrorPage(conf, "404"));
+
 	// Checking if there's a redirect
 	if (redirect(route, res))
 		return ;
@@ -218,10 +216,9 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		    res.setBody(path, request);
 		return ;
 	}
-	
-	throw (ErrorPage(conf, "500"));
+
 	if (!is_dir(path))
-		throw (ErrorPage(conf, "400"));
+		throw (ErrorPage(conf, "404"));
 
 	std::map<ft::string, ServerRoute>::const_iterator route_it(
 		conf.routes.find(url)
