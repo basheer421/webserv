@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 17:39:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 13:51:41 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 15:32:40 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,10 @@ struct ServerRoute
  * 
  * @param routes A vector of ServerRoute struct, that stores the routes info.
  * 
+ * @param error_pages A map that stores the error pages.
+ * 
+ * @param cgi_extensions A vector that stores the allowed cgi extensions.
+ * 
 */
 struct ServerTraits
 {
@@ -66,6 +70,7 @@ struct ServerTraits
 	in_addr_t listen_address;
 	in_port_t listen_port;
 	std::vector<string> server_name;
+	std::vector<string> cgi_extensions;
 	size_t client_max_body_size;
 	std::map<string, string> error_pages;
 	std::map<string, ServerRoute> routes;

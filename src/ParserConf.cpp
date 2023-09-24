@@ -146,6 +146,10 @@ void ParserConf::fillServerValue(ServerTraits& server, string& name, std::vector
 			throw std::runtime_error("Parse Error: could not parse 'error_page'");
 		}
 	}
+	else if (name == "cgi_extensions")
+	{
+		server.cgi_extensions = segments;
+	}
 	else
 	{
 		throw std::runtime_error((string("Parse Error: Unknown type {") + name + string("}")).c_str());

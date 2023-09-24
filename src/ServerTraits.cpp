@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/02 03:08:40 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 13:23:03 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 15:34:30 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ ServerTraits::ServerTraits()
 	routes["/"].root = root;
 	client_max_body_size = 1024;
 	root = "/var/www/html";
+	cgi_extensions.push_back("");
 }
 
 ServerRoute::ServerRoute()
