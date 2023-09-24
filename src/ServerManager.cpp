@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 15:10:02 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 18:40:25 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,14 +46,36 @@ ServerManager& ServerManager::operator = (const ServerManager& src)
 ServerManager::~ServerManager() {}
 
 
-static std::vector<Server>::iterator findServer(std::vector<Server>::iterator start, std::vector<Server>::iterator end, in_addr_t address, in_port_t port)
+static std::vector<Server>::iterator findServer(std::vector<Server>::iterator start, std::vector<Server>::iterator end, const string& host)
 {
 	std::vector<Server>::iterator it;
+	string hst = host;
+	in_port_t port = 0;
+	in_addr_t address = 0;
 
+	if (hst.find(':') == std::string::npos)
+		throw std::runtime_error("400");
+	string addStr = hst.substr(0, hst.find(':'));
+	string portStr = hst.substr(hst.find(':') + 1);
+	if (std::count(host.begin(), host.end(), '.') == 3)
+	{
+		setAddress(hst, address, port);	
+	} else {
+		setAddress(portStr, address, port);
+	}
+	
 	for (it = start; it != end; ++it)
 	{
 		if ((((*it).getConf().listen_address == address)
 			|| ((*it).getConf().listen_address == htonl(INADDR_ANY)))
+			&& (*it).getConf().listen_port == port)
+			return (it);
+		std::cout << "host: " << host << std::endl;
+		std::cout << "server_name: " << (*it).getConf().server_name.back() << std::endl;
+		if (((std::find((*it).getConf().server_name.begin(),
+			(*it).getConf().server_name.end(), addStr) != (*it).getConf().server_name.end())
+			|| (std::find((*it).getConf().server_name.begin(),
+			(*it).getConf().server_name.end(), "_") != (*it).getConf().server_name.end()))
 			&& (*it).getConf().listen_port == port)
 			return (it);
 	}
@@ -151,19 +173,13 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	this->envMap = request.modifyEnv(this->envMap);
 	const ft::string& url = request.getReqUrl();
 
-	in_port_t req_port;
-	in_addr_t req_address;
 	string host = request.getHost();
 
 	if (host.empty())
 		throw std::runtime_error("400");
-
-	// Throws 500
-	setAddress(host, req_address, req_port);
-
 	
 	std::vector<Server>::iterator serv_it = findServer(
-		servers.begin(), servers.end(), req_address, req_port);
+		servers.begin(), servers.end(), host);
 	if (serv_it == servers.end())
 		throw std::runtime_error("400");
 
@@ -175,13 +191,12 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	ServerRoute route = getRoute(routeUrl, conf);
 	if (route.root.empty())
 		route.root = conf.root;
-    if (conf.client_max_body_size < (request.getContLen() + request.getHeaderLength()))
+    if (conf.client_max_body_size < (request.getContLen() + request.getHeaderLength())) {
         throw std::runtime_error("400");
-
-	string path;
+	}
 
 	// Changing the path to be the full path
-	path = route.root + "/" + url.substr(routeUrl.length());
+	string path = route.root + "/" + url.substr(routeUrl.length());
 
 	// Checking if the url has the request method allowed
 	throwIfnotAllowed(url, conf, request);
@@ -300,7 +315,7 @@ Response ServerManager::ManageRequest(const string& buffer)
 			"Forbidden", "Bad Request", "Request Timeout", "Internal Server Error"};
 
 		if (what == "405" || what == "404" || what == "403" || what == "400" || what == "408" || what == "500")
-			setErrPage(response, request, what, msgArr[(std::find(arr, arr + 6, what) - arr)], e.getConf()); // std::find finds the index of the element
+			setErrPage(response, request, what, msgArr[(std::find(arr, arr + 6, what) - arr)], e.getConf());
 		if (what == "408")
 			response.appendHeader("Connection: close");
 	}

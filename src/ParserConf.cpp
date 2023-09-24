@@ -240,7 +240,7 @@ void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port)
 {
     std::vector<ft::string> vec = confAdrss.split(':');
     if (vec.size() != 1 && vec.size() != 2)
-        throw std::runtime_error("500"); // Bad Address: Invalid format
+        throw std::runtime_error("400"); // Bad Address: Invalid format
 
     // Only port provided
     if (vec.size() == 1)
@@ -248,7 +248,7 @@ void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port)
 		address = htonl(INADDR_ANY);
         port = ft::from_string<in_port_t>(vec.at(0));
         if (port <= 0)
-            throw std::runtime_error("500"); // Bad Address: Invalid format
+            throw std::runtime_error("400"); // Bad Address: Invalid format
         port = htons(port);
         return;
     }
@@ -256,15 +256,9 @@ void setAddress(ft::string& confAdrss, in_addr_t &address, in_port_t& port)
     // Handling address
     if (vec.at(0) != "*")
     {
-		// /**
-		//  * This needs to be changed to be what is in the /etc/hosts
-		//  * All of the urls there has to be too.
-		//  */
-		if (vec.at(0) == "localhost")
-			vec.at(0) = "127.0.0.1";
         std::vector<ft::string> segments = vec.at(0).split('.');
         if (segments.size() != 4)
-            throw std::runtime_error("Bad Address: Invalid IP address format");
+            throw std::runtime_error("400");
 
         in_addr_t adrs_int = (ft::from_string<in_addr_t>(segments.at(0)) << 24)
                            | (ft::from_string<in_addr_t>(segments.at(1)) << 16)
