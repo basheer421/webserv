@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 12:54:10 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 14:43:53 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,28 @@ private:
 	std::map<std::string, std::string> envMap;
 	std::map<int, string> requestBuilder;
     std::map<int, bool> isReqCompleteMap;
+
+	class ErrorPage : public std::exception
+	{
+	private:
+		const ServerTraits conf;
+		const std::string msg;
+
+	public:
+		ErrorPage(const ServerTraits& conf, const std::string& msg) : conf(conf), msg(msg) {}
+
+		virtual const char* what() const throw()
+		{
+			return msg.c_str();
+		}
+
+		const ServerTraits& getConf() const
+		{
+			return conf;
+		}
+		virtual ~ErrorPage() throw() {}
+	};
+
 
 public:
 	ServerManager(const std::vector<ServerTraits>& cnf);

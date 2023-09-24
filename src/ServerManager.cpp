@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 12:55:22 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 15:10:02 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,8 +155,6 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	in_addr_t req_address;
 	string host = request.getHost();
 
-	
-
 	if (host.empty())
 		throw std::runtime_error("400");
 
@@ -188,6 +186,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Checking if the url has the request method allowed
 	throwIfnotAllowed(url, conf, request);
 
+
 	// Checking if there's a redirect
 	if (redirect(route, res))
 		return ;
@@ -217,17 +216,16 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		    res.setBody(path, request);
 		return ;
 	}
-	
 
 	if (!is_dir(path))
-		throw (std::runtime_error("404"));
+		throw (ErrorPage(conf, "404"));
 
 	std::map<ft::string, ServerRoute>::const_iterator route_it(
 		conf.routes.find(url)
 	);
 	// Didn't find the dir
 	if (route_it == conf.routes.end())
-		throw std::runtime_error("404");
+		throw ErrorPage(conf, "404");
 
 	/**
 	 * By now we know that the url is a directory.
@@ -249,11 +247,11 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		if (route.autoindex == true)
 		{
 			if (!is_dir(path))
-				throw (std::runtime_error("404"));
+				throw (ErrorPage(conf, "404"));
 			res.setBody(path, request, true);
 			return ;
 		}
-		throw (std::runtime_error("404"));
+		throw (ErrorPage(conf, "404"));
 	}
 
 	/**
@@ -263,12 +261,25 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	{
 		// Responding with autoindex if found
 		if (!is_dir(path) || route.autoindex == false)
-			throw (std::runtime_error("404"));
+			throw (ErrorPage(conf, "404"));
 		res.setBody(path, request, true);
 		return ;
 	}
 	// Should be already found, otherwise 500 is thrown.
-	throw (std::runtime_error("500"));
+	throw (ErrorPage(conf, "500"));
+}
+
+static void setErrPage(Response& response, const Request& request, const string& code,
+	const string& mssg, const ServerTraits& conf)
+{
+	response.setResponseHeader(code, mssg);
+	string page;
+	if (conf.error_pages.find(code) != conf.error_pages.end())
+		page = conf.error_pages.find(code)->second;
+	else
+		page = getErrPage(code, mssg);
+	
+	response.setErrBody(page, request);
 }
 
 Response ServerManager::ManageRequest(const string& buffer)
@@ -280,6 +291,18 @@ Response ServerManager::ManageRequest(const string& buffer)
 	{
 		request.parseRequest(true);
 		ProcessResponse(request, response); // server can be known from the request
+	}
+	catch (const ErrorPage& e)
+	{
+		string what = e.what();
+		string arr[] = {"405", "404", "403", "400", "408", "500"};
+		string msgArr[] = {"Method Not Allowed", "Not Found",
+			"Forbidden", "Bad Request", "Request Timeout", "Internal Server Error"};
+
+		if (what == "405" || what == "404" || what == "403" || what == "400" || what == "408" || what == "500")
+			setErrPage(response, request, what, msgArr[(std::find(arr, arr + 6, what) - arr)], e.getConf()); // std::find finds the index of the element
+		if (what == "408")
+			response.appendHeader("Connection: close");
 	}
 	catch(const std::runtime_error& e)
 	{
@@ -306,10 +329,10 @@ Response ServerManager::ManageRequest(const string& buffer)
 		}
         else if (what == "408")
 		{
-            std::cout << "IAM HERE BRO" << std::endl;
 			response.setResponseHeader("408", "Request Timeout");
-            response.appendHeader("Connection: close");
+            
 			response.setErrBody(getErrPage("408", "Request Timeout"), request);
+			response.appendHeader("Connection: close");
 		}
 		else
 		{
@@ -331,8 +354,6 @@ static void handle_exit(int sig)
 {
     (void)sig;
     isExit = true;
-    std::cout << "is inside handle exit\n";
-    // exit(-1);
 }
 
 void ServerManager::run(char **envp)
@@ -397,9 +418,6 @@ void ServerManager::run(char **envp)
 			else if (pfd.revents & POLLOUT && isReqCompleteMap[pfd.fd] == true)
 			{
 				Response res = ManageRequest(requestBuilder[pfd.fd]);
-				std::cout << "===========================================================================" << std::endl;
-				std::cout << res.getResponse() << std::endl;
-				std::cout << "===========================================================================" << std::endl;
 				send(pfd.fd, res.getResponse().c_str(),
 					res.getResponse().length(), 0);
 				requestBuilder[pfd.fd].clear();
