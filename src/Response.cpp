@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/23 14:13:41 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/24 18:00:17 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,14 +96,17 @@ void	Response::setBody(const std::string& path, const Request &request, bool aut
 	std::string type;
 	size_t pos;
 
-	if (is_dir(path.c_str()) && autoindex)
-		body = dirList(path, request.getReqUrl());
-	else if (is_dir(path.c_str()) && request.getReqType() ==  DELETE)
-		body = dirList(path, request.getReqUrl());
-	else if (is_file(path.c_str()))
-		body = ft::file_to_string(path);
-	else
-		throw ("404");
+	if (request.getReqType() != POST)
+	{
+		if (is_dir(path.c_str()) && autoindex)
+			body = dirList(path, request.getReqUrl());
+		else if (is_dir(path.c_str()) && request.getReqType() ==  DELETE)
+			body = dirList(path, request.getReqUrl());
+		else if (is_file(path.c_str()))
+			body = ft::file_to_string(path);
+		else
+			throw ("404");
+	}
 
 	std::map<std::string, std::string>::iterator it;
 	for (it = this->mimes.begin(); it != this->mimes.end(); ++it)
@@ -116,6 +119,14 @@ void	Response::setBody(const std::string& path, const Request &request, bool aut
 	this->res_body.clear();
 	this->res_body = body;
 	this->content_len = res_body.length();
+	if (request.getReqType() == POST || request.getReqType() == PUT)
+	{
+		if (request.getPutCode() == "201")
+			this->setResponseHeader("201", "Created");
+		if (request.getReqType() == POST)
+			this->setResponseHeader("200", "OK");
+		this->res_body.clear();
+	}
 	if (request.getReqType() == HEAD)
 		this->res_body.clear();
 	if (request.getReqType() == DELETE)

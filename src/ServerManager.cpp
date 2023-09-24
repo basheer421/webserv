@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 18:40:25 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 18:48:16 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,16 +206,10 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	if (redirect(route, res))
 		return ;
 
-	if (request.getReqType() == DELETE)
+	if (request.getReqType() == DELETE || request.getReqType() == POST || request.getReqType() == PUT)
 	{
 		res.setBody(path, request);
 		return ;
-	}
-	if (request.getReqType() == POST || request.getReqType() == PUT)
-	{
-		if (request.getPutCode() == "201")
-			res.setResponseHeader("201", "Created");
-		// return ;
 	}
 
 	if (is_file(path))
@@ -227,8 +221,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			cgi.SetEnv(this->envMap, res, request);
 			cgi.HandleCgi(res, request, conf.root);
 		}
-        else
-		    res.setBody(path, request);
+		else
+			res.setBody(path, request);
 		return ;
 	}
 
@@ -342,12 +336,10 @@ Response ServerManager::ManageRequest(const string& buffer)
 			response.setResponseHeader("400", "Bad Request");
 			response.setErrBody(getErrPage("400", "Bad Request"), request);
 		}
-        else if (what == "408")
+        else if (what == "504")
 		{
-			response.setResponseHeader("408", "Request Timeout");
-            
-			response.setErrBody(getErrPage("408", "Request Timeout"), request);
-			response.appendHeader("Connection: close");
+			response.setResponseHeader("504", "Gateway Timeout");
+			response.setErrBody(getErrPage("504", "Gateway Timeout"), request);
 		}
 		else
 		{
@@ -433,6 +425,9 @@ void ServerManager::run(char **envp)
 			else if (pfd.revents & POLLOUT && isReqCompleteMap[pfd.fd] == true)
 			{
 				Response res = ManageRequest(requestBuilder[pfd.fd]);
+				std::cout << "====================================================================" << std::endl;
+				std::cout << res.getResponse() << std::endl;
+				std::cout << "====================================================================" << std::endl;
 				send(pfd.fd, res.getResponse().c_str(),
 					res.getResponse().length(), 0);
 				requestBuilder[pfd.fd].clear();

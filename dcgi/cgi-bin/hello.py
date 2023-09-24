@@ -17,4 +17,4 @@ print("</body></html>")
 form = cgi.FieldStorage() # instantiate only once!
 name = form.getfirst('num', '1')
 print(name, file=sys.stderr)
-time.sleep(7)
+time.sleep(20)
