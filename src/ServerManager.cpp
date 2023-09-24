@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 18:48:16 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 19:17:59 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,12 @@ static void throwIfnotAllowed(const string& url, const ServerTraits& conf,
 		case GET:
 			reqType = "GET";
 			break;
+		case HEAD:
+			reqType = "HEAD";
+			break;
+		case PUT:
+			reqType = "PUT";
+			break;
 		case POST:
 			reqType = "POST";
 			break;
@@ -171,7 +177,8 @@ static ServerRoute getRoute(string& url, const ServerTraits& conf)
 void ServerManager::ProcessResponse(Request& request, Response& res)
 {
 	this->envMap = request.modifyEnv(this->envMap);
-	const ft::string& url = request.getReqUrl();
+	const ft::string& urlx = request.getReqUrl();
+	string url = urlx;
 
 	string host = request.getHost();
 
@@ -186,7 +193,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	// Getting the server
 	const ServerTraits& conf = (*serv_it).getConf();
 
-	
+	if (url.back() == '/')
+		url.resize(url.size() - 1);
 	string routeUrl = url;
 	ServerRoute route = getRoute(routeUrl, conf);
 	if (route.root.empty())
@@ -197,6 +205,8 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 
 	// Changing the path to be the full path
 	string path = route.root + "/" + url.substr(routeUrl.length());
+	std::cout << "PATH: " << path << std::endl;
+	
 
 	// Checking if the url has the request method allowed
 	throwIfnotAllowed(url, conf, request);

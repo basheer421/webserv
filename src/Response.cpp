@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 15:03:49 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/24 18:00:17 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/24 18:22:06 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,9 @@ void	Response::setBody(const std::string& path, const Request &request, bool aut
 	std::string type;
 	size_t pos;
 
+		std::cout << "*****************" << std::endl;
+		std::cout << path << std::endl;
+		std::cout << "*****************" << std::endl;
 	if (request.getReqType() != POST)
 	{
 		if (is_dir(path.c_str()) && autoindex)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerTraits.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/02 03:08:40 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 15:34:30 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 18:12:09 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,10 @@ ServerTraits::ServerTraits()
 
 ServerRoute::ServerRoute()
 {
-	limit_except.reserve(3);
+	limit_except.reserve(5);
 	limit_except.push_back("GET");
+	limit_except.push_back("HEAD");
+	limit_except.push_back("PUT");
 	limit_except.push_back("POST");
 	limit_except.push_back("DELETE");
 
