@@ -14,13 +14,6 @@
 
 ParserConf::ParserConf() {}
 
-ParserConf::ParseException::ParseException(const ft::string& msg) : msg(msg) {}
-
-const char *ParserConf::ParseException::what() const throw()
-{
-	return (msg.c_str());
-}
-
 // Replaces all spaces with ' ' except '\\n'
 void ParserConf::replaceSpaces(ft::string& str)
 {
@@ -85,41 +78,49 @@ void ParserConf::fillRouteValue(ServerRoute& route, string& name,
 	else if (name == "autoindex")
 	{
 		if (segments.size() > 1)
-			throw ParseException("Parse Error: 'autoindex' should have 1 value");
+			throw std::runtime_error("Parse Error: 'autoindex' should have 1 value");
 		if (segments.front() == "true")
 			route.autoindex = true;
 		else if (segments.front() == "false")
 			route.autoindex = false;
 		else
-			throw ParseException("Parse Error: could not parse 'autoindex'");
+			throw std::runtime_error("Parse Error: could not parse 'autoindex'");
 	}
-	else if (name == "try_files")
-		route.try_files = segments;
+	else if (name == "root")
+	{
+		if (segments.size() > 1)
+			throw std::runtime_error("Parse Error: 'root' should have 1 value");
+		route.root = segments.front();
+		if ((route.root.length() > 1) && ((*(route.root.end() - 1)) == '/'))
+			route.root.erase(route.root.end() - 1);
+	}
+	else if (name == "index")
+	{
+		route.index = segments;
+	}
 	else if (name == "return")
 	{
 		if (segments.size() > 1)
-			throw ParseException("Parse Error: 'return' should have 1 value");
+			throw std::runtime_error("Parse Error: 'return' should have 1 value");
 		route.return_ = segments.front();
 	}
+	else
+		throw std::runtime_error((string("Parse Error: Unknown type {") + name + string("}")).c_str());
 }
 
 void ParserConf::fillServerValue(ServerTraits& server, string& name, std::vector<string>& segments)
 {
-	if (name == "root")
+	if (name == "listen")
 	{
 		if (segments.size() > 1)
-			throw ParseException("Parse Error: 'root' should have 1 value");
-		server.root = segments.front();
-	}
-	else if (name == "index")
-	{
-		server.index = segments;
-	}
-	else if (name == "listen")
-	{
-		if (segments.size() > 1)
-			throw ParseException("Parse Error: 'listen' should have 1 value");
+			throw std::runtime_error("Parse Error: 'listen' should have 1 value");
 		setAddress(segments.front(), server.listen_address, server.listen_port);
+	}
+	else if (name == "root")
+	{
+		if (segments.size() > 1)
+			throw std::runtime_error("Parse Error: 'root' should have 1 value");
+		server.root = segments.front();
 	}
 	else if (name == "server_name")
 	{
@@ -128,11 +129,11 @@ void ParserConf::fillServerValue(ServerTraits& server, string& name, std::vector
 	else if (name == "client_max_body_size")
 	{
 		if (segments.size() > 1)
-			throw ParseException("Parse Error: 'client_max_body_size' should have 1 value");
+			throw std::runtime_error("Parse Error: 'client_max_body_size' should have 1 value");
 		try {
 			server.client_max_body_size = ft::from_string<size_t>(segments.front()); // Throws
 		} catch (std::exception& e) {
-			throw ParseException("Parse Error: could not parse 'client_max_body_size'");
+			throw std::runtime_error("Parse Error: could not parse 'client_max_body_size'");
 		}
 	}
 }
@@ -171,13 +172,13 @@ std::vector<ServerTraits> ParserConf::parseFile()
 			else if ((modlSplit.size() == 2) && modlSplit.front() == "location")
 			{
 				if (modlSplit.back()[0] != '/')
-					throw ParseException("Parse Error: Bad module name");
+					throw std::runtime_error("Parse Error: Bad module name");
 
 				file.back().routes[modlSplit.back()] = ServerRoute();
 				isRoute = true;
 			}
 			else
-				throw ParseException("Parse Error: Bad module name");
+				throw std::runtime_error("Parse Error: Bad module name");
 		}
 		else
 		{
@@ -185,9 +186,10 @@ std::vector<ServerTraits> ParserConf::parseFile()
 
 			if (segments.empty())
 				continue ;
+
 			// First element should always be a Module and there should be a name at the start.
 			if (file.empty() || segments.size() == 1)
-				throw std::exception();
+				throw std::runtime_error("Parse Error: Bad module name");
 
 			ft::string name = segments.front();
 			segments.erase(segments.begin());

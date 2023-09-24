@@ -20,13 +20,13 @@ class ParserConf
 		typedef std::vector<ft::string> Directive;
 		typedef std::map<ft::string, Directive> Module;
 
-		class ParseException : public std::exception
-		{
-			public:
-				const ft::string& msg;
-				ParseException(const ft::string& msg);
-				virtual const char *what() const throw();
-		};
+		// class ParseException : public std::exception
+		// {
+		// 	public:
+		// 		const ft::string& msg;
+		// 		ParseException(const ft::string& msg);
+		// 		virtual const char *what() const throw();
+		// };
 
 	private:
 		ft::string text;
