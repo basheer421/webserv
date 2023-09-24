@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 15:10:02 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 17:28:05 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -327,12 +327,10 @@ Response ServerManager::ManageRequest(const string& buffer)
 			response.setResponseHeader("400", "Bad Request");
 			response.setErrBody(getErrPage("400", "Bad Request"), request);
 		}
-        else if (what == "408")
+        else if (what == "504")
 		{
-			response.setResponseHeader("408", "Request Timeout");
-            
-			response.setErrBody(getErrPage("408", "Request Timeout"), request);
-			response.appendHeader("Connection: close");
+			response.setResponseHeader("504", "Gateway Timeout");
+			response.setErrBody(getErrPage("504", "Gateway Timeout"), request);
 		}
 		else
 		{
@@ -418,6 +416,9 @@ void ServerManager::run(char **envp)
 			else if (pfd.revents & POLLOUT && isReqCompleteMap[pfd.fd] == true)
 			{
 				Response res = ManageRequest(requestBuilder[pfd.fd]);
+				std::cout << "====================================================================" << std::endl;
+				std::cout << res.getResponse() << std::endl;
+				std::cout << "====================================================================" << std::endl;
 				send(pfd.fd, res.getResponse().c_str(),
 					res.getResponse().length(), 0);
 				requestBuilder[pfd.fd].clear();
