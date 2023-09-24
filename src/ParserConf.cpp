@@ -192,7 +192,7 @@ std::vector<ServerTraits> ParserConf::parseFile()
 				if (modlSplit.back()[0] != '/')
 					throw std::runtime_error("Parse Error: Bad module name");
 
-				file.back().routes[modlSplit.back()] = ServerRoute();
+				file.back().routes[modlSplit.back().rstrip('/')] = ServerRoute();
 				isRoute = true;
 			}
 			else
