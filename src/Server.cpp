@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/13 22:26:15 by bammar            #+#    #+#             */
-/*   Updated: 2023/08/24 13:26:49 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 13:55:05 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ Server::Server(const ServerTraits& cnf) : conf(cnf)
 		throw std::runtime_error("setsockopt Error");
 	if (bind(serverFd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		throw std::runtime_error("Bind Error");
-    if (listen(serverFd, 10) < 0)
+    if (listen(serverFd, 50) < 0)
 		throw std::runtime_error("Listen Error");
 }
 
