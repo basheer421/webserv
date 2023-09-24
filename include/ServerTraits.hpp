@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 17:39:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/23 21:47:59 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/24 13:51:41 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,12 +27,6 @@ using namespace ft;
  * 
  * @param autoindex A bool to tell if a directory should be listed or not
  * 	when a directory link is requested.
- * 
- * @param try_files A vector that stores the files to be responded after a request,
- * 	the default is just the requested and it returns error if not found.
- * 	eg. {"$uri", "$uri/", "/index.html"}, $uri expands to the requested.
- * 	if not found it will try the directory {autoindex should be true for this otherwise error 403}
- * 	and if directory is not found respond with server_root/index.html
  * 
  * @param return_ A string that stores a redirection path. note: called "return" in conf file.
  */
@@ -69,10 +63,10 @@ struct ServerTraits
 	ServerTraits();
 
 	string root;
-	// std::vector<string> index;
 	in_addr_t listen_address;
 	in_port_t listen_port;
 	std::vector<string> server_name;
 	size_t client_max_body_size;
+	std::map<string, string> error_pages;
 	std::map<string, ServerRoute> routes;
 };

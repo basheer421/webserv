@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Pages.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 15:14:46 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/06 14:31:37 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/24 14:02:21 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Pages.hpp"
 #include <dirent.h>
 
-const	std::string	dirList(std::string	path, std::string reqURL)
+const	std::string	dirList(const std::string& path, const std::string& reqURL)
 {
 	std::string html = "<html>"
 						"<head>"                                                                                  
@@ -41,8 +41,11 @@ const	std::string	dirList(std::string	path, std::string reqURL)
 	return html + "</ul><hr></body></html>";
 }
 
-const	std::string	getErrPage(std::string code, std::string mssg)
+const	std::string	getErrPage(const std::string& code, const std::string& mssg)
 {
+	// if (conf.error_pages.find(code) != conf.error_pages.end())
+	// 	return (conf.error_pages.find(code)->second);
+
 	std::string	html = "<!DOCTYPE html>"
 						"<html lang=\"en\">"
 						"<head>"

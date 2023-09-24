@@ -136,6 +136,20 @@ void ParserConf::fillServerValue(ServerTraits& server, string& name, std::vector
 			throw std::runtime_error("Parse Error: could not parse 'client_max_body_size'");
 		}
 	}
+	else if (name == "error_page")
+	{
+		if (segments.size() != 2)
+			throw std::runtime_error("Parse Error: 'error_page' should have 1 or 2 values");
+		try {
+			server.error_pages[segments.front()] = ft::file_to_string(segments.back()); // Throws
+		} catch (std::exception& e) {
+			throw std::runtime_error("Parse Error: could not parse 'error_page'");
+		}
+	}
+	else
+	{
+		throw std::runtime_error((string("Parse Error: Unknown type {") + name + string("}")).c_str());
+	}
 }
 
 /**
