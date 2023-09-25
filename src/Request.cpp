@@ -134,17 +134,20 @@ void	Request::fileUpload()
 
 void	Request::parsePostBody()
 {
-	if (this->isUrlCgi() == true)
-		return ;
 	if (this->_type != POST)
 		return ;
     std::string::size_type pos = 0;
 	std::string	req = _buffCopy;
-	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && 
-			(_request["content-length:"].empty() == false || _request["Content-Length:"].empty() == false)
-				&& _postFlag == false && this->_flagEnc == false && this->_isFileUpload == false)
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos 
+		&& _postFlag == false && this->_flagEnc == false && this->_isFileUpload == false)
 	{
-        string cont_length = _request["content-length:"];
+        std::string cont_length;
+		if (_request["content-length:"].empty() == false)
+			cont_length = _request["content-length:"];
+		else if (_request["Content-Length:"].empty() == false)
+			cont_length = _request["Content-Length:"];
+		else
+			return ;
 		std::string	body = req.substr(pos, ft::from_string<int>(cont_length));
 		std::string::size_type pos1 = 0;
 		while ((pos1 = body.find("\r\n", pos1)) != std::string::npos)
@@ -158,6 +161,8 @@ void	Request::parsePostBody()
 		// std::cout << "===========================================================================" << std::endl;
 		_postFlag = true;
 	}
+	if (this->isUrlCgi() == true)
+		return ;
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Transfer-Encoding:"] == "chunked")
     	parseChunkedBody();
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && this->_isFileUpload)
