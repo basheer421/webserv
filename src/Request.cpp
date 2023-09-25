@@ -15,12 +15,12 @@
 // curl -X POST -H "Transfer-Encoding: chunked" --data-binary @- http://localhost:8080 < data.txt
 // Command to send a chunked post request to the server. The body will be in the data.txt
 
-Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200"), _queryString(""), queryURl("")
+Request::Request():  _type(DEFAULT), _buff(""), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200"), _queryString(""), queryURl(""), _flagEnc(false)
 {
 	this->_contLen = 0;
 }
 
-Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200"), _queryString(""), queryURl("")
+Request::Request(std::string buffer):  _type(DEFAULT), _buff(buffer), _reqUrl(""), _isUrlCgi(false), _postFlag(false), _isFileUpload(false), _putCode("200"), _queryString(""), queryURl(""), _flagEnc(false)
 {
 	this->_contLen = 0;
 }
@@ -74,8 +74,17 @@ void	Request::parseChunkedBody()
 			if (line[0] == '0' && line.length() == 1)
 				break ;
 			std::string::size_type posN = line.find('\n');
-			string	num = line.substr(0, posN);
-			size_t body_len = ft::from_string<int>(num);
+			std::string	num = line.substr(0, posN);
+			size_t body_len;
+			if (num.find_first_not_of("0123456789") != std::string::npos)
+			{
+				std::stringstream ss;
+				ss << std::hex << num;
+				ss >> body_len;
+			}
+			else
+				body_len = ft::from_string<int>(num);
+			std::cout << body_len << std::endl;
 			std::string appendBody;
 			while (appendBody.length() < body_len)
 			{
@@ -125,11 +134,15 @@ void	Request::fileUpload()
 
 void	Request::parsePostBody()
 {
+	if (this->isUrlCgi() == true)
+		return ;
 	if (this->_type != POST)
 		return ;
     std::string::size_type pos = 0;
 	std::string	req = _buffCopy;
-	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && (_request["content-length:"].empty() == false || _request["Content-Length:"].empty() == false) && _postFlag == false)
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && 
+			(_request["content-length:"].empty() == false || _request["Content-Length:"].empty() == false)
+				&& _postFlag == false && this->_flagEnc == false && this->_isFileUpload == false)
 	{
         string cont_length = _request["content-length:"];
 		std::string	body = req.substr(pos, ft::from_string<int>(cont_length));
@@ -213,7 +226,6 @@ void	Request::headerValidation()
 	{
 		std::map<std::string, std::string>::iterator it;
 		bool	flagClen = false;
-		bool	flagEnc = false;
 		for (it = this->_request.begin(); it != _request.end(); ++it)
 		{
 			if (it->first == "content-length:")
@@ -221,9 +233,9 @@ void	Request::headerValidation()
 			if (it->first == "Content-Length:")
 				flagClen = true;
 			if (it->first == "Transfer-Encoding:")
-				flagEnc = true;
+				this->_flagEnc = true;
 		}
-		if (flagClen == flagEnc)
+		if (flagClen == this->_flagEnc)
 			throw std::runtime_error("400");
 	}
 }

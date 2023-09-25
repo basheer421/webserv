@@ -43,6 +43,7 @@ class Request
 		std::string							_queryString;
 		std::string							queryURl;
 		std::string							deleteURl;
+		bool								_flagEnc;
 
 	public:
 		Request();
