@@ -143,6 +143,8 @@ void Cgi::RunCgi(Response &res, Request &req, const ServerTraits& conf){
 				free(env[i]);
 			delete[] env;
 
+			std::cout << getErrPage("500", "Internal Server Error") << std::endl;
+
 			fclose(parent_input);
 			fclose(child_output);
 			close(child_out_fd);
