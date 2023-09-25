@@ -223,6 +223,8 @@ std::vector<ServerTraits> ParserConf::parseFile()
 				fillServerValue(file.back(), name, segments);
 		}
 	}
+	if (file.empty())
+		throw std::runtime_error("Parse Error: No server found in the configuration file");
 	return (file);
 }
 
