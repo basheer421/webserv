@@ -90,6 +90,7 @@ void Cgi::RunCgi(Response &res, Request &req){
 
     if (req.getReqType() == POST)
     {
+		// std::cout << req.getPostBody().c_str() << std::endl;
        if (fputs(req.getPostBody().c_str(), parent_input) == EOF)
 	   {
 			fclose(parent_input);

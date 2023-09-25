@@ -93,7 +93,7 @@ void	Request::parseChunkedBody()
 			}
 			body += appendBody;
 		}
-		_postBody = body;
+		_postBody = ft::string(body).replace_all("\n", "");
 		// std::cout << "===========================================================================" << std::endl;
 		// std::cout << "{" << body << "}" << std::endl;
 		// std::cout << "===========================================================================" << std::endl;
@@ -152,7 +152,7 @@ void	Request::parsePostBody()
 			body.replace(pos1, 2, "\n");
 			pos1 += 1; // Move past the replaced '\n' to avoid an infinite loop
 		}
-		_postBody = body;
+		_postBody = ft::string(body).replace_all("\n", "");
 		// std::cout << "===========================================================================" << std::endl;
 		// std::cout << "{" << body << "}" << std::endl;
 		// std::cout << "===========================================================================" << std::endl;
