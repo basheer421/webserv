@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/25 21:18:35 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/25 21:38:30 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,9 +254,9 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		// Responding with index
 		for (size_t i = 0; i < route.index.size(); ++i)
 		{
-			if (is_file(route.root + "/" + route.index[i]))
+			if (is_file(route.root + route.index[i]))
 			{
-				res.setBody(route.root + "/" + route.index[i], request.getReqUrl());
+				res.setBody(route.root + route.index[i], request.getReqUrl());
 				return ;
 			}
 		}
