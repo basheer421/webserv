@@ -82,6 +82,7 @@ class Request
 		void								parseHexReqUrl();
 		void								parseQueryUrl();
 		void								headerValidation();
+		void								addBodyToQuery();
 		void								setReqType(const std::string &key);
         std::string                         replaceotherChar(std::string str);
 };

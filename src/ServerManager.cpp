@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/25 18:56:20 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/25 19:29:01 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -397,7 +397,7 @@ void ServerManager::run(char **envp)
 			{
 				char buffer[BUFFER_SIZE];
 
-                std::memset(buffer, 0, BUFFER_SIZE);
+				std::memset(buffer, 0, BUFFER_SIZE);
 				int read_res = recv(pfd.fd, buffer, BUFFER_SIZE - 1, 0);
 				if (read_res < 0)
 				{
