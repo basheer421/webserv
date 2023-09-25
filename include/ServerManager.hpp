@@ -6,7 +6,7 @@
 /*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:07:06 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 14:43:53 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/25 18:51:47 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,4 +67,7 @@ public:
 	bool	partialRequest(std::string	buff);
 	std::map<std::string, std::string> getEnv() const; 
 	std::string	strToUpper(std::string str); 
+	static void throwIfnotAllowed(const string& url, const ServerTraits& conf,
+		const Request& request);
+	static ServerRoute getRoute(string& url, const ServerTraits& conf);
 };

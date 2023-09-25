@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
+/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/24 21:38:36 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/25 18:56:20 by bammar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,6 @@ static std::vector<Server>::iterator findServer(std::vector<Server>::iterator st
 			|| ((*it).getConf().listen_address == htonl(INADDR_ANY)))
 			&& (*it).getConf().listen_port == port)
 			return (it);
-		std::cout << "host: " << host << std::endl;
-		std::cout << "server_name: " << (*it).getConf().server_name.back() << std::endl;
 		if (((std::find((*it).getConf().server_name.begin(),
 			(*it).getConf().server_name.end(), addStr) != (*it).getConf().server_name.end())
 			|| (std::find((*it).getConf().server_name.begin(),
@@ -82,7 +80,7 @@ static std::vector<Server>::iterator findServer(std::vector<Server>::iterator st
 	return (it);
 }
 
-static void throwIfnotAllowed(const string& url, const ServerTraits& conf,
+void ServerManager::throwIfnotAllowed(const string& url, const ServerTraits& conf,
 	const Request& request)
 {
 	std::map<ft::string, ServerRoute>::const_iterator route_it;
@@ -116,7 +114,7 @@ static void throwIfnotAllowed(const string& url, const ServerTraits& conf,
 	// Checking if the request type is allowed
 	if (std::count(foundDir.second.limit_except.begin(),
 			foundDir.second.limit_except.end(), reqType) == 0)
-		throw std::runtime_error("405");
+		throw ErrorPage(conf, "405");
 }
 
 /**
@@ -155,7 +153,7 @@ static string getDir(string path)
 	return (path);
 }
 
-static ServerRoute getRoute(string& url, const ServerTraits& conf)
+ServerRoute ServerManager::getRoute(string& url, const ServerTraits& conf)
 {
 	std::map<ft::string, ServerRoute>::const_iterator route_it;
 	route_it = conf.routes.find(url);
@@ -169,7 +167,7 @@ static ServerRoute getRoute(string& url, const ServerTraits& conf)
 		url = "/";
 		route_it = conf.routes.find(url);
 		if (route_it == conf.routes.end())
-			throw std::runtime_error("500");
+			throw ErrorPage(conf, "500");
 	}
 	return route_it->second;
 }
@@ -200,15 +198,13 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	if (route.root.empty())
 		route.root = conf.root;
     if (conf.client_max_body_size < (request.getContLen() + request.getHeaderLength())) {
-        throw std::runtime_error("400");
+        throw ErrorPage(conf, "400");
 	}
 
 	// Changing the path to be the full path
 	string path = route.root + "/" + url.substr(routeUrl.length());
 	if (path.back() == '/')
 		path.resize(path.size() - 1);
-	std::cout << "PATH: " << path << std::endl;
-	
 
 	// Checking if the url has the request method allowed
 	throwIfnotAllowed(url, conf, request);
@@ -244,6 +240,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 	std::map<ft::string, ServerRoute>::const_iterator route_it(
 		conf.routes.find(url)
 	);
+
 	// Didn't find the dir
 	if (route_it == conf.routes.end())
 		throw ErrorPage(conf, "404");
@@ -286,6 +283,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 		res.setBody(path, request, true);
 		return ;
 	}
+
 	// Should be already found, otherwise 500 is thrown.
 	throw (ErrorPage(conf, "500"));
 }
@@ -303,64 +301,40 @@ static void setErrPage(Response& response, const Request& request, const string&
 	response.setErrBody(page, request);
 }
 
+static void setDefaultErrPage(Response& response, const Request& request, const string& code,
+	const string& mssg)
+{
+	response.setResponseHeader(code, mssg);
+	string page = getErrPage(code, mssg);
+	response.setErrBody(page, request);
+}
+
 Response ServerManager::ManageRequest(const string& buffer)
 {
 	Request  request(buffer);
 	Response response;
 
+	string arr[] = {"400", "403", "404", "405", "500", "504"};
+	string msgArr[] = {"Bad Request", "Forbidden", "Not Found", "Method Not Allowed",
+		"Internal Server Error", "Gateway Timeout"};
 	try
 	{
 		request.parseRequest(true);
-		ProcessResponse(request, response); // server can be known from the request
+		ProcessResponse(request, response);
 	}
 	catch (const ErrorPage& e)
 	{
 		string what = e.what();
-		string arr[] = {"405", "404", "403", "400", "408", "500"};
-		string msgArr[] = {"Method Not Allowed", "Not Found",
-			"Forbidden", "Bad Request", "Request Timeout", "Internal Server Error"};
 
-		if (what == "405" || what == "404" || what == "403" || what == "400" || what == "408" || what == "500")
-			setErrPage(response, request, what, msgArr[(std::find(arr, arr + 6, what) - arr)], e.getConf());
-		if (what == "408")
-			response.appendHeader("Connection: close");
+		setErrPage(response, request, what, msgArr[(std::find(arr, arr + 6, what) - arr)], e.getConf());
 	}
-	catch(const std::runtime_error& e)
+	catch (const std::runtime_error& e)
 	{
 		string what = e.what();
-		if (what == "405")
-		{
-			response.setResponseHeader("405", "Method Not Allowed");
-			response.setErrBody(getErrPage("405", "Method Not Allowed"), request);
-		}
-		else if (what == "404")
-		{
-			response.setResponseHeader("404", "Not Found");
-			response.setErrBody(getErrPage("404", "Not Found"), request);
-		}
-		else if (what == "403")
-		{
-			response.setResponseHeader("403", "Forbidden");
-			response.setErrBody(getErrPage("403", "Forbidden"), request);
-		}
-		else if (what == "400")
-		{
-			response.setResponseHeader("400", "Bad Request");
-			response.setErrBody(getErrPage("400", "Bad Request"), request);
-		}
-        else if (what == "504")
-		{
-			response.setResponseHeader("504", "Gateway Timeout");
-			response.setErrBody(getErrPage("504", "Gateway Timeout"), request);
-		}
-		else
-		{
-			std::cerr << "Error: " << e.what() << std::endl;
-			response.setResponseHeader("500", "Internal Server Error");
-			response.setErrBody(getErrPage("500", "Internal Server Error"), request);
-		}
+
+		setDefaultErrPage(response, request, what, msgArr[(std::find(arr, arr + 6, what) - arr)]);
 	}
-	catch(const std::exception& e)
+	catch (const std::exception& e)
 	{
 		std::cerr << "Error: " << e.what() << std::endl;
 		response.setResponseHeader("500", "Internal Server Error");
@@ -388,6 +362,7 @@ void ServerManager::run(char **envp)
 		if (poll(sockets.data(), sockets.size(), -1) < 0){
 			throw std::runtime_error("Poll Error");
         }
+
 		/**
 		 * loop through servers and check if any is ready to read
 		 * 	and then accept the connection.
@@ -437,9 +412,6 @@ void ServerManager::run(char **envp)
 			else if (pfd.revents & POLLOUT && isReqCompleteMap[pfd.fd] == true)
 			{
 				Response res = ManageRequest(requestBuilder[pfd.fd]);
-				std::cout << "====================================================================" << std::endl;
-				std::cout << res.getResponse() << std::endl;
-				std::cout << "====================================================================" << std::endl;
 				send(pfd.fd, res.getResponse().c_str(),
 					res.getResponse().length(), 0);
 				requestBuilder[pfd.fd].clear();
