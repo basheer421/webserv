@@ -84,6 +84,7 @@ void	Request::parseChunkedBody()
 			}
 			else
 				body_len = ft::from_string<int>(num);
+			std::cout << body_len << std::endl;
 			std::string appendBody;
 			while (appendBody.length() < body_len)
 			{
@@ -131,48 +132,19 @@ void	Request::fileUpload()
 	outfile << body;
 }
 
-void	Request::addBodyToQuery()
-{
-	bool	flag = false;
-	std::stringstream str1(this->_postBody);
-    std::string       pair;	
-	while (getline(str1, pair, '&'))
-	{
-		std::stringstream line(pair);
-		std::string			key;
-		std::string			value;
-
-		getline(line, key, '=');
-		getline(line, value);
-		key = strToUpper(key);
-		std::map<std::string, std::string>::iterator it;
-		for (it = _queryMap.begin(); it != _queryMap.end(); ++it)
-		{
-			if (key == it->first)
-				flag = true;
-		}
-		if (flag)
-			continue;
-		_queryMap[key] = value;
-	}	
-}
-
 void	Request::parsePostBody()
 {
+	if (this->isUrlCgi() == true)
+		return ;
 	if (this->_type != POST)
 		return ;
     std::string::size_type pos = 0;
 	std::string	req = _buffCopy;
-	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos 
-			&& _postFlag == false && this->_flagEnc == false && this->_isFileUpload == false)
+	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && 
+			(_request["content-length:"].empty() == false || _request["Content-Length:"].empty() == false)
+				&& _postFlag == false && this->_flagEnc == false && this->_isFileUpload == false)
 	{
-		std::string cont_length;
-		if (_request["content-length:"].empty() == false)
-        	cont_length = _request["content-length:"];
-		else if (_request["Content-Length:"].empty() == false)
-        	cont_length = _request["Content-Length:"];
-		else
-			return ;
+        string cont_length = _request["content-length:"];
 		std::string	body = req.substr(pos, ft::from_string<int>(cont_length));
 		std::string::size_type pos1 = 0;
 		while ((pos1 = body.find("\r\n", pos1)) != std::string::npos)
@@ -185,11 +157,6 @@ void	Request::parsePostBody()
 		// std::cout << "{" << body << "}" << std::endl;
 		// std::cout << "===========================================================================" << std::endl;
 		_postFlag = true;
-	}
-	if (this->isUrlCgi() == true)
-	{
-		addBodyToQuery();
-		return ;
 	}
 	if ((pos = _buffCopy.find("\r\n\r\n")) != std::string::npos && _request["Transfer-Encoding:"] == "chunked")
     	parseChunkedBody();
@@ -290,13 +257,13 @@ void	Request::setReqType(const std::string &key)
 void    Request::parseRequest(bool	flag)
 {
 
+    std::string::size_type pos = 0;
 	this->_buffCopy = _buff;
-	// std::string::size_type pos = 0;
-	// while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
-	// {
-	// 	_buff.replace(pos, 2, "\n");
-	// 	pos += 1;
-	// }
+    while ((pos = _buff.find("\r\n", pos)) != std::string::npos)
+    {
+        _buff.replace(pos, 2, "\n");
+        pos += 1;
+    }
 	std::stringstream str(_buff);
     std::string       str1;
     std::string       key;

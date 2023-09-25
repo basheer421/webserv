@@ -6,7 +6,7 @@
 /*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/14 15:14:46 by mkhan             #+#    #+#             */
-/*   Updated: 2023/09/25 13:21:08 by mkhan            ###   ########.fr       */
+/*   Updated: 2023/09/13 12:55:22 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,43 +284,22 @@
 // 	std::cout << getErrPage("404", "Not Found") << std::endl;
 // }
 
-// bool file_exists(const std::string &filename) {
-//   std::ifstream file(filename);
-//   return file.good();
-// }
+bool file_exists(const std::string &filename) {
+  std::ifstream file(filename);
+  return file.good();
+}
 
 
-// int main() {
-//   std::string filename = "example.txt";
+int main() {
+  std::string filename = "example.txt";
 
 
-//   if (file_exists(filename)) {
-//   std::cout << "The file '" << filename << "' exists." << std::endl;
-//   } else {
-//   std::cout << "The file '" << filename << "' does not exist." << std::endl;
-//   }
+  if (file_exists(filename)) {
+  std::cout << "The file '" << filename << "' exists." << std::endl;
+  } else {
+  std::cout << "The file '" << filename << "' does not exist." << std::endl;
+  }
 
 
-//   return 0;
-// }
-
-
-// int main()
-// {
-// 	std::string str = "2c";
-// 	int hexVal;
-// 	bool	isNum = false;
-// 	if (str.find_first_not_of("0123456789") == std::string::npos)
-// 		isNum = true;
-
-// 	if (isNum == false)
-// 	{
-// 		std::stringstream ss;
-// 		ss << std::hex << str;
-// 		ss >> hexVal;
-// 	}
-// 	else
-// 		hexVal = atoi(str.c_str());
-
-// 	std::cout << hexVal << std::endl;
-// }
+  return 0;
+}
