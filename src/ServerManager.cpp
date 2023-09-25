@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerManager.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bammar <bammar@student.42abudhabi.ae>      +#+  +:+       +#+        */
+/*   By: mkhan <mkhan@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 17:06:57 by bammar            #+#    #+#             */
-/*   Updated: 2023/09/25 18:56:20 by bammar           ###   ########.fr       */
+/*   Updated: 2023/09/25 21:18:35 by mkhan            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,7 +227,7 @@ void ServerManager::ProcessResponse(Request& request, Response& res)
 			Cgi cgi;
 
 			cgi.SetEnv(this->envMap, res, request);
-			cgi.HandleCgi(res, request, conf.root);
+			cgi.HandleCgi(res, request, conf.root, conf);
 		}
 		else
 			res.setBody(path, request);

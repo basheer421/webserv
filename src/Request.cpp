@@ -84,7 +84,6 @@ void	Request::parseChunkedBody()
 			}
 			else
 				body_len = ft::from_string<int>(num);
-			std::cout << body_len << std::endl;
 			std::string appendBody;
 			while (appendBody.length() < body_len)
 			{
@@ -94,9 +93,6 @@ void	Request::parseChunkedBody()
 			body += appendBody;
 		}
 		_postBody = ft::string(body).replace_all("\n", "");
-		// std::cout << "===========================================================================" << std::endl;
-		// std::cout << "{" << body << "}" << std::endl;
-		// std::cout << "===========================================================================" << std::endl;
 }
 
 void	Request::fileUpload()
@@ -156,9 +152,6 @@ void	Request::parsePostBody()
 			pos1 += 1; // Move past the replaced '\n' to avoid an infinite loop
 		}
 		_postBody = ft::string(body).replace_all("\n", "");
-		// std::cout << "===========================================================================" << std::endl;
-		// std::cout << "{" << body << "}" << std::endl;
-		// std::cout << "===========================================================================" << std::endl;
 		_postFlag = true;
 	}
 	if (this->isUrlCgi() == true)
@@ -304,9 +297,6 @@ void    Request::parseRequest(bool	flag)
     }
 	if (flag)
 	{
-		std::cout << "===========================================================================" << std::endl;
-		std::cout << _buffCopy << std::endl;
-		std::cout << "===========================================================================" << std::endl;
 		headerValidation();
 		parsePostBody();
 	}

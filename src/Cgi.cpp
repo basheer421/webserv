@@ -39,12 +39,6 @@ void Cgi::SetEnv(std::map<std::string, std::string> &envMap, Response &res, Requ
     this->envMap["SERVER_PROTOCOL"] = "HTTP/1.1";
     this->envMap["SERVER_SOFTWARE"] = "Webserv/1.0";
     this->envMap["REDIRECT_STATUS"] = "200";
-
-    // for (std::map<std::string, std::string>::iterator  i = this->envMap.begin(); i != this->envMap.end(); i++)
-    // {
-    //     std::cout << i->first << "=" << i->second << std::endl;
-    // }
-
 }
 
 char **Cgi::GetCharEnv(){
@@ -66,15 +60,13 @@ char **Cgi::GetCharEnv(){
 }
 // add all the headers to the response
 
-void Cgi::HandleCgi(Response &res, Request &req, std::string rooturl)
+void Cgi::HandleCgi(Response &res, Request &req, std::string rooturl, const ServerTraits& conf)
 {
     this->scriptpath = rooturl + req.getCgiUrl();
-    this->RunCgi(res, req);
+    this->RunCgi(res, req, conf);
 }
 
-void Cgi::RunCgi(Response &res, Request &req){
-    std::cout << "--------- ENTER CGI--------" << std::endl;
-
+void Cgi::RunCgi(Response &res, Request &req, const ServerTraits& conf){
     FILE *parent_input = tmpfile();
     FILE *child_output = tmpfile();
 
@@ -82,7 +74,7 @@ void Cgi::RunCgi(Response &res, Request &req){
 	{
 		fclose(parent_input);
 		fclose(child_output);
-        throw std::runtime_error("500");
+        throw ServerManager::ErrorPage(conf, "500");
 	}
 
     int parent_in_fd = fileno(parent_input);
@@ -90,14 +82,13 @@ void Cgi::RunCgi(Response &res, Request &req){
 
     if (req.getReqType() == POST)
     {
-		// std::cout << req.getPostBody().c_str() << std::endl;
        if (fputs(req.getPostBody().c_str(), parent_input) == EOF)
 	   {
 			fclose(parent_input);
 			fclose(child_output);
 			close(child_out_fd);
 			close(parent_in_fd);
-            throw std::runtime_error("500");
+            throw ServerManager::ErrorPage(conf, "500");
 	   }
        if  (fseek(parent_input, 0, SEEK_SET) == -1)
 	   {
@@ -105,7 +96,7 @@ void Cgi::RunCgi(Response &res, Request &req){
 			fclose(child_output);
 			close(child_out_fd);
 			close(parent_in_fd);
-            throw std::runtime_error("500");
+            throw ServerManager::ErrorPage(conf, "500");
 	   }
     }
 
@@ -118,7 +109,7 @@ void Cgi::RunCgi(Response &res, Request &req){
 		fclose(child_output);
 		close(child_out_fd);
 		close(parent_in_fd);
-        throw std::runtime_error("500");
+        throw ServerManager::ErrorPage(conf, "500");
     }
 	// set file descriptors for child process
 	// if execve fails then free and exit child process and return error.
@@ -133,7 +124,7 @@ void Cgi::RunCgi(Response &res, Request &req){
 			fclose(child_output);
 			close(child_out_fd);
 			close(parent_in_fd);
-            throw std::runtime_error("500");
+            throw ServerManager::ErrorPage(conf, "500");
 		}
         if (dup2(child_out_fd, STDOUT_FILENO) == -1)
 		{
@@ -141,15 +132,13 @@ void Cgi::RunCgi(Response &res, Request &req){
 			fclose(child_output);
 			close(child_out_fd);
 			close(parent_in_fd);
-            throw std::runtime_error("500");
+            throw ServerManager::ErrorPage(conf, "500");
 		}
 
 		std::cerr << this->scriptpath <<std::endl;
         char *const *argv = NULL;
 		if (execve(this->scriptpath.c_str(), argv, env) == -1)
 		{
-			std::cout << "---------FAILED--------" << std::endl;
-
 			for (int i = 0; env[i] != NULL; i++)
 				free(env[i]);
 			delete[] env;
@@ -189,7 +178,7 @@ void Cgi::RunCgi(Response &res, Request &req){
 				fclose(child_output);
 				close(child_out_fd);
 				close(parent_in_fd);
-                throw std::runtime_error("504");
+                throw ServerManager::ErrorPage(conf, "504");
             }
         }
 
@@ -199,10 +188,8 @@ void Cgi::RunCgi(Response &res, Request &req){
 			fclose(child_output);
 			close(child_out_fd);
 			close(parent_in_fd);
-            throw std::runtime_error("500");
+            throw ServerManager::ErrorPage(conf, "500");
         }
-
-		std::cout << outchild << std::endl;
 		char read_buffer[CGI_BUFF];
         std::string head = "";
 		std::string body = "";
@@ -214,7 +201,7 @@ void Cgi::RunCgi(Response &res, Request &req){
 			fclose(child_output);
 			close(child_out_fd);
 			close(parent_in_fd);
-            throw std::runtime_error("500");
+            throw ServerManager::ErrorPage(conf, "500");
 		}
 		while (feof(child_output) == false)
 		{
@@ -236,9 +223,6 @@ void Cgi::RunCgi(Response &res, Request &req){
         }
         else
         {
-			// std::cout << "*******************" << std::endl;
-			// std::cout << "Here" << std::endl;
-			// std::cout << "*******************" << std::endl;
             res.setResponseHeader("200", "OK");
             res.setCgiBody(body);
         }
@@ -250,5 +234,4 @@ void Cgi::RunCgi(Response &res, Request &req){
 	close(parent_in_fd);
 
     // set response object.
-	std::cout << "--------- EXIT CGI--------" << std::endl;
 }
