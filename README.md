@@ -1,21 +1,21 @@
-#Quick to run web server
-Event-driven Asynchronous Web server with CGI support and simple configuration setup that allows for multiple servers. 
+# Quick to run web server
+ Event-driven Asynchronous Web server with CGI support and simple configuration setup that allows for multiple servers. 
 
-##Not maintained!
+## Not maintained!
 
-This project was made with nginx web server as a big inspiration and with help of the contributers.
+ This project was made with nginx web server as a big inspiration and with help of the contributers.
 
-A sample configuration file was provided with comments to show the usage.
+ A sample configuration file was provided with comments to show the usage.
 
-To compile and run:
+ To compile and run:
 
-`make`
+ `make`
 
-`./webserv [conf_file]`
+ `./webserv [conf_file]`
 
 
-Eg. (default conf is "conf.ini"):
+ Eg. (default conf is "conf.ini"):
 
-`make && make clean`
+ `make && make clean`
 
-`./webserv`
+ `./webserv`
