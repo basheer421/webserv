@@ -1,7 +1,7 @@
-# Quick to run web server
+#Quick to run web server
 Event-driven Asynchronous Web server with CGI support and simple configuration setup that allows for multiple servers. 
 
-## Not maintained!
+##Not maintained!
 
 This project was made with nginx web server as a big inspiration and with help of the contributers.
 
